@@ -1,0 +1,53 @@
+
+"use client";
+
+import { useState } from 'react';
+import Sidebar from './sidebar';
+import Header from './header';
+import RightSidebar from './right-sidebar';
+import TutorialTour from '../tutorial/tutorial-tour';
+
+interface MainLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function MainLayout({ children }: MainLayoutProps) {
+  const [isTourOpen, setIsTourOpen] = useState(false);
+
+  const startTour = () => {
+    setIsTourOpen(true);
+  };
+
+  const closeTour = () => {
+    setIsTourOpen(false);
+  };
+
+  return (
+    <div className="h-screen bg-gray-100 flex overflow-hidden">
+      {/* Sidebar */}
+      <div className="sidebar flex-shrink-0">
+        <Sidebar onStartTour={startTour} />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        
+        <div className="flex-1 flex overflow-hidden">
+          {/* Main Content Area */}
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+            {children}
+          </main>
+
+          {/* Right Sidebar */}
+          <div className="right-sidebar flex-shrink-0">
+            <RightSidebar />
+          </div>
+        </div>
+      </div>
+
+      {/* Tutorial Tour */}
+      <TutorialTour isOpen={isTourOpen} onClose={closeTour} />
+    </div>
+  );
+}

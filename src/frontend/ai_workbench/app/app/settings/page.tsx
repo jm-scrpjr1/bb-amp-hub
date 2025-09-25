@@ -1,0 +1,15 @@
+
+"use client";
+
+import PageTemplate from '@/components/common/page-template';
+import { Settings } from 'lucide-react';
+
+export default function SettingsPage() {
+  return (
+    <PageTemplate
+      title="Settings"
+      description="Manage your account preferences and application settings"
+      icon={Settings}
+    />
+  );
+}

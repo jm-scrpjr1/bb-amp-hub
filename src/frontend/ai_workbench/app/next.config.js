@@ -6,6 +6,8 @@ const nextConfig = {
   output: process.env.NEXT_OUTPUT_MODE,
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../'),
+    // Enable optimized page loading
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-navigation-menu'],
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -14,6 +16,11 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: { unoptimized: true },
+  // Enable faster builds and navigation
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
 };
 
 module.exports = nextConfig;

@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
+import GSAPProvider from '@/components/animations/GSAPProvider';
+import LiquidMouseFollower from '@/components/animations/LiquidMouseFollower';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,15 +22,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <GSAPProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <LiquidMouseFollower />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </GSAPProvider>
       </body>
     </html>
   );

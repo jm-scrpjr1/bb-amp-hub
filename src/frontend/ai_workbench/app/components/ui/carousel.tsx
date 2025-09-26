@@ -4,7 +4,20 @@ import * as React from 'react';
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from 'embla-carousel-react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+// Temporary: Using custom icons until lucide-react is installed
+// import { ArrowLeft, ArrowRight } from 'lucide-react';
+// Creating inline icons for carousel
+const ArrowLeft = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m15 18-6-6 6-6"></path>
+  </svg>
+);
+
+const ArrowRight = ({ className = "h-4 w-4" }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m9 18 6-6-6-6"></path>
+  </svg>
+);
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';

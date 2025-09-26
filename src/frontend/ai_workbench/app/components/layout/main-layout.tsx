@@ -6,6 +6,8 @@ import Sidebar from './sidebar';
 import Header from './header';
 import RightSidebar from './right-sidebar';
 import TutorialTour from '../tutorial/tutorial-tour';
+import PageTransition from './page-transition';
+import FloatingChatbot from '../ui/floating-chatbot';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -36,7 +38,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <div className="flex-1 flex overflow-hidden">
           {/* Main Content Area */}
           <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
 
           {/* Right Sidebar */}
@@ -48,6 +52,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
       {/* Tutorial Tour */}
       <TutorialTour isOpen={isTourOpen} onClose={closeTour} />
+
+      {/* Floating Chatbot */}
+      <FloatingChatbot />
     </div>
   );
 }

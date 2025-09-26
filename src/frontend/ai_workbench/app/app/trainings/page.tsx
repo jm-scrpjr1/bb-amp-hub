@@ -2,7 +2,9 @@
 "use client";
 
 import PageTemplate from '@/components/common/page-template';
-import { GraduationCap } from 'lucide-react';
+// Temporary: Using custom icon until lucide-react is installed
+// import { GraduationCap } from 'lucide-react';
+import { GraduationCap } from '@/components/icons';
 
 export default function TrainingsPage() {
   return (

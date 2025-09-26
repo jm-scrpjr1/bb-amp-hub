@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 // Temporary: Using custom icons until lucide-react is installed
 // import {
 //   Home,
@@ -31,10 +31,18 @@ import {
   GraduationCap,
   Lightbulb,
   Settings,
-  LogOut
+  LogOut,
+  Ticket,
+  BarChart,
+  Server,
+  Wrench,
+  User,
+  Document,
+  Circle
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/lib/mock-data';
+import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
 
 const iconMap = {
   Home,
@@ -48,7 +56,14 @@ const iconMap = {
   GraduationCap,
   Lightbulb,
   Settings,
-  LogOut
+  LogOut,
+  Ticket,
+  BarChart,
+  Server,
+  Wrench,
+  User,
+  Document,
+  Circle
 };
 
 interface SidebarProps {
@@ -57,25 +72,36 @@ interface SidebarProps {
 
 export default function Sidebar({ onStartTour }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeItem, setActiveItem] = useState('home');
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
 
-  const handleNavigation = (itemId: string) => {
+  const handleNavigation = useCallback((itemId: string, href: string) => {
     setActiveItem(itemId);
     if (itemId === 'logout') {
       // Handle logout logic here
       console.log('Logout clicked');
       return;
     }
-  };
+    if (itemId === 'submit-ticket') {
+      // Open ticket modal instead of navigating
+      setIsTicketModalOpen(true);
+      return;
+    }
+    // Prefetch the route for instant navigation
+    router.prefetch(href);
+  }, [router]);
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-blue-600">
-          AI <span className="text-gray-900">Workbench</span>
-          <sup className="text-xs">TM</sup>
-        </h1>
+        <div className="text-right">
+          <div className="text-sm text-gray-500 font-medium">Bold Business</div>
+          <div className="text-xl font-bold text-blue-600">
+            AI W<span className="text-cyan-500">o</span>rkbench<span className="text-sm align-super">™</span>
+          </div>
+        </div>
       </div>
 
       {/* AI Assistants Section */}
@@ -88,13 +114,16 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}` || (pathname === '/' && item.id === 'home');
             
+            const href = item.id === 'home' ? '/' : `/${item.id}`;
+
             return (
               <Link
                 key={item.id}
-                href={item.id === 'home' ? '/' : `/${item.id}`}
-                onClick={() => handleNavigation(item.id)}
+                href={href}
+                onClick={() => handleNavigation(item.id, href)}
+                onMouseEnter={() => router.prefetch(href)}
                 className={cn(
-                  "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -114,17 +143,20 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER PAGES
         </p>
         <nav className="space-y-1">
-          {navigationItems.slice(5, -2).map((item) => {
+          {navigationItems.slice(5, -3).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
-            
+
+            const href = `/${item.id}`;
+
             return (
               <Link
                 key={item.id}
-                href={`/${item.id}`}
-                onClick={() => handleNavigation(item.id)}
+                href={href}
+                onClick={() => handleNavigation(item.id, href)}
+                onMouseEnter={() => router.prefetch(href)}
                 className={cn(
-                  "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -144,17 +176,20 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER OPTIONS
         </p>
         <nav className="space-y-1">
-          {navigationItems.slice(-2).map((item) => {
+          {navigationItems.slice(-3).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
-            
+
+            const href = item.id === 'logout' || item.id === 'submit-ticket' ? '#' : `/${item.id}`;
+
             return (
               <Link
                 key={item.id}
-                href={item.id === 'logout' ? '#' : `/${item.id}`}
-                onClick={() => handleNavigation(item.id)}
+                href={href}
+                onClick={() => handleNavigation(item.id, href)}
+                onMouseEnter={() => href !== '#' && router.prefetch(href)}
                 className={cn(
-                  "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -170,13 +205,19 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
 
       {/* Tutorial Button */}
       <div className="p-4 border-t border-gray-200">
-        <button
+        <div
           onClick={onStartTour}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer text-center"
         >
           Start Tutorial Tour
-        </button>
+        </div>
       </div>
+
+      {/* Ticket Confirmation Modal */}
+      <TicketConfirmationModal
+        isOpen={isTicketModalOpen}
+        onClose={() => setIsTicketModalOpen(false)}
+      />
     </div>
   );
 }

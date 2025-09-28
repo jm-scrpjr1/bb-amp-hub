@@ -40,6 +40,7 @@ interface FloatingChatbotProps {
 export default function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [position, setPosition] = useState<'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'>('bottom-right');
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -228,7 +229,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
               stiffness: 300,
               damping: 30
             }}
-            className={`fixed ${getPositionClasses()} w-80 bg-white rounded-2xl shadow-2xl border border-blue-200/50 overflow-hidden`}
+            className={`fixed ${getPositionClasses()} ${isExpanded ? 'w-[600px]' : 'w-80'} bg-white rounded-2xl shadow-2xl border border-blue-200/50 overflow-hidden transition-all duration-300`}
             style={{
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(37, 99, 235, 0.1), 0 0 50px rgba(37, 99, 235, 0.15)'
             }}
@@ -267,6 +268,15 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                   </div>
                 </button>
                 <button
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className="p-1 hover:bg-white/20 rounded transition-colors"
+                  title={isExpanded ? "Make smaller" : "Make bigger"}
+                >
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    <div className={`border-2 border-white rounded transition-all ${isExpanded ? 'w-2 h-2' : 'w-3 h-3'}`}></div>
+                  </div>
+                </button>
+                <button
                   onClick={() => setIsMinimized(!isMinimized)}
                   className="p-1 hover:bg-white/20 rounded transition-colors"
                 >
@@ -291,7 +301,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                   transition={{ duration: 0.3 }}
                 >
                   {/* Messages */}
-                  <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
+                  <div className={`${isExpanded ? 'h-96' : 'h-64'} overflow-y-auto p-4 space-y-3 bg-gray-50/50 transition-all duration-300`}>
                     {messages.map((msg) => (
                       <motion.div
                         key={msg.id}

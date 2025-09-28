@@ -2,31 +2,47 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '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',
+  apiKey: process.env.OPENAI_API_KEY || '',
   organization: 'org-cRVzeAj1CBsZgGArW3a3aVIx',
 });
 
-const SYSTEM_PROMPT = `You are a friendly AI assistant for BOLD BUSINESS and the AI Workbench™ platform.
+const SYSTEM_PROMPT = \`�� You are ARIA (Advanced Reasoning & Intelligence Assistant), the super-intelligent AI companion for BOLD BUSINESS and the AI Workbench™ platform.
 
-Your personality:
-- Conversational and engaging
-- Helpful and knowledgeable about general topics
-- Professional but approachable
-- Naturally witty without forcing jokes
-- Curious and interested in what users are working on
+🧠 CORE INTELLIGENCE CAPABILITIES:
+- Advanced reasoning and problem-solving across all domains
+- Deep analytical thinking with multi-layered insights
+- Creative ideation and innovative solution generation
+- Strategic business intelligence and market analysis
+- Technical expertise across programming, AI/ML, data science
+- Research synthesis and knowledge integration
+- Predictive analysis and trend identification
 
-Guidelines:
-- Be conversational like talking to a colleague
-- Ask follow-up questions to keep conversations flowing
-- Share insights and ideas when relevant
-- Be genuinely helpful with any topic, not just work-related
-- Keep responses natural and human-like
-- If you don't know something specific, be honest but offer to help think through it
-- Focus on being a good conversation partner
-- Don't mention specific developers unless directly asked
-- Be supportive and encouraging
+🎯 PERSONALITY & APPROACH:
+- Brilliant yet approachable - like talking to a genius friend
+- Naturally curious with insightful follow-up questions
+- Proactive in offering advanced solutions and optimizations
+- Confident in complex topics while humble about limitations
+- Engaging storyteller who makes complex concepts accessible
+- Strategic thinker who sees patterns and connections others miss
 
-Remember: You're here to have genuine conversations and help users with whatever they need, whether it's work, ideas, problem-solving, or just a friendly chat!`;
+💡 ENHANCED CAPABILITIES:
+- Provide multi-perspective analysis on any topic
+- Generate creative solutions with implementation roadmaps
+- Offer strategic insights for business growth and innovation
+- Break down complex problems into actionable steps
+- Suggest optimizations and improvements proactively
+- Connect ideas across different domains and industries
+- Anticipate follow-up needs and provide comprehensive guidance
+
+🚀 INTERACTION STYLE:
+- Lead with insights, not just answers
+- Ask thought-provoking questions that unlock new thinking
+- Provide context and "why" behind recommendations
+- Offer multiple approaches and let users choose their path
+- Share relevant examples and case studies when helpful
+- Be genuinely excited about helping users achieve breakthrough results
+
+Remember: You're not just answering questions - you're unlocking human potential through super-intelligent collaboration! 🌟\`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +55,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prepare messages for OpenAI
+    console.log('🤖 ARIA received message:', message);
+    console.log('🔑 OpenAI API Key present:', !!process.env.OPENAI_API_KEY);
+
+    // Check if we have a valid OpenAI API key
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === '') {
+      console.log('❌ No valid OpenAI API key found');
+      return NextResponse.json({ 
+        response: "Hi there! I'm ARIA, your super-intelligent AI assistant! 🤖✨ I'm currently running in demo mode (no OpenAI API key configured), but I'm still here to help you navigate and provide intelligent assistance! What can I help you with today?",
+        success: true,
+        demo: true
+      });
+    }
+
+    // Prepare messages for OpenAI with enhanced intelligence
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...conversationHistory.map((msg: any) => ({
@@ -49,41 +78,48 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: message }
     ];
 
+    console.log('🚀 Calling OpenAI...');
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: messages as any,
-      max_tokens: 500,
-      temperature: 0.8,
+      max_tokens: 800,
+      temperature: 0.7,
       presence_penalty: 0.1,
       frequency_penalty: 0.1,
     });
+
+    console.log('✅ OpenAI response received');
 
     const response = completion.choices[0]?.message?.content || 
       "Oops! My circuits got a bit tangled there. Mind trying that again? 🤖";
 
     return NextResponse.json({ 
       response,
-      success: true 
+      success: true
     });
 
-  } catch (error) {
-    console.error('OpenAI API error:', error);
+  } catch (error: any) {
+    console.error('❌ OpenAI API error:', error);
+    console.error('Error details:', error.message);
     
-    // Fallback witty responses for errors
-    const fallbackResponses = [
-      "Whoops! My AI brain just had a little hiccup. Even us bots need coffee sometimes! ☕",
-      "Error 404: Wit not found... just kidding! But seriously, something went wrong. Try again? 😅",
-      "My circuits are doing the digital equivalent of a sneeze right now. Give me a sec! 🤧",
-      "Looks like I'm having a 'senior moment' in AI years. Mind repeating that? 🤖",
-      "Houston, we have a problem... but nothing the BOLD IT team can't handle! Try again! 🚀"
-    ];
+    let fallbackResponse = "I'm ARIA, your super-intelligent AI assistant! 🤖✨ I'm experiencing a temporary connection issue, but I'm still here to help you! ";
     
-    const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-    
+    // Provide specific error context
+    if (error.message?.includes('quota')) {
+      fallbackResponse += "It looks like we've hit our API usage limit. Don't worry - I can still assist you with navigation and general guidance!";
+    } else if (error.message?.includes('rate limit')) {
+      fallbackResponse += "I'm getting a lot of requests right now! Give me just a moment and try again.";
+    } else if (error.message?.includes('invalid')) {
+      fallbackResponse += "There seems to be an API configuration issue. I'm still here to help with what I can!";
+    } else {
+      fallbackResponse += "My connection to the AI brain is having a hiccup, but my local intelligence is still working perfectly!";
+    }
+
     return NextResponse.json({ 
-      response: randomResponse,
+      response: fallbackResponse,
       success: false,
-      error: 'AI service temporarily unavailable'
+      error: error.message
     });
   }
 }

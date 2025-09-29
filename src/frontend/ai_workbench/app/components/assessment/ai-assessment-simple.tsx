@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useCallback } from 'react';
 import { ChevronRight, ChevronLeft, Brain, Target, Zap, CheckCircle, AlertCircle, X, Home } from 'lucide-react';
 
 interface Question {

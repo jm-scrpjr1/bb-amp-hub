@@ -7,7 +7,9 @@ import QuickActions from '@/components/dashboard/quick-actions';
 import BoldUpdates from '@/components/dashboard/bold-updates';
 import ActivitySection from '@/components/dashboard/activity-section';
 import PageTransition from '@/components/layout/page-transition';
-import ScrollReveal from '@/components/animations/ScrollReveal';
+// import ScrollReveal from '@/components/effects/scroll-reveal';
+// import CyberGrid from '@/components/effects/cyber-grid';
+// import { motion } from 'framer-motion';
 
 export default function HomePage() {
   return (
@@ -15,32 +17,24 @@ export default function HomePage() {
       <PageTransition>
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Welcome Section */}
-          <ScrollReveal direction="fade" delay={0.1} className="page-element">
-            <div className="welcome-section">
-              <WelcomeSection />
-            </div>
-          </ScrollReveal>
+          <div className="welcome-section">
+            <WelcomeSection />
+          </div>
 
           {/* Quick Actions */}
-          <ScrollReveal direction="up" delay={0.3} className="page-element">
-            <div className="quick-actions">
-              <QuickActions />
-            </div>
-          </ScrollReveal>
+          <div className="quick-actions">
+            <QuickActions />
+          </div>
 
           {/* Bold Updates */}
-          <ScrollReveal direction="left" delay={0.5} className="page-element">
-            <div className="bold-updates">
-              <BoldUpdates />
-            </div>
-          </ScrollReveal>
+          <div className="bold-updates">
+            <BoldUpdates />
+          </div>
 
           {/* Activity Section */}
-          <ScrollReveal direction="right" delay={0.7} className="page-element">
-            <div className="activity-section">
-              <ActivitySection />
-            </div>
-          </ScrollReveal>
+          <div className="activity-section">
+            <ActivitySection />
+          </div>
         </div>
       </PageTransition>
     </MainLayout>

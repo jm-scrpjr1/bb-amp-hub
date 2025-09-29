@@ -7,6 +7,12 @@ import { useState, useEffect } from 'react';
 import { Bot, Sparkles } from '@/components/icons';
 import { useSession } from 'next-auth/react';
 import { mockUser } from '@/lib/mock-data';
+// import TextScramble from '@/components/effects/text-scramble';
+// import HolographicText from '@/components/effects/holographic-text';
+// import ParticleField from '@/components/effects/particle-field';
+// import CyberGrid from '@/components/effects/cyber-grid';
+// import ScrollReveal from '@/components/effects/scroll-reveal';
+// import { motion } from 'framer-motion';
 
 export default function WelcomeSection() {
   const { data: session } = useSession();
@@ -31,7 +37,7 @@ export default function WelcomeSection() {
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full opacity-20 -translate-y-16 translate-x-16"></div>
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-500 rounded-full opacity-20 translate-y-12 -translate-x-12"></div>
-      
+
       <div className="flex items-center justify-between relative z-10">
         <div className="flex-1">
           <div className="flex items-center mb-2">
@@ -45,18 +51,18 @@ export default function WelcomeSection() {
             Let's make your work smarter with AI assistance
           </p>
         </div>
-        
+
         {/* Robot Character */}
         <div className="flex-shrink-0 ml-8">
           <div className="relative">
             <div className="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden">
-              <img 
+              <img
                 src="https://cdn.abacus.ai/images/50ccdffd-40b2-4846-81a3-aa091da3ecf8.png"
                 alt="AI Assistant Robot"
                 className="w-28 h-28 object-cover rounded-full"
               />
             </div>
-            
+
             {/* Speech bubble */}
             <div className="absolute -top-8 -right-4 bg-white text-blue-600 px-3 py-1 rounded-lg text-xs font-medium shadow-lg">
               Hello!

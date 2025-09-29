@@ -5,7 +5,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import GSAPProvider from '@/components/animations/GSAPProvider';
-import LiquidMouseFollower from '@/components/animations/LiquidMouseFollower';
+import LiquidCursor from '@/components/effects/liquid-cursor';
 import AuthProvider from '@/providers/auth-provider';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -31,7 +31,11 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange={false}
             >
-              <LiquidMouseFollower />
+              <LiquidCursor
+                color="#06E5EC"
+                size={24}
+                intensity="medium"
+              />
               {children}
               <Toaster />
             </ThemeProvider>

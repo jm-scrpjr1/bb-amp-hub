@@ -1,8 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
 import { Brain, Target, Zap, TrendingUp, Users, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import AIAssessmentSimple from '@/components/assessment/ai-assessment-simple';
@@ -53,18 +52,9 @@ export default function AIAssessmentsPage() {
             </Link>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-4xl mx-auto"
-          >
+          <div className="text-center max-w-4xl mx-auto opacity-0 animate-fade-in">
             {/* AI-Powered Icon with Glow Effect */}
-            <motion.div
-              className="flex justify-center mb-8"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-            >
+            <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-3xl blur-xl opacity-30 animate-pulse"></div>
                 <div className="relative p-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-3xl shadow-2xl">
@@ -83,23 +73,13 @@ export default function AIAssessmentsPage() {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent mb-6">
               AI Readiness Assessment
-            </motion.h1>
+            </h1>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="relative"
-            >
+            <div className="relative">
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
                 🚀 <span className="font-semibold text-gray-800">Unlock your AI potential</span> with our intelligent assessment system.
                 Powered by advanced algorithms, we'll analyze your knowledge, technical readiness, and strategic
@@ -110,19 +90,12 @@ export default function AIAssessmentsPage() {
               <div className="absolute -top-4 -left-4 w-8 h-8 bg-blue-400 rounded-full opacity-20 animate-bounce" style={{animationDelay: '0s'}}></div>
               <div className="absolute -top-2 -right-8 w-6 h-6 bg-cyan-400 rounded-full opacity-30 animate-bounce" style={{animationDelay: '1s'}}></div>
               <div className="absolute -bottom-4 left-1/4 w-4 h-4 bg-purple-400 rounded-full opacity-25 animate-bounce" style={{animationDelay: '2s'}}></div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-              className="relative"
-            >
-              <motion.button
+            <div className="relative">
+              <button
                 onClick={handleStartAssessment}
-                className="relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 text-white text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                className="relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 text-white text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-200"
               >
                 {/* Animated Background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -135,18 +108,13 @@ export default function AIAssessmentsPage() {
                   <span>🤖 Start Your AI Assessment</span>
                   <div className="ml-3 w-2 h-2 bg-white rounded-full animate-ping"></div>
                 </div>
-              </motion.button>
+              </button>
 
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur-xl opacity-30 -z-10 animate-pulse"></div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              className="flex justify-center items-center space-x-8 mt-6 text-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.0 }}
-            >
+            <div className="flex justify-center items-center space-x-8 mt-6 text-sm">
               <div className="flex items-center text-gray-600">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
                 ⏱️ 5-7 minutes
@@ -159,8 +127,8 @@ export default function AIAssessmentsPage() {
                 <div className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
                 🤖 Instant AI Analysis
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
 
         {/* Background Elements */}
@@ -173,12 +141,7 @@ export default function AIAssessmentsPage() {
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12">
           <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4">
             🧠 What Our AI Will Discover About You
           </h2>
@@ -186,7 +149,7 @@ export default function AIAssessmentsPage() {
             Our advanced AI assessment engine analyzes your responses using machine learning algorithms to provide
             <span className="text-blue-600 font-semibold"> deep insights</span> into your readiness across multiple dimensions
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
@@ -227,11 +190,8 @@ export default function AIAssessmentsPage() {
               color: "pink"
             }
           ].map((feature, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
               className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300"
             >
               <div className={`p-3 bg-${feature.color}-100 rounded-xl w-fit mb-4`}>
@@ -243,19 +203,14 @@ export default function AIAssessmentsPage() {
               <p className="text-gray-600 leading-relaxed">
                 {feature.description}
               </p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
 
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 rounded-3xl p-12 text-center text-white overflow-hidden"
-        >
+        <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 rounded-3xl p-12 text-center text-white overflow-hidden">
           {/* AI Neural Network Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 400 200">
@@ -270,11 +225,7 @@ export default function AIAssessmentsPage() {
             </svg>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div>
             <h2 className="text-4xl font-bold mb-4">
               🚀 Ready to Unlock Your AI Potential?
             </h2>
@@ -282,13 +233,11 @@ export default function AIAssessmentsPage() {
               Join <span className="font-bold text-yellow-300">thousands of professionals</span> who have discovered their AI readiness
               and <span className="font-bold text-cyan-200">accelerated their careers</span> with our AI-powered insights
             </p>
-          </motion.div>
+          </div>
 
-          <motion.button
+          <button
             onClick={handleStartAssessment}
-            className="relative inline-flex items-center px-10 py-5 bg-white text-blue-600 text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            className="relative inline-flex items-center px-10 py-5 bg-white text-blue-600 text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-200"
           >
             {/* Shimmer Effect */}
             <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
@@ -298,8 +247,8 @@ export default function AIAssessmentsPage() {
               <span className="text-blue-600">🤖 Begin AI Assessment Now</span>
               <div className="ml-3 w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
             </div>
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       </div>
     </div>
   );

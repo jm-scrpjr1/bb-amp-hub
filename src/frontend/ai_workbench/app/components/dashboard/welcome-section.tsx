@@ -41,15 +41,28 @@ export default function WelcomeSection() {
       <div className="flex items-center justify-between relative z-10">
         <div className="flex-1">
           <div className="flex items-center mb-2">
-            <Sparkles className="h-5 w-5 mr-2 text-blue-200" />
-            <span className="text-blue-200 text-sm font-medium">Get Started</span>
+            <Sparkles className="h-5 w-5 mr-2 text-cyan-300" />
+            <span className="text-cyan-300 text-sm font-medium">AI-Amplified™ Workspace</span>
           </div>
           <h1 className="text-3xl font-bold mb-2">
             Welcome, {getUserName()}!
           </h1>
-          <p className="text-blue-100 text-lg">
-            Let's make your work smarter with AI assistance
+          <p className="text-blue-100 text-lg mb-3">
+            Select your tools. Start your work. Ask for help.
           </p>
+          <p className="text-cyan-200 text-xl font-semibold mb-4">
+            Get amplified results. ⚡
+          </p>
+          <button
+            onClick={() => {
+              // Trigger onboarding - we'll implement this via props or context
+              const event = new CustomEvent('showAmplificationOnboarding');
+              window.dispatchEvent(event);
+            }}
+            className="text-sm text-cyan-300 hover:text-cyan-100 underline transition-colors"
+          >
+            📖 Learn about the amplification workflow
+          </button>
         </div>
 
         {/* Robot Character */}

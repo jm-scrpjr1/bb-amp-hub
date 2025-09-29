@@ -52,9 +52,9 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
   const getWelcomeMessage = () => {
     if (session?.user?.name) {
       const firstName = session.user.name.split(' ')[0];
-      return `Hey ${firstName}! 👋 I'm ARIA, your super-intelligent AI assistant here at BOLD BUSINESS. I'm here to help you navigate, solve problems, and unlock your potential. What can I help you with today?`;
+      return `Hey ${firstName}! 👋 I'm ARIA, your productivity engineer at BOLD BUSINESS. I'm here to help you select your tools, start your work, and get amplified results. Ready to unlock your potential? What can I help you with today?`;
     }
-    return 'Hey there! 👋 I\'m ARIA, your super-intelligent AI assistant here at BOLD BUSINESS. I\'m here to chat, help with ideas, answer questions, and guide you to the right tools. What\'s on your mind today?';
+    return 'Hey there! 👋 I\'m ARIA, your productivity engineer at BOLD BUSINESS. I\'m here to help you select your tools, start your work, and achieve amplified results. What\'s on your mind today?';
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -344,7 +344,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                   <RobotIcon className="w-6 h-6" />
                 </motion.div>
                 <div>
-                  <h3 className="font-semibold text-sm text-white">ARIA Assistant</h3>
+                  <h3 className="font-semibold text-sm text-white">ARIA - Your Productivity Engineer</h3>
                   <motion.p
                     className="text-xs text-cyan-200"
                     animate={{

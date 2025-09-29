@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Clock, FileText, Lightbulb } from '@/components/icons';
 import { mockQuickActions } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
+import BoldIdeaModal from '@/components/ui/bold-idea-modal';
 // import ScrollReveal from '@/components/effects/scroll-reveal';
 // import HolographicText from '@/components/effects/holographic-text';
 // import { motion } from 'framer-motion';
@@ -19,6 +20,7 @@ const iconMap = {
 
 export default function QuickActions() {
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
 
   const handleActionClick = (actionId: number) => {
     console.log(`Quick action ${actionId} clicked`);
@@ -26,6 +28,12 @@ export default function QuickActions() {
     // Handle Submit Ticket action
     if (actionId === 2) {
       setIsTicketModalOpen(true);
+      return;
+    }
+
+    // Handle Submit Bold Idea action
+    if (actionId === 3) {
+      setIsBoldIdeaModalOpen(true);
       return;
     }
 
@@ -72,6 +80,12 @@ export default function QuickActions() {
       <TicketConfirmationModal
         isOpen={isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
+      />
+
+      {/* Bold Idea Modal */}
+      <BoldIdeaModal
+        isOpen={isBoldIdeaModalOpen}
+        onClose={() => setIsBoldIdeaModalOpen(false)}
       />
     </>
   );

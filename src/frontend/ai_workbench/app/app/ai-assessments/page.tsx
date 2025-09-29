@@ -80,10 +80,11 @@ export default function AIAssessmentsPage() {
             </h1>
 
             <div className="relative">
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                🚀 <span className="font-semibold text-gray-800">Unlock your AI potential</span> with our intelligent assessment system.
-                Powered by advanced algorithms, we'll analyze your knowledge, technical readiness, and strategic
-                thinking to create your <span className="text-blue-600 font-semibold">personalized AI roadmap</span>.
+              <p className="text-xl text-gray-600 mb-4 leading-relaxed">
+                🚀 <span className="font-semibold text-gray-800">Imagine a world where your talent walks into their desktop, selects and uses AI tools, gets help from a productivity engineer... and achieves amplified results.</span>
+              </p>
+              <p className="text-lg text-blue-600 font-semibold mb-8">
+                Select your tools. Start your work. Ask for help. Get amplified results.
               </p>
 
               {/* AI Floating Elements */}

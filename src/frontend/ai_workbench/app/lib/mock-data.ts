@@ -91,21 +91,21 @@ export const mockQuickActions = [
   {
     id: 1,
     title: "Track your time",
-    subtitle: "Click to track time on any project",
+    subtitle: "Select your tools and start tracking amplified productivity",
     icon: "Clock",
     color: "bg-blue-50 border-blue-200"
   },
   {
     id: 2,
-    title: "Submit Ticket", 
-    subtitle: "Submit Ticket for any technical issues",
+    title: "Submit Ticket",
+    subtitle: "Ask for help with technical issues - get amplified support",
     icon: "Ticket",
     color: "bg-green-50 border-green-200"
   },
   {
     id: 3,
     title: "Submit Bold Idea",
-    subtitle: "Share your innovative ideas with the team",
+    subtitle: "Start your work with innovative ideas - achieve amplified impact",
     icon: "Lightbulb",
     color: "bg-purple-50 border-purple-200"
   }

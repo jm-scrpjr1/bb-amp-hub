@@ -11,8 +11,8 @@ import AuthProvider from '@/providers/auth-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AI Workbench™ - Your AI-Powered Workspace',
-  description: 'Manage projects, track progress, and collaborate with your team using AI assistance.',
+  title: 'AI Workbench™ - Select Your Tools. Start Your Work. Ask for Help. Get Amplified Results.',
+  description: 'Imagine a world where your talent walks into their desktop, selects and uses AI tools, gets help from a productivity engineer... and achieves amplified results.',
 };
 
 export default function RootLayout({

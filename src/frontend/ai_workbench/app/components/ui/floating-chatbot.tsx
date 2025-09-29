@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Minimize2, Maximize2 } from '@/components/icons';
+import { useSession } from 'next-auth/react';
 
 // Robot Icon Component matching the mockup
 const RobotIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
@@ -38,15 +39,25 @@ interface FloatingChatbotProps {
 }
 
 export default function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [position, setPosition] = useState<'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'>('bottom-right');
+
+  const getWelcomeMessage = () => {
+    if (session?.user?.name) {
+      const firstName = session.user.name.split(' ')[0];
+      return `Hey ${firstName}! 👋 I'm ARIA, your super-intelligent AI assistant here at BOLD BUSINESS. I'm here to help you navigate, solve problems, and unlock your potential. What can I help you with today?`;
+    }
+    return 'Hey there! 👋 I\'m ARIA, your super-intelligent AI assistant here at BOLD BUSINESS. I\'m here to chat, help with ideas, answer questions, and guide you to the right tools. What\'s on your mind today?';
+  };
+
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
-      text: 'Hey there! 👋 I\'m your AI assistant here at BOLD BUSINESS. I\'m here to chat, help with ideas, answer questions, or just have a good conversation. What\'s on your mind today?',
+      text: getWelcomeMessage(),
       isBot: true,
       timestamp: new Date()
     }

@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import GSAPProvider from '@/components/animations/GSAPProvider';
 import LiquidMouseFollower from '@/components/animations/LiquidMouseFollower';
+import AuthProvider from '@/providers/auth-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,18 +23,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <GSAPProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange={false}
-          >
-            <LiquidMouseFollower />
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </GSAPProvider>
+        <AuthProvider>
+          <GSAPProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="light"
+              enableSystem
+              disableTransitionOnChange={false}
+            >
+              <LiquidMouseFollower />
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </GSAPProvider>
+        </AuthProvider>
       </body>
     </html>
   );

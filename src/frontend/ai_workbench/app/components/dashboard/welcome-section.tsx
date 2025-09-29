@@ -5,14 +5,24 @@ import { useState, useEffect } from 'react';
 // Temporary: Using custom icons until lucide-react is installed
 // import { Bot, Sparkles } from 'lucide-react';
 import { Bot, Sparkles } from '@/components/icons';
+import { useSession } from 'next-auth/react';
 import { mockUser } from '@/lib/mock-data';
 
 export default function WelcomeSection() {
+  const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Get the user's first name from session or fallback to mock user
+  const getUserName = () => {
+    if (session?.user?.name) {
+      return session.user.name.split(' ')[0];
+    }
+    return mockUser.name;
+  };
 
   return (
     <div className={`bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 mb-8 text-white relative overflow-hidden transition-all duration-1000 ${
@@ -29,7 +39,7 @@ export default function WelcomeSection() {
             <span className="text-blue-200 text-sm font-medium">Get Started</span>
           </div>
           <h1 className="text-3xl font-bold mb-2">
-            Welcome, {mockUser.name}!
+            Welcome, {getUserName()}!
           </h1>
           <p className="text-blue-100 text-lg">
             Let's make your work smarter with AI assistance

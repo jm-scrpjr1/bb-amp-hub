@@ -4,6 +4,7 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 // Temporary: Using custom icons until lucide-react is installed
 // import {
 //   Home,
@@ -38,11 +39,13 @@ import {
   Wrench,
   User,
   Document,
-  Circle
+  Circle,
+  Shield
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
+import { canAccessAdminPanel } from '@/lib/permissions';
 
 const iconMap = {
   Home,
@@ -63,7 +66,8 @@ const iconMap = {
   Wrench,
   User,
   Document,
-  Circle
+  Circle,
+  Shield
 };
 
 interface SidebarProps {
@@ -73,8 +77,27 @@ interface SidebarProps {
 export default function Sidebar({ onStartTour }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
   const [activeItem, setActiveItem] = useState('home');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+
+  // Filter navigation items based on user permissions
+  const getFilteredNavigationItems = () => {
+    return navigationItems.filter(item => {
+      // Show admin panel only to authorized users
+      if (item.adminOnly) {
+        const user = session?.user as any; // Type assertion for now
+
+        // Temporary: Show admin panel for owner email during development
+        if (user?.email === 'jlope@boldbusiness.com') {
+          return true;
+        }
+
+        return canAccessAdminPanel(user);
+      }
+      return true;
+    });
+  };
 
   const handleNavigation = useCallback((itemId: string, href: string) => {
     setActiveItem(itemId);
@@ -88,8 +111,8 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       setIsTicketModalOpen(true);
       return;
     }
-    // Prefetch the route for instant navigation
-    router.prefetch(href);
+    // Navigate to the route
+    router.push(href);
   }, [router]);
 
   return (
@@ -110,27 +133,32 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           AI ASSISTANTS
         </p>
         <nav className="space-y-1">
-          {navigationItems.slice(0, 5).map((item) => {
+          {getFilteredNavigationItems().slice(0, 5).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}` || (pathname === '/' && item.id === 'home');
-            
+
             const href = item.id === 'home' ? '/' : `/${item.id}`;
 
             return (
               <Link
                 key={item.id}
                 href={href}
-                onClick={() => handleNavigation(item.id, href)}
                 onMouseEnter={() => router.prefetch(href)}
                 className={cn(
                   "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
                 )}
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.name}
+                {item.adminOnly && (
+                  <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                    Admin
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -143,7 +171,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER PAGES
         </p>
         <nav className="space-y-1">
-          {navigationItems.slice(5, -3).map((item) => {
+          {getFilteredNavigationItems().slice(5, -3).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
@@ -153,17 +181,22 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
               <Link
                 key={item.id}
                 href={href}
-                onClick={() => handleNavigation(item.id, href)}
                 onMouseEnter={() => router.prefetch(href)}
                 className={cn(
                   "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
                 )}
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.name}
+                {item.adminOnly && (
+                  <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                    Admin
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -176,7 +209,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER OPTIONS
         </p>
         <nav className="space-y-1">
-          {navigationItems.slice(-3).map((item) => {
+          {getFilteredNavigationItems().slice(-3).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
@@ -186,17 +219,28 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
               <Link
                 key={item.id}
                 href={href}
-                onClick={() => handleNavigation(item.id, href)}
+                onClick={(e) => {
+                  if (item.id === 'logout' || item.id === 'submit-ticket') {
+                    e.preventDefault();
+                    handleNavigation(item.id, href);
+                  }
+                }}
                 onMouseEnter={() => href !== '#' && router.prefetch(href)}
                 className={cn(
                   "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
                   isActive
                     ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
                 )}
               >
                 <Icon className="mr-3 h-5 w-5" />
                 {item.name}
+                {item.adminOnly && (
+                  <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                    Admin
+                  </span>
+                )}
               </Link>
             );
           })}

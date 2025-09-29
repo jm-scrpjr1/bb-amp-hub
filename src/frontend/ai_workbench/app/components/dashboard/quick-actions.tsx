@@ -8,6 +8,7 @@ import { Clock, FileText, Lightbulb } from '@/components/icons';
 import { mockQuickActions } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
 import BoldIdeaModal from '@/components/ui/bold-idea-modal';
+import { ScrollEffects } from '@/components/effects';
 // import ScrollReveal from '@/components/effects/scroll-reveal';
 // import HolographicText from '@/components/effects/holographic-text';
 // import { motion } from 'framer-motion';
@@ -47,31 +48,36 @@ export default function QuickActions() {
           const Icon = iconMap[action.icon as keyof typeof iconMap];
 
           return (
-            <div
+            <ScrollEffects
               key={action.id}
-              className={`${action.color} border rounded-xl p-6 hover:shadow-md transition-all duration-300 cursor-pointer group transform hover:-translate-y-1 h-full`}
-              onClick={() => handleActionClick(action.id)}
+              effect="fadeUp"
+              delay={index * 0.2}
             >
-              <div className="flex items-start space-x-4">
-                <div className={`p-3 rounded-lg ${
+              <div
+                className={`${action.color} border rounded-2xl p-8 hover:shadow-xl transition-all duration-300 cursor-pointer group transform hover:-translate-y-2 h-full`}
+                onClick={() => handleActionClick(action.id)}
+              >
+                <div className="flex items-start space-x-6">
+                <div className={`p-4 rounded-xl ${
                   action.icon === 'Clock' ? 'bg-blue-100' :
                   action.icon === 'Ticket' ? 'bg-green-100' : 'bg-purple-100'
-                } group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className={`h-6 w-6 ${
+                } group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
+                  <Icon className={`h-8 w-8 ${
                     action.icon === 'Clock' ? 'text-blue-600' :
                     action.icon === 'Ticket' ? 'text-green-600' : 'text-purple-600'
                   }`} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
                     {action.title}
                   </h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <p className="text-base text-gray-600 leading-relaxed">
                     {action.subtitle}
                   </p>
                 </div>
               </div>
             </div>
+            </ScrollEffects>
           );
         })}
       </div>

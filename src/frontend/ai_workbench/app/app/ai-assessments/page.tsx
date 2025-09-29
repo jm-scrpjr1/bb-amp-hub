@@ -4,7 +4,9 @@
 import React, { useState } from 'react';
 import { Brain, Target, Zap, TrendingUp, Users, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import MainLayout from '@/components/layout/main-layout';
 import AIAssessmentSimple from '@/components/assessment/ai-assessment-simple';
+import { ScrollEffects, AnimatedText, ScrollTextReveal } from '@/components/effects';
 
 export default function AIAssessmentsPage() {
   const [showAssessment, setShowAssessment] = useState(false);
@@ -25,18 +27,21 @@ export default function AIAssessmentsPage() {
 
   if (showAssessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-8">
-        <div className="container mx-auto px-4">
-          <AIAssessmentSimple
-            onComplete={handleAssessmentComplete}
-            onCancel={handleAssessmentCancel}
-          />
+      <MainLayout>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-8">
+          <div className="container mx-auto px-4">
+            <AIAssessmentSimple
+              onComplete={handleAssessmentComplete}
+              onCancel={handleAssessmentCancel}
+            />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   return (
+    <MainLayout>
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
@@ -75,17 +80,27 @@ export default function AIAssessmentsPage() {
               </div>
             </div>
 
-            <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent mb-6">
-              AI Readiness Assessment
-            </h1>
+            <ScrollTextReveal effect="scramble" delay={0.3}>
+              <h1 className="text-7xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent mb-8 leading-tight tracking-wide">
+                AI Readiness Assessment
+              </h1>
+            </ScrollTextReveal>
 
-            <div className="relative">
-              <p className="text-xl text-gray-600 mb-4 leading-relaxed">
-                🚀 <span className="font-semibold text-gray-800">Imagine a world where your talent walks into their desktop, selects and uses AI tools, gets help from a productivity engineer... and achieves amplified results.</span>
-              </p>
-              <p className="text-lg text-blue-600 font-semibold mb-8">
-                Select your tools. Start your work. Ask for help. Get amplified results.
-              </p>
+            <div className="relative max-w-5xl mx-auto">
+              <ScrollEffects effect="fadeUp" delay={0.5}>
+                <p className="text-2xl text-gray-600 mb-6 leading-relaxed">
+                  <span className="font-semibold text-gray-800">Imagine a world where your talent walks into their desktop, selects and uses AI tools, gets help from a productivity engineer... and achieves amplified results.</span>
+                </p>
+              </ScrollEffects>
+
+              <AnimatedText
+                text="Select your tools. Start your work. Ask for help. Get amplified results."
+                className="text-xl text-blue-600 font-bold mb-12"
+                animation="fadeUp"
+                by="word"
+                stagger={0.1}
+                delay={0.7}
+              />
 
               {/* AI Floating Elements */}
               <div className="absolute -top-4 -left-4 w-8 h-8 bg-blue-400 rounded-full opacity-20 animate-bounce" style={{animationDelay: '0s'}}></div>
@@ -106,7 +121,7 @@ export default function AIAssessmentsPage() {
 
                 <div className="relative flex items-center">
                   <Target className="w-7 h-7 mr-3 animate-pulse" />
-                  <span>🤖 Start Your AI Assessment</span>
+                  <span>Start Your AI Assessment</span>
                   <div className="ml-3 w-2 h-2 bg-white rounded-full animate-ping"></div>
                 </div>
               </button>
@@ -118,15 +133,15 @@ export default function AIAssessmentsPage() {
             <div className="flex justify-center items-center space-x-8 mt-6 text-sm">
               <div className="flex items-center text-gray-600">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                ⏱️ 5-7 minutes
+                5-7 minutes
               </div>
               <div className="flex items-center text-gray-600">
                 <div className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse"></div>
-                🔒 AI-Secured
+                AI-Secured
               </div>
               <div className="flex items-center text-gray-600">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse"></div>
-                🤖 Instant AI Analysis
+                Instant AI Analysis
               </div>
             </div>
           </div>
@@ -252,5 +267,6 @@ export default function AIAssessmentsPage() {
         </div>
       </div>
     </div>
+    </MainLayout>
   );
 }

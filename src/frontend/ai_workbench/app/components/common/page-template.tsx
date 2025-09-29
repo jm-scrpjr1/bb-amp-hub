@@ -3,7 +3,7 @@
 
 import { memo } from 'react';
 import MainLayout from '@/components/layout/main-layout';
-import PageTransition from '@/components/layout/page-transition';
+import { ScrollEffects, ScrollTextReveal } from '@/components/effects';
 // Temporary: Using custom icon type until lucide-react is installed
 // import { LucideIcon } from 'lucide-react';
 type LucideIcon = React.ComponentType<{ className?: string; size?: number }>;
@@ -18,24 +18,41 @@ interface PageTemplateProps {
 const PageTemplate = memo(function PageTemplate({ title, description, icon: Icon, children }: PageTemplateProps) {
   return (
     <MainLayout>
-      <PageTransition>
-        <div className="max-w-5xl mx-auto page-transition">
-          {/* Page Header */}
-          <div className="mb-8 page-element">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Icon className="h-8 w-8 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-                <p className="text-gray-600 mt-1">{description}</p>
-              </div>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Hero Section */}
+        <ScrollEffects effect="fadeUp" delay={0.1}>
+          <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
+
+            <div className="relative z-10">
+              <ScrollTextReveal effect="scramble" delay={0.4}>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  {title}
+                </h1>
+              </ScrollTextReveal>
+
+              <ScrollEffects effect="fadeUp" delay={0.6}>
+                <p className="text-xl text-blue-100 mb-6 max-w-3xl">
+                  {description}
+                </p>
+              </ScrollEffects>
+
+              <ScrollEffects effect="fadeUp" delay={0.8}>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2 bg-white/20 rounded-lg px-4 py-2">
+                    <Icon className="h-5 w-5" />
+                    <span className="font-semibold">AI-Amplified™</span>
+                  </div>
+                </div>
+              </ScrollEffects>
             </div>
           </div>
+        </ScrollEffects>
 
-          {/* Coming Soon Section */}
-          {!children && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center page-element">
+        {/* Coming Soon Section */}
+        {!children && (
+          <ScrollEffects effect="fadeUp" delay={1.0}>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="p-6 bg-blue-50 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
                   <Icon className="h-12 w-12 text-blue-600" />
@@ -55,14 +72,18 @@ const PageTemplate = memo(function PageTemplate({ title, description, icon: Icon
                 </div>
               </div>
             </div>
-          )}
+          </ScrollEffects>
+        )}
 
-          {/* Custom Content */}
-          <div className="page-element">
-            {children}
-          </div>
-        </div>
-      </PageTransition>
+        {/* Custom Content */}
+        {children && (
+          <ScrollEffects effect="fadeUp" delay={1.0}>
+            <div>
+              {children}
+            </div>
+          </ScrollEffects>
+        )}
+      </div>
     </MainLayout>
   );
 });

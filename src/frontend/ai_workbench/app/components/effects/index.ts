@@ -8,3 +8,8 @@ export { default as ParticleField } from './particle-field';
 export { default as ScrollReveal } from './scroll-reveal';
 export { default as LiquidCursor } from './liquid-cursor';
 export { default as CyberLoader } from './cyber-loader';
+
+// Advanced Scroll Effects
+export { default as ScrollTextReveal } from './scroll-text-reveal';
+export { default as AnimatedText } from './animated-text';
+export { default as ScrollEffects } from './scroll-effects';

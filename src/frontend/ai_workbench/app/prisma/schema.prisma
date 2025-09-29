@@ -8,3 +8,88 @@ datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+    OWNER
+    ADMIN
+    TEAM_MANAGER
+    MEMBER
+}
+
+enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+}
+
+model User {
+    id            String      @id @default(cuid())
+    email         String      @unique
+    name          String?
+    image         String?
+    role          UserRole    @default(MEMBER)
+    status        UserStatus  @default(ACTIVE)
+    teamId        String?
+    team          Team?       @relation(fields: [teamId], references: [id])
+    managedTeams  Team[]      @relation("TeamManager")
+
+    // Activity tracking
+    lastLoginAt   DateTime?
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+
+    // Analytics
+    loginCount    Int         @default(0)
+
+    // Permissions
+    permissions   UserPermission[]
+
+    @@map("users")
+}
+
+model Team {
+    id          String   @id @default(cuid())
+    name        String
+    description String?
+    managerId   String?
+    manager     User?    @relation("TeamManager", fields: [managerId], references: [id])
+    members     User[]
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("teams")
+}
+
+model UserPermission {
+    id         String @id @default(cuid())
+    userId     String
+    user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    permission String
+    resource   String?
+
+    createdAt  DateTime @default(now())
+
+    @@unique([userId, permission, resource])
+    @@map("user_permissions")
+}
+
+model SystemAnalytics {
+    id              String   @id @default(cuid())
+    date            DateTime @unique @default(now())
+    totalUsers      Int      @default(0)
+    activeUsers     Int      @default(0)
+    newUsers        Int      @default(0)
+    totalLogins     Int      @default(0)
+
+    // Feature usage
+    promptTutorUsage    Int @default(0)
+    aiAgentsUsage       Int @default(0)
+    automationsUsage    Int @default(0)
+    assessmentsUsage    Int @default(0)
+    resourcesUsage      Int @default(0)
+
+    createdAt       DateTime @default(now())
+
+    @@map("system_analytics")
+}

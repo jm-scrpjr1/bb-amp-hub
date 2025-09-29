@@ -317,3 +317,9 @@ export const Circle = ({ className = "h-5 w-5", size }: IconProps) => (
     <circle cx="12" cy="12" r="10"></circle>
   </svg>
 );
+
+export const Shield = ({ className = "h-5 w-5", size }: IconProps) => (
+  <svg className={className} width={size} height={size} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
+);

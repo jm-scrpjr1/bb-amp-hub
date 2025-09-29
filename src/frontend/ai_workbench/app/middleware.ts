@@ -1,15 +1,38 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { UserService } from '@/lib/user-service'
+import { canAccessAdminPanel, canManageUsers } from '@/lib/permissions'
 
 export default withAuth(
-  function middleware(req) {
-    // Add any additional middleware logic here
+  async function middleware(req) {
     console.log('Middleware running for:', req.nextUrl.pathname)
 
-    // You can add custom logic here, for example:
-    // - Role-based access control
-    // - Logging
-    // - Custom redirects
+    // Admin panel access control
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+      const token = req.nextauth.token
+
+      if (!token?.email) {
+        return NextResponse.redirect(new URL('/auth/signin', req.url))
+      }
+
+      // Temporary: Allow access for owner email during development
+      const isOwnerEmail = token.email === 'jlope@boldbusiness.com'
+
+      if (!isOwnerEmail) {
+        // Get user with permissions
+        const user = await UserService.getUserByEmail(token.email)
+
+        // Check admin panel access
+        if (req.nextUrl.pathname === '/admin' && !canAccessAdminPanel(user)) {
+          return NextResponse.redirect(new URL('/', req.url))
+        }
+
+        // Check user management access
+        if (req.nextUrl.pathname.startsWith('/admin/users') && !canManageUsers(user)) {
+          return NextResponse.redirect(new URL('/admin', req.url))
+        }
+      }
+    }
 
     return NextResponse.next()
   },

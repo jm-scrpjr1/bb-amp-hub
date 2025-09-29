@@ -10,6 +10,7 @@ import ActivitySection from '@/components/dashboard/activity-section';
 import PageTransition from '@/components/layout/page-transition';
 import AmplificationOnboarding from '@/components/onboarding/amplification-onboarding';
 import { useSession } from 'next-auth/react';
+import { ScrollEffects, AnimatedText, ScrollTextReveal } from '@/components/effects';
 // import ScrollReveal from '@/components/effects/scroll-reveal';
 // import CyberGrid from '@/components/effects/cyber-grid';
 // import { motion } from 'framer-motion';
@@ -56,32 +57,64 @@ export default function HomePage() {
             <WelcomeSection />
           </div>
 
-          {/* Amplification Narrative Section */}
-          <div className="amplification-narrative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-xl p-6 border border-cyan-200/50">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                🚀 Your AI-Amplified Workflow
-              </h2>
-              <div className="grid md:grid-cols-4 gap-4 text-sm">
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-cyan-100">
-                  <div className="text-cyan-600 font-semibold mb-2">1. Select Your Tools</div>
-                  <p className="text-gray-600">Choose from our AI-powered toolkit</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
-                  <div className="text-blue-600 font-semibold mb-2">2. Start Your Work</div>
-                  <p className="text-gray-600">Begin your projects with confidence</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-purple-100">
-                  <div className="text-purple-600 font-semibold mb-2">3. Ask for Help</div>
-                  <p className="text-gray-600">Get assistance from ARIA when needed</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-sm border border-green-100">
-                  <div className="text-green-600 font-semibold mb-2">4. Get Amplified Results</div>
-                  <p className="text-gray-600">Achieve more than you thought possible</p>
-                </div>
+          {/* Amplification Workflow Cards */}
+          <ScrollEffects effect="fadeUp" delay={0.2}>
+            <div className="amplification-narrative bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-12 border border-cyan-200/50">
+              <div className="flex flex-col md:flex-row gap-6 justify-center items-stretch">
+                <ScrollEffects effect="fadeUp" delay={0.6}>
+                  <div className="bg-white rounded-2xl p-8 shadow-xl border border-cyan-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex-1 h-[220px] flex flex-col justify-center">
+                    <AnimatedText
+                      text="1. Select Your Tools"
+                      className="text-cyan-600 font-bold mb-4 text-2xl text-center"
+                      animation="fadeUp"
+                      by="word"
+                      delay={0.8}
+                    />
+                    <p className="text-gray-600 text-lg leading-relaxed text-center">Choose from our AI-powered toolkit</p>
+                  </div>
+                </ScrollEffects>
+
+                <ScrollEffects effect="fadeUp" delay={0.8}>
+                  <div className="bg-white rounded-2xl p-8 shadow-xl border border-blue-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex-1 h-[220px] flex flex-col justify-center">
+                    <AnimatedText
+                      text="2. Start Your Work"
+                      className="text-blue-600 font-bold mb-4 text-2xl text-center"
+                      animation="fadeUp"
+                      by="word"
+                      delay={1.0}
+                    />
+                    <p className="text-gray-600 text-lg leading-relaxed text-center">Begin your projects with confidence</p>
+                  </div>
+                </ScrollEffects>
+
+                <ScrollEffects effect="fadeUp" delay={1.0}>
+                  <div className="bg-white rounded-2xl p-8 shadow-xl border border-purple-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex-1 h-[220px] flex flex-col justify-center">
+                    <AnimatedText
+                      text="3. Ask for Help"
+                      className="text-purple-600 font-bold mb-4 text-2xl text-center"
+                      animation="fadeUp"
+                      by="word"
+                      delay={1.2}
+                    />
+                    <p className="text-gray-600 text-lg leading-relaxed text-center">Get assistance from ARIA when needed</p>
+                  </div>
+                </ScrollEffects>
+
+                <ScrollEffects effect="fadeUp" delay={1.2}>
+                  <div className="bg-white rounded-2xl p-8 shadow-xl border border-green-100 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex-1 h-[220px] flex flex-col justify-center">
+                    <AnimatedText
+                      text="4. Get Amplified Results"
+                      className="text-green-600 font-bold mb-4 text-2xl text-center"
+                      animation="fadeUp"
+                      by="word"
+                      delay={1.4}
+                    />
+                    <p className="text-gray-600 text-lg leading-relaxed text-center">Achieve more than you thought possible</p>
+                  </div>
+                </ScrollEffects>
               </div>
             </div>
-          </div>
+          </ScrollEffects>
 
           {/* Quick Actions */}
           <div className="quick-actions">

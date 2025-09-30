@@ -7,6 +7,12 @@ export class UserService {
   // Get user by email with permissions
   static async getUserByEmail(email: string): Promise<UserWithPermissions | null> {
     try {
+      // Check if database is available
+      if (!prisma) {
+        console.warn('Database not available, using fallback for user:', email);
+        return this.createFallbackUser(email);
+      }
+
       const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
         include: {
@@ -47,8 +53,14 @@ export class UserService {
   }): Promise<UserWithPermissions | null> {
     try {
       const email = authUser.email.toLowerCase();
-      
-      // Check if this is the owner email
+
+      // Check if database is available
+      if (!prisma) {
+        console.warn('Database not available, using fallback for auth user:', email);
+        return this.createFallbackUser(email);
+      }
+
+      // God mode: Owner email always gets OWNER role
       const role = isOwnerEmail(email) ? UserRole.OWNER : UserRole.MEMBER;
 
       const user = await prisma.user.upsert({
@@ -335,5 +347,73 @@ export class UserService {
         recentActivity: []
       };
     }
+  }
+
+  // Update user profile
+  static async updateUser(
+    userId: string,
+    data: {
+      name?: string;
+      image?: string;
+      role?: UserRole;
+      status?: UserStatus;
+      teamId?: string;
+    }
+  ): Promise<UserWithPermissions | null> {
+    try {
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data,
+        include: {
+          team: {
+            select: {
+              id: true,
+              name: true,
+              managerId: true,
+            }
+          },
+          managedTeams: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          permissions: {
+            select: {
+              permission: true,
+              resource: true,
+            }
+          }
+        }
+      });
+
+      return user as UserWithPermissions;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return null;
+    }
+  }
+
+  // Fallback user creation when database is not available
+  private static createFallbackUser(email: string): UserWithPermissions {
+    const isOwner = isOwnerEmail(email);
+
+    return {
+      id: 'fallback-' + email.replace('@', '-').replace('.', '-'),
+      email: email.toLowerCase(),
+      name: isOwner ? 'John Lopez (God Mode)' : 'User',
+      image: null,
+      role: isOwner ? UserRole.OWNER : UserRole.MEMBER,
+      status: UserStatus.ACTIVE,
+      loginCount: 0,
+      lastLoginAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      teamId: null,
+      team: null,
+      permissions: [],
+      groupMemberships: [],
+      managedGroups: []
+    };
   }
 }

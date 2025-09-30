@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/layout/main-layout';
-import { ScrollEffects, ScrollTextReveal } from '@/components/effects';
+import { ScrollEffects, TextScramble } from '@/components/effects';
 import { 
   Users, 
   BarChart3, 
@@ -152,11 +152,16 @@ export default function AdminDashboard() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
             
             <div className="relative z-10">
-              <ScrollTextReveal effect="scramble" delay={0.4}>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
-                  Admin Dashboard
+              <ScrollEffects effect="fadeUp" delay={0.4}>
+                <h1 className="text-2xl md:text-3xl lg:text-3xl font-bold mb-4 bg-gradient-to-r from-white to-purple-100 bg-clip-text text-transparent">
+                  <TextScramble
+                    text="Admin Dashboard"
+                    trigger={true}
+                    speed={50}
+                    delay={400}
+                  />
                 </h1>
-              </ScrollTextReveal>
+              </ScrollEffects>
               
               <ScrollEffects effect="fadeUp" delay={0.6}>
                 <p className="text-xl text-purple-100 mb-6 max-w-3xl">

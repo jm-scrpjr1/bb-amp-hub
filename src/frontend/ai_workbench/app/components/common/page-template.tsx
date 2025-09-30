@@ -3,10 +3,27 @@
 
 import { memo } from 'react';
 import MainLayout from '@/components/layout/main-layout';
-import { ScrollEffects, ScrollTextReveal } from '@/components/effects';
+import { ScrollEffects, TextScramble } from '@/components/effects';
 // Temporary: Using custom icon type until lucide-react is installed
 // import { LucideIcon } from 'lucide-react';
 type LucideIcon = React.ComponentType<{ className?: string; size?: number }>;
+
+// Client component for Subscribe button
+function SubscribeButton() {
+  const handleClick = () => {
+    console.log('Subscribe to updates clicked');
+    // Add subscription logic here
+  };
+
+  return (
+    <span
+      onClick={handleClick}
+      className="text-blue-600 font-medium ml-1 cursor-pointer hover:text-blue-800"
+    >
+      Subscribe to updates
+    </span>
+  );
+}
 
 interface PageTemplateProps {
   title: string;
@@ -25,11 +42,16 @@ const PageTemplate = memo(function PageTemplate({ title, description, icon: Icon
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
 
             <div className="relative z-10">
-              <ScrollTextReveal effect="scramble" delay={0.4}>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                  {title}
+              <ScrollEffects effect="fadeUp" delay={0.4}>
+                <h1 className="text-2xl md:text-3xl lg:text-3xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                  <TextScramble
+                    text={title}
+                    trigger={true}
+                    speed={50}
+                    delay={400}
+                  />
                 </h1>
-              </ScrollTextReveal>
+              </ScrollEffects>
 
               <ScrollEffects effect="fadeUp" delay={0.6}>
                 <p className="text-xl text-blue-100 mb-6 max-w-3xl">
@@ -65,9 +87,7 @@ const PageTemplate = memo(function PageTemplate({ title, description, icon: Icon
                 <div className="mt-8 p-4 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-500">
                     Want to be notified when this feature is ready?
-                    <span className="text-blue-600 font-medium ml-1 cursor-pointer hover:text-blue-800">
-                      Subscribe to updates
-                    </span>
+                    <SubscribeButton />
                   </p>
                 </div>
               </div>

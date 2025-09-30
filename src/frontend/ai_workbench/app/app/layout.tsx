@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import GSAPProvider from '@/components/animations/GSAPProvider';
 import LiquidCursor from '@/components/effects/liquid-cursor';
 import AuthProvider from '@/providers/auth-provider';
+import { RBACProvider } from '@/providers/rbac-provider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,22 +25,24 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AuthProvider>
-          <GSAPProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="light"
-              enableSystem
-              disableTransitionOnChange={false}
-            >
-              <LiquidCursor
-                color="#06E5EC"
-                size={24}
-                intensity="medium"
-              />
-              {children}
-              <Toaster />
-            </ThemeProvider>
-          </GSAPProvider>
+          <RBACProvider>
+            <GSAPProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="light"
+                enableSystem
+                disableTransitionOnChange={false}
+              >
+                <LiquidCursor
+                  color="#06E5EC"
+                  size={24}
+                  intensity="medium"
+                />
+                {children}
+                <Toaster />
+              </ThemeProvider>
+            </GSAPProvider>
+          </RBACProvider>
         </AuthProvider>
       </body>
     </html>

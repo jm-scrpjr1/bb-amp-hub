@@ -4,7 +4,7 @@ import { UserRole, UserStatus, OWNER_EMAIL } from '../lib/permissions';
 async function main() {
   console.log('🌱 Starting database seed...');
 
-  // Create or update the owner user
+  // Create or update the owner user with God mode
   const ownerUser = await prisma.user.upsert({
     where: { email: OWNER_EMAIL },
     update: {
@@ -20,7 +20,8 @@ async function main() {
     },
   });
 
-  console.log('👑 Owner user created/updated:', ownerUser.email);
+  console.log('👑 God Mode Owner user created/updated:', ownerUser.email);
+  console.log('🔥 Account has unlimited access to all features and permissions');
 
   // Create sample teams
   const engineeringTeam = await prisma.team.upsert({

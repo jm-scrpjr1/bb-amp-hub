@@ -11,10 +11,10 @@ interface TextScrambleProps {
   delay?: number;
 }
 
-export default function TextScramble({ 
-  text, 
-  className = '', 
-  trigger = true, 
+export default function TextScramble({
+  text,
+  className = '',
+  trigger = true,
   speed = 50,
   scrambleChars = '!@#$%^&*()_+-=[]{}|;:,.<>?',
   delay = 0
@@ -53,7 +53,7 @@ export default function TextScramble({
         setIsAnimating(false);
       }
 
-      iteration += 1 / 3;
+      iteration += 1;
     }, speed);
   };
 
@@ -82,11 +82,12 @@ export default function TextScramble({
   }, []);
 
   return (
-    <span 
-      className={`inline-block ${className}`}
-      style={{ 
-        fontFamily: 'monospace',
-        letterSpacing: '0.05em'
+    <span
+      className={`inline-block font-rounded ${className}`}
+      style={{
+        fontFamily: '"Inter", "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+        letterSpacing: '0.02em',
+        fontWeight: '600'
       }}
     >
       {displayText || text}

@@ -13,6 +13,103 @@ export enum UserStatus {
   SUSPENDED = 'SUSPENDED'
 }
 
+export enum GroupType {
+  DEPARTMENT = 'DEPARTMENT',
+  PROJECT = 'PROJECT',
+  FUNCTIONAL = 'FUNCTIONAL',
+  TEMPORARY = 'TEMPORARY',
+  CUSTOM = 'CUSTOM'
+}
+
+export enum GroupVisibility {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  RESTRICTED = 'RESTRICTED'
+}
+
+export enum MembershipStatus {
+  ACTIVE = 'ACTIVE',
+  PENDING = 'PENDING',
+  INACTIVE = 'INACTIVE',
+  REMOVED = 'REMOVED'
+}
+
+export enum Permission {
+  // Group Management
+  CREATE_GROUP = 'CREATE_GROUP',
+  DELETE_GROUP = 'DELETE_GROUP',
+  EDIT_GROUP = 'EDIT_GROUP',
+  MANAGE_GROUP_MEMBERS = 'MANAGE_GROUP_MEMBERS',
+  VIEW_ALL_GROUPS = 'VIEW_ALL_GROUPS',
+
+  // User Management
+  MANAGE_USERS = 'MANAGE_USERS',
+  VIEW_USER_PROFILES = 'VIEW_USER_PROFILES',
+  ASSIGN_ROLES = 'ASSIGN_ROLES',
+
+  // Content Access
+  VIEW_HR_CONTENT = 'VIEW_HR_CONTENT',
+  VIEW_IT_CONTENT = 'VIEW_IT_CONTENT',
+  VIEW_FINANCE_CONTENT = 'VIEW_FINANCE_CONTENT',
+  VIEW_MARKETING_CONTENT = 'VIEW_MARKETING_CONTENT',
+  VIEW_ADMIN_CONTENT = 'VIEW_ADMIN_CONTENT',
+
+  // System Administration
+  ADMIN_PANEL_ACCESS = 'ADMIN_PANEL_ACCESS',
+  SYSTEM_SETTINGS = 'SYSTEM_SETTINGS',
+  ANALYTICS_ACCESS = 'ANALYTICS_ACCESS',
+
+  // AI Features
+  AI_TRAINING_ACCESS = 'AI_TRAINING_ACCESS',
+  AI_ASSESSMENT_ACCESS = 'AI_ASSESSMENT_ACCESS',
+  PROMPT_TUTOR_ACCESS = 'PROMPT_TUTOR_ACCESS'
+}
+
+export interface GroupMembershipInfo {
+  id: string;
+  groupId: string;
+  group: {
+    id: string;
+    name: string;
+    type: GroupType;
+    visibility: GroupVisibility;
+  };
+  status: MembershipStatus;
+  role?: string;
+  joinedAt?: Date;
+  canInvite: boolean;
+  canRemove: boolean;
+  canEdit: boolean;
+}
+
+export interface GroupInfo {
+  id: string;
+  name: string;
+  description?: string;
+  type: GroupType;
+  visibility: GroupVisibility;
+  managerId?: string;
+  manager?: {
+    id: string;
+    name?: string;
+    email: string;
+  };
+  createdById: string;
+  createdBy: {
+    id: string;
+    name?: string;
+    email: string;
+  };
+  isActive: boolean;
+  maxMembers?: number;
+  autoApprove: boolean;
+  tags: string[];
+  metadata?: any;
+  memberCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface UserWithPermissions {
   id: string;
   email: string;
@@ -20,6 +117,8 @@ export interface UserWithPermissions {
   image?: string;
   role: UserRole;
   status: UserStatus;
+
+  // Legacy team support
   teamId?: string;
   team?: {
     id: string;
@@ -30,14 +129,163 @@ export interface UserWithPermissions {
     id: string;
     name: string;
   }>;
+
+  // New group system
+  groupMemberships?: GroupMembershipInfo[];
+  managedGroups?: GroupInfo[];
+
   lastLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   loginCount: number;
   permissions: Array<{
-    permission: string;
+    permission: Permission;
     resource?: string;
   }>;
+}
+
+// Permission checking functions
+export const OWNER_EMAIL = 'jlope@boldbusiness.com';
+
+export function isOwnerEmail(email: string): boolean {
+  return email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+}
+
+// God mode check - ensures owner email always has access
+export function hasGodMode(user: UserWithPermissions | null): boolean {
+  return user ? isOwnerEmail(user.email) : false;
+}
+
+export function hasPermission(user: UserWithPermissions | null, permission: Permission, resource?: string): boolean {
+  if (!user || user.status !== UserStatus.ACTIVE) return false;
+
+  // God mode for owner email - ALWAYS has all permissions
+  if (isOwnerEmail(user.email)) return true;
+
+  // Owner role has all permissions
+  if (user.role === UserRole.OWNER) return true;
+
+  // Check direct user permissions
+  return user.permissions.some(p =>
+    p.permission === permission &&
+    (!resource || p.resource === resource || p.resource === '*')
+  );
+}
+
+export function canAccessAdminPanel(user: UserWithPermissions | null): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  return user.role === UserRole.OWNER ||
+         user.role === UserRole.ADMIN ||
+         hasPermission(user, Permission.ADMIN_PANEL_ACCESS);
+}
+
+export function canManageUsers(user: UserWithPermissions | null): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  return user.role === UserRole.OWNER ||
+         user.role === UserRole.ADMIN ||
+         hasPermission(user, Permission.MANAGE_USERS);
+}
+
+export function canCreateGroups(user: UserWithPermissions | null): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  return user.role === UserRole.OWNER ||
+         user.role === UserRole.ADMIN ||
+         user.role === UserRole.TEAM_MANAGER ||
+         hasPermission(user, Permission.CREATE_GROUP);
+}
+
+export function canManageGroup(user: UserWithPermissions | null, groupId: string): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner and Admin can manage all groups
+  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+
+  // Check if user is the group manager
+  const managedGroup = user.managedGroups?.find(g => g.id === groupId);
+  if (managedGroup) return true;
+
+  // Check if user has group management permission
+  return hasPermission(user, Permission.MANAGE_GROUP_MEMBERS, groupId);
+}
+
+export function canViewGroup(user: UserWithPermissions | null, group: GroupInfo): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner and Admin can view all groups
+  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+
+  // Public groups are visible to all
+  if (group.visibility === GroupVisibility.PUBLIC) return true;
+
+  // Check if user is a member
+  const membership = user.groupMemberships?.find(m => m.groupId === group.id);
+  if (membership && membership.status === MembershipStatus.ACTIVE) return true;
+
+  // Check if user is the manager
+  if (group.managerId === user.id) return true;
+
+  return false;
+}
+
+export function canInviteToGroup(user: UserWithPermissions | null, groupId: string): boolean {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner and Admin can invite to any group
+  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+
+  // Check if user is the group manager
+  const managedGroup = user.managedGroups?.find(g => g.id === groupId);
+  if (managedGroup) return true;
+
+  // Check if user has invite permission in the group
+  const membership = user.groupMemberships?.find(m => m.groupId === groupId);
+  return membership?.canInvite || false;
+}
+
+export function getAccessibleContent(user: UserWithPermissions | null): Permission[] {
+  if (!user) return [];
+
+  const accessibleContent: Permission[] = [];
+
+  // Check each content permission
+  if (hasPermission(user, Permission.VIEW_HR_CONTENT)) {
+    accessibleContent.push(Permission.VIEW_HR_CONTENT);
+  }
+  if (hasPermission(user, Permission.VIEW_IT_CONTENT)) {
+    accessibleContent.push(Permission.VIEW_IT_CONTENT);
+  }
+  if (hasPermission(user, Permission.VIEW_FINANCE_CONTENT)) {
+    accessibleContent.push(Permission.VIEW_FINANCE_CONTENT);
+  }
+  if (hasPermission(user, Permission.VIEW_MARKETING_CONTENT)) {
+    accessibleContent.push(Permission.VIEW_MARKETING_CONTENT);
+  }
+  if (hasPermission(user, Permission.VIEW_ADMIN_CONTENT)) {
+    accessibleContent.push(Permission.VIEW_ADMIN_CONTENT);
+  }
+
+  return accessibleContent;
 }
 
 // Permission constants
@@ -138,8 +386,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   ],
 };
 
-// Permission checking functions
-export function hasPermission(
+// Legacy permission checking function for string-based permissions
+export function hasLegacyPermission(
   user: UserWithPermissions | null,
   permission: string,
   resource?: string
@@ -147,6 +395,9 @@ export function hasPermission(
   if (!user || user.status !== UserStatus.ACTIVE) {
     return false;
   }
+
+  // God mode for owner email - ALWAYS has all permissions
+  if (isOwnerEmail(user.email)) return true;
 
   // Check role-based permissions
   const rolePermissions = ROLE_PERMISSIONS[user.role] || [];
@@ -164,14 +415,14 @@ export function hasAnyPermission(
   user: UserWithPermissions | null,
   permissions: string[]
 ): boolean {
-  return permissions.some(permission => hasPermission(user, permission));
+  return permissions.some(permission => hasLegacyPermission(user, permission));
 }
 
 export function hasAllPermissions(
   user: UserWithPermissions | null,
   permissions: string[]
 ): boolean {
-  return permissions.every(permission => hasPermission(user, permission));
+  return permissions.every(permission => hasLegacyPermission(user, permission));
 }
 
 export function isOwner(user: UserWithPermissions | null): boolean {
@@ -190,7 +441,8 @@ export function isTeamManager(user: UserWithPermissions | null): boolean {
          user?.status === UserStatus.ACTIVE;
 }
 
-export function canAccessAdminPanel(user: UserWithPermissions | null): boolean {
+// Legacy admin panel access function (replaced by enhanced version above)
+export function canAccessAdminPanelLegacy(user: UserWithPermissions | null): boolean {
   return hasAnyPermission(user, [
     PERMISSIONS.SYSTEM_ADMIN,
     PERMISSIONS.SYSTEM_ANALYTICS,
@@ -199,7 +451,8 @@ export function canAccessAdminPanel(user: UserWithPermissions | null): boolean {
   ]);
 }
 
-export function canManageUsers(user: UserWithPermissions | null): boolean {
+// Legacy user management function (replaced by enhanced version above)
+export function canManageUsersLegacy(user: UserWithPermissions | null): boolean {
   return hasAnyPermission(user, [
     PERMISSIONS.USER_CREATE,
     PERMISSIONS.USER_UPDATE,
@@ -216,9 +469,4 @@ export function canViewAnalytics(user: UserWithPermissions | null): boolean {
   ]);
 }
 
-// Owner email configuration
-export const OWNER_EMAIL = 'jlope@boldbusiness.com';
-
-export function isOwnerEmail(email: string): boolean {
-  return email.toLowerCase() === OWNER_EMAIL.toLowerCase();
-}
+// Owner email configuration (duplicate removed - using the one above)

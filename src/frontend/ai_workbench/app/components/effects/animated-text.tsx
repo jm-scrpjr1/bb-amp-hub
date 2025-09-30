@@ -31,6 +31,11 @@ export default function AnimatedText({
 
   // Split text based on the 'by' prop
   const splitText = () => {
+    // Safety check for undefined or null text
+    if (!text || typeof text !== 'string') {
+      return [];
+    }
+
     switch (by) {
       case 'character':
         return text.split('');

@@ -7,7 +7,8 @@ import { useState, useEffect } from 'react';
 import { Sparkles } from '@/components/icons';
 import { useSession } from 'next-auth/react';
 import { mockUser } from '@/lib/mock-data';
-import { ScrollTextReveal, ScrollEffects } from '@/components/effects';
+import { ScrollEffects, TextScramble } from '@/components/effects';
+import TutorialButton from './tutorial-button';
 // import TextScramble from '@/components/effects/text-scramble';
 // import HolographicText from '@/components/effects/holographic-text';
 // import ParticleField from '@/components/effects/particle-field';
@@ -32,75 +33,87 @@ export default function WelcomeSection() {
   };
 
   return (
-    <div className={`bg-gradient-to-r from-blue-600 to-blue-500 rounded-2xl p-8 md:p-12 mb-8 text-white relative overflow-hidden transition-all duration-1000 ${
-      isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
-    }`}>
-      {/* Background decoration - simplified */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
+    <div className="space-y-6 mb-8">
+      {/* Large Welcome Message Container */}
+      <div className={`bg-blue-600 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden transition-all duration-1000 ${
+        isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+      }`}>
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
 
-      <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
-        <div className="flex-1 text-left mb-6 md:mb-0">
-          {/* Welcome Message */}
+        <div className="relative z-10 text-center">
+          {/* Large Welcome Message */}
           {status === 'loading' ? (
-            <div className="space-y-4">
-              <div className="h-8 bg-white/20 rounded animate-pulse w-64"></div>
-              <div className="h-6 bg-white/20 rounded animate-pulse w-48"></div>
+            <div className="space-y-4 flex justify-center">
+              <div className="h-16 bg-white/20 rounded animate-pulse w-96"></div>
             </div>
           ) : (
-            <ScrollTextReveal effect="scramble" delay={0.4}>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                Welcome, {getUserName()}!
-              </h1>
-            </ScrollTextReveal>
-          )}
-
-          <ScrollEffects effect="fadeUp" delay={0.6}>
-            <h2 className="text-xl md:text-2xl text-blue-100 mb-4 font-medium flex items-center">
-              <Sparkles className="h-6 w-6 mr-2 text-cyan-300" />
-              AI-Amplified™ Workspace
-            </h2>
-          </ScrollEffects>
-
-          <ScrollEffects effect="fadeUp" delay={0.8}>
-            <div className="space-y-2 text-blue-100 mb-6">
-              <p className="text-lg">Select your tools. Start your work. Ask for help.</p>
-              <p className="text-lg font-semibold">Get amplified results.</p>
-            </div>
-          </ScrollEffects>
-
-          <ScrollEffects effect="fadeUp" delay={1.0}>
-            <button
-              onClick={() => {
-                const event = new CustomEvent('showAmplificationOnboarding');
-                window.dispatchEvent(event);
-              }}
-              className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-md"
-            >
-              Learn about the amplification workflow
-            </button>
-          </ScrollEffects>
-        </div>
-
-        {/* Robot Team Illustration - Official Marketing Asset */}
-        <div className="flex-shrink-0 md:ml-8">
-          <ScrollEffects effect="scale" delay={0.6}>
-            <div className="relative">
-              <div className="w-96 h-48 md:w-[32rem] md:h-64 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm p-4 border border-white/20">
-                <img
-                  src="/images/robot-team.png"
-                  alt="Bold Business AI Robot Team"
-                  className="w-full h-full object-contain"
+            <ScrollEffects effect="fadeUp" delay={0.4}>
+              <h1
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
+                style={{
+                  textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                <TextScramble
+                  text={`Welcome, ${getUserName()}!`}
+                  speed={80}
                 />
+              </h1>
+            </ScrollEffects>
+          )}
+        </div>
+      </div>
+
+      {/* AI Workspace Information Container */}
+      <div className={`bg-blue-600 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden transition-all duration-1000 ${
+        isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+      }`}>
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
+
+        <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
+          <div className="flex-1 text-left mb-6 md:mb-0">
+            <ScrollEffects effect="fadeUp" delay={0.6}>
+              <h2 className="text-2xl md:text-3xl text-white mb-4 font-medium flex items-center">
+                <Sparkles className="h-8 w-8 mr-3 text-cyan-300" />
+                AI-Amplified™ Workspace
+              </h2>
+            </ScrollEffects>
+
+            <ScrollEffects effect="fadeUp" delay={0.8}>
+              <div className="space-y-2 text-blue-100 mb-6">
+                <p className="text-xl">Select your tools. Start your work. Ask for help.</p>
+                <p className="text-xl font-semibold">Get amplified results.</p>
               </div>
-              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-pulse">
-                <Sparkles className="w-4 h-4 inline mr-1" />
-                AI Team Ready!
+            </ScrollEffects>
+
+            <ScrollEffects effect="fadeUp" delay={1.0}>
+              <TutorialButton />
+            </ScrollEffects>
+          </div>
+
+          {/* Robot Team Illustration */}
+          <div className="flex-shrink-0 md:ml-8">
+            <ScrollEffects effect="scale" delay={0.6}>
+              <div className="relative">
+                <div className="w-96 h-48 md:w-[32rem] md:h-64 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm p-4 border border-white/20">
+                  <img
+                    src="/images/robot-team.png"
+                    alt="Bold Business AI Robot Team"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="absolute -top-3 -right-3 bg-cyan-400 text-blue-900 px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                  <Sparkles className="w-4 h-4 inline mr-1" />
+                  AI Team Ready!
+                </div>
+                <div className="absolute -bottom-3 -left-3 bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-medium shadow-md">
+                  Powered by ARIA
+                </div>
               </div>
-              <div className="absolute -bottom-3 -left-3 bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-medium shadow-md">
-                5 AI Assistants
-              </div>
-            </div>
-          </ScrollEffects>
+            </ScrollEffects>
+          </div>
         </div>
       </div>
     </div>

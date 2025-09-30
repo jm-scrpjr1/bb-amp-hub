@@ -8,6 +8,18 @@ import { mockTrainings, mockMessages } from '@/lib/mock-data';
 // import { Clock, MessageCircle } from 'lucide-react';
 import { Clock, MessageCircle } from '@/components/icons';
 
+// Client component for View More button
+function ViewMoreButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+  return (
+    <div
+      onClick={onClick}
+      className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function RightSidebar() {
   return (
     <div className="w-80 bg-gray-50 border-l border-gray-200 h-full overflow-y-auto">
@@ -15,12 +27,9 @@ export default function RightSidebar() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Trainings</h2>
-          <div
-            onClick={() => console.log('View More Trainings clicked')}
-            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
-          >
+          <ViewMoreButton onClick={() => console.log('View More Trainings clicked')}>
             View More
-          </div>
+          </ViewMoreButton>
         </div>
         
         <div className="space-y-4">
@@ -53,12 +62,9 @@ export default function RightSidebar() {
       <div className="px-6 pb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
-          <div
-            onClick={() => console.log('View More Messages clicked')}
-            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
-          >
+          <ViewMoreButton onClick={() => console.log('View More Messages clicked')}>
             View More
-          </div>
+          </ViewMoreButton>
         </div>
         
         <div className="space-y-3">

@@ -1,7 +1,7 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
 import { UserService } from '@/lib/user-service'
-import { canAccessAdminPanel, canManageUsers } from '@/lib/permissions'
+import { canAccessAdminPanel, canManageUsers, isOwnerEmail } from '@/lib/permissions'
 
 export default withAuth(
   async function middleware(req) {
@@ -15,10 +15,10 @@ export default withAuth(
         return NextResponse.redirect(new URL('/auth/signin', req.url))
       }
 
-      // Temporary: Allow access for owner email during development
-      const isOwnerEmail = token.email === 'jlope@boldbusiness.com'
+      // God mode: Owner email always has access
+      const hasGodMode = isOwnerEmail(token.email)
 
-      if (!isOwnerEmail) {
+      if (!hasGodMode) {
         // Get user with permissions
         const user = await UserService.getUserByEmail(token.email)
 
@@ -30,6 +30,11 @@ export default withAuth(
         // Check user management access
         if (req.nextUrl.pathname.startsWith('/admin/users') && !canManageUsers(user)) {
           return NextResponse.redirect(new URL('/admin', req.url))
+        }
+
+        // Check groups access
+        if (req.nextUrl.pathname.startsWith('/groups') && !user) {
+          return NextResponse.redirect(new URL('/', req.url))
         }
       }
     }

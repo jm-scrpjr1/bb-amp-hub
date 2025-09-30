@@ -6,7 +6,8 @@ import { Brain, Target, Zap, TrendingUp, Users, Award, ArrowLeft } from 'lucide-
 import Link from 'next/link';
 import MainLayout from '@/components/layout/main-layout';
 import AIAssessmentSimple from '@/components/assessment/ai-assessment-simple';
-import { ScrollEffects, AnimatedText, ScrollTextReveal } from '@/components/effects';
+import { ScrollEffects, AnimatedText, TextScramble } from '@/components/effects';
+import StartAssessmentButton from '@/components/assessment/start-assessment-button';
 
 export default function AIAssessmentsPage() {
   const [showAssessment, setShowAssessment] = useState(false);
@@ -80,11 +81,14 @@ export default function AIAssessmentsPage() {
               </div>
             </div>
 
-            <ScrollTextReveal effect="scramble" delay={0.3}>
-              <h1 className="text-7xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent mb-8 leading-tight tracking-wide">
-                AI Readiness Assessment
+            <ScrollEffects effect="fadeUp" delay={0.3}>
+              <h1 className="text-2xl md:text-3xl lg:text-3xl font-bold mb-8 leading-tight tracking-wide bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                <TextScramble
+                  text="AI Readiness Assessment"
+                  speed={50}
+                />
               </h1>
-            </ScrollTextReveal>
+            </ScrollEffects>
 
             <div className="relative max-w-5xl mx-auto">
               <ScrollEffects effect="fadeUp" delay={0.5}>
@@ -109,22 +113,11 @@ export default function AIAssessmentsPage() {
             </div>
 
             <div className="relative">
-              <button
-                onClick={handleStartAssessment}
-                className="relative inline-flex items-center px-10 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 text-white text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-200"
-              >
-                {/* Animated Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-
-                <div className="relative flex items-center">
-                  <Target className="w-7 h-7 mr-3 animate-pulse" />
-                  <span>Start Your AI Assessment</span>
-                  <div className="ml-3 w-2 h-2 bg-white rounded-full animate-ping"></div>
-                </div>
-              </button>
+              <StartAssessmentButton onClick={handleStartAssessment} variant="primary">
+                <Target className="w-7 h-7 mr-3 animate-pulse" />
+                <span>Start Your AI Assessment</span>
+                <div className="ml-3 w-2 h-2 bg-white rounded-full animate-ping"></div>
+              </StartAssessmentButton>
 
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur-xl opacity-30 -z-10 animate-pulse"></div>
@@ -251,19 +244,11 @@ export default function AIAssessmentsPage() {
             </p>
           </div>
 
-          <button
-            onClick={handleStartAssessment}
-            className="relative inline-flex items-center px-10 py-5 bg-white text-blue-600 text-xl font-bold rounded-2xl overflow-hidden group shadow-2xl hover:scale-105 active:scale-95 transition-transform duration-200"
-          >
-            {/* Shimmer Effect */}
-            <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-blue-200/50 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700"></div>
-
-            <div className="relative flex items-center">
-              <Brain className="w-7 h-7 mr-3 text-blue-600" />
-              <span className="text-blue-600">🤖 Begin AI Assessment Now</span>
-              <div className="ml-3 w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
-            </div>
-          </button>
+          <StartAssessmentButton onClick={handleStartAssessment} variant="secondary">
+            <Brain className="w-7 h-7 mr-3 text-blue-600" />
+            <span className="text-blue-600">🤖 Begin AI Assessment Now</span>
+            <div className="ml-3 w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
+          </StartAssessmentButton>
         </div>
       </div>
     </div>

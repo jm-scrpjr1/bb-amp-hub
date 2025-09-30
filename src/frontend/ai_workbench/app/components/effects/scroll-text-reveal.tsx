@@ -14,6 +14,7 @@ interface ScrollTextRevealProps {
   once?: boolean;
   scrambleChars?: string;
   staggerChildren?: number;
+  disableInternalStyling?: boolean;
 }
 
 export default function ScrollTextReveal({
@@ -26,7 +27,8 @@ export default function ScrollTextReveal({
   threshold = 0.1,
   once = true,
   scrambleChars = '!@#$%^&*()_+-=[]{}|;:,.<>?',
-  staggerChildren = 0.1
+  staggerChildren = 0.1,
+  disableInternalStyling = false
 }: ScrollTextRevealProps) {
   const ref = useRef(null);
   const isInView = useInView(ref, { threshold, once });
@@ -217,9 +219,9 @@ export default function ScrollTextReveal({
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: distance }}
         transition={{ duration: 0.6, delay }}
       >
-        <span 
-          className="font-mono tracking-wider"
-          style={{ 
+        <span
+          className={disableInternalStyling ? '' : 'tracking-wider'}
+          style={{
             minHeight: '1em',
             display: 'inline-block'
           }}

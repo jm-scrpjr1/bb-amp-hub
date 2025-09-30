@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/main-layout';
-import { ScrollEffects, AnimatedText, ScrollTextReveal } from '@/components/effects';
+import { ScrollEffects, AnimatedText, TextScramble } from '@/components/effects';
 import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building } from 'lucide-react';
 
 // Document repository data based on your table
@@ -118,11 +118,14 @@ export default function ResourcesPage() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
 
             <div className="relative z-10">
-              <ScrollTextReveal effect="scramble" delay={0.4}>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
-                  AI-Amplified™ Resources
+              <ScrollEffects effect="fadeUp" delay={0.4}>
+                <h1 className="text-2xl md:text-3xl lg:text-3xl font-bold mb-4 bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
+                  <TextScramble
+                    text="AI-Amplified™ Resources"
+                    speed={50}
+                  />
                 </h1>
-              </ScrollTextReveal>
+              </ScrollEffects>
 
               <ScrollEffects effect="fadeUp" delay={0.6}>
                 <p className="text-xl text-blue-100 mb-6 max-w-3xl">

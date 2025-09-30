@@ -16,7 +16,11 @@ import TutorialButton from './tutorial-button';
 // import ScrollReveal from '@/components/effects/scroll-reveal';
 // import { motion } from 'framer-motion';
 
-export default function WelcomeSection() {
+interface WelcomeSectionProps {
+  showWelcomeBanner?: boolean;
+}
+
+export default function WelcomeSection({ showWelcomeBanner = true }: WelcomeSectionProps) {
   const { data: session, status } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
@@ -34,36 +38,38 @@ export default function WelcomeSection() {
 
   return (
     <div className="space-y-6 mb-8">
-      {/* Large Welcome Message Container */}
-      <div className={`bg-blue-600 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden transition-all duration-1000 ${
-        isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
-      }`}>
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
+      {/* Large Welcome Message Container - Conditional */}
+      {showWelcomeBanner && (
+        <div className={`bg-blue-600 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden transition-all duration-1000 ${
+          isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+        }`}>
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
 
-        <div className="relative z-10 text-center">
-          {/* Large Welcome Message */}
-          {status === 'loading' ? (
-            <div className="space-y-4 flex justify-center">
-              <div className="h-16 bg-white/20 rounded animate-pulse w-96"></div>
-            </div>
-          ) : (
-            <ScrollEffects effect="fadeUp" delay={0.4}>
-              <h1
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
-                style={{
-                  textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2)'
-                }}
-              >
-                <TextScramble
-                  text={`Welcome, ${getUserName()}!`}
-                  speed={80}
-                />
-              </h1>
-            </ScrollEffects>
-          )}
+          <div className="relative z-10 text-center">
+            {/* Large Welcome Message */}
+            {status === 'loading' ? (
+              <div className="space-y-4 flex justify-center">
+                <div className="h-16 bg-white/20 rounded animate-pulse w-96"></div>
+              </div>
+            ) : (
+              <ScrollEffects effect="fadeUp" delay={0.4}>
+                <h1
+                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
+                  style={{
+                    textShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4), 0 0 40px rgba(255, 255, 255, 0.2)'
+                  }}
+                >
+                  <TextScramble
+                    text={`Welcome, ${getUserName()}!`}
+                    speed={80}
+                  />
+                </h1>
+              </ScrollEffects>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* AI Workspace Information Container */}
       <div className={`bg-blue-600 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden transition-all duration-1000 ${

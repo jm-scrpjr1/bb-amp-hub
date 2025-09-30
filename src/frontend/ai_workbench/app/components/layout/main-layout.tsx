@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import Sidebar from './sidebar';
 import Header from './header';
-import RightSidebar from './right-sidebar';
 import TutorialTour from '../tutorial/tutorial-tour';
 import PageTransition from './page-transition';
 import FloatingChatbot from '../ui/floating-chatbot';
@@ -42,11 +41,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
               {children}
             </PageTransition>
           </main>
-
-          {/* Right Sidebar */}
-          <div className="right-sidebar flex-shrink-0">
-            <RightSidebar />
-          </div>
         </div>
       </div>
 

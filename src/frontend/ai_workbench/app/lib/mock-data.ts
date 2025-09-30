@@ -90,24 +90,24 @@ export const mockBoldUpdates = [
 export const mockQuickActions = [
   {
     id: 1,
-    title: "Track your time",
-    subtitle: "Select your tools and start tracking amplified productivity",
-    icon: "Clock",
-    color: "bg-blue-50 border-blue-200"
-  },
-  {
-    id: 2,
     title: "Submit Ticket",
     subtitle: "Ask for help with technical issues - get amplified support",
     icon: "Ticket",
     color: "bg-green-50 border-green-200"
   },
   {
-    id: 3,
+    id: 2,
     title: "Submit Bold Idea",
     subtitle: "Start your work with innovative ideas - achieve amplified impact",
     icon: "Lightbulb",
     color: "bg-purple-50 border-purple-200"
+  },
+  {
+    id: 3,
+    title: "My Space",
+    subtitle: "Access your personal workspace and preferences",
+    icon: "User",
+    color: "bg-blue-50 border-blue-200"
   }
 ];
 
@@ -142,17 +142,21 @@ export const mockActivity = [
 ];
 
 export const navigationItems = [
-  { id: 'home', name: 'Home', icon: 'Home', active: true },
-  { id: 'prompt-tutor', name: 'Prompt Tutor', icon: 'BookOpen' },
-  { id: 'ai-agents', name: 'AI Agents', icon: 'Bot' },
+  // MY AI-AMPLIFIERS Section (renamed from AI ASSISTANTS)
+  { id: 'home', name: 'AI Home', icon: 'Home', active: true },
+  { id: 'prompt-tutor', name: 'Prompts', icon: 'BookOpen' },
   { id: 'automations', name: 'Automations', icon: 'Zap' },
-  { id: 'ai-assessments', name: 'AI Assessments', icon: 'ClipboardList' },
-  { id: 'groups', name: 'Groups', icon: 'Users' },
-  { id: 'activity', name: 'Activity', icon: 'Activity' },
-  { id: 'resources', name: 'Resources', icon: 'FileText' },
+  { id: 'ai-agents', name: 'AI Agents', icon: 'Bot' },
   { id: 'trainings', name: 'Trainings', icon: 'GraduationCap' },
+
+  // EMPLOYEE TOOLS Section
+  { id: 'my-space', name: 'My Space', icon: 'User' },
+  { id: 'activity', name: 'Activity', icon: 'Activity' },
+  { id: 'groups', name: 'Groups', icon: 'Users' },
+  { id: 'resources', name: 'Resources', icon: 'FileText' },
   { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: 'Lightbulb' },
-  { id: 'track-my-time', name: 'Track My Time', icon: 'Clock' },
+
+  // OTHER OPTIONS Section
   { id: 'admin', name: 'Admin Panel', icon: 'Shield', adminOnly: true },
   { id: 'submit-ticket', name: 'Submit Ticket', icon: 'Ticket' },
   { id: 'settings', name: 'Settings', icon: 'Settings' },

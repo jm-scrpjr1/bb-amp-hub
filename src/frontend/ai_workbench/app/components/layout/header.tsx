@@ -6,10 +6,12 @@ import { useSession, signOut } from 'next-auth/react';
 import { useState, useRef, useEffect } from 'react';
 import GoogleSignIn from '@/components/auth/google-signin';
 import { mockUser } from '@/lib/mock-data';
+import AISearch from '@/components/search/ai-search';
 
 export default function Header() {
   const { data: session, status } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -23,6 +25,19 @@ export default function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Handle scroll for translucency effect
+  useEffect(() => {
+    function handleScroll() {
+      const scrolled = window.scrollY > 10;
+      setIsScrolled(scrolled);
+    }
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -42,11 +57,26 @@ export default function Header() {
   };
 
   return (
-    <div className="h-16 bg-white/95 backdrop-blur-md border-b border-gray-200/50 flex items-center justify-end px-6 relative">
+    <div className={`h-16 backdrop-blur-md border-b flex items-center justify-between px-6 relative transition-all duration-300 ${
+      isScrolled
+        ? 'bg-white/70 border-gray-200/30'
+        : 'bg-white/95 border-gray-200/50'
+    }`}>
       {/* Background decoration */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none bg-gradient-to-r from-blue-50 to-cyan-50"></div>
-      
-      <div className="flex items-center space-x-4 relative z-10">
+      <div className={`absolute inset-0 pointer-events-none bg-gradient-to-r from-blue-50 to-cyan-50 transition-opacity duration-300 ${
+        isScrolled ? 'opacity-2' : 'opacity-5'
+      }`}></div>
+
+      {/* Left spacer */}
+      <div className="w-16 flex-shrink-0"></div>
+
+      {/* Center - AI Search (Extended) */}
+      <div className="flex-1 flex justify-center px-4 relative z-10">
+        <AISearch className="w-full max-w-4xl" />
+      </div>
+
+      {/* Right - User Profile */}
+      <div className="flex items-center space-x-4 relative z-10 w-64 flex-shrink-0 justify-end">
         {status === 'loading' ? (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>

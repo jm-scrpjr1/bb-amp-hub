@@ -2,13 +2,13 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 // Temporary: Using custom icons until lucide-react is installed
 // import { Clock, FileText, Lightbulb } from 'lucide-react';
-import { Clock, FileText, Lightbulb } from '@/components/icons';
+import { Clock, FileText, Lightbulb, User } from '@/components/icons';
 import { mockQuickActions } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
 import BoldIdeaModal from '@/components/ui/bold-idea-modal';
-import TrackTimeModal from '@/components/ui/track-time-modal';
 import { ScrollEffects } from '@/components/effects';
 // import ScrollReveal from '@/components/effects/scroll-reveal';
 // import HolographicText from '@/components/effects/holographic-text';
@@ -17,32 +17,33 @@ import { ScrollEffects } from '@/components/effects';
 const iconMap = {
   Clock,
   Ticket: FileText,
-  Lightbulb
+  Lightbulb,
+  User
 };
 
 export default function QuickActions() {
+  const router = useRouter();
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
-  const [isTrackTimeModalOpen, setIsTrackTimeModalOpen] = useState(false);
 
   const handleActionClick = (actionId: number) => {
     console.log(`Quick action ${actionId} clicked`);
 
-    // Handle Track My Time action
-    if (actionId === 1) {
-      setIsTrackTimeModalOpen(true);
-      return;
-    }
-
     // Handle Submit Ticket action
-    if (actionId === 2) {
+    if (actionId === 1) {
       setIsTicketModalOpen(true);
       return;
     }
 
     // Handle Submit Bold Idea action
-    if (actionId === 3) {
+    if (actionId === 2) {
       setIsBoldIdeaModalOpen(true);
+      return;
+    }
+
+    // Handle My Space action
+    if (actionId === 3) {
+      router.push('/my-space');
       return;
     }
 
@@ -67,12 +68,14 @@ export default function QuickActions() {
               >
                 <div className="flex items-start space-x-6">
                 <div className={`p-4 rounded-xl ${
-                  action.icon === 'Clock' ? 'bg-blue-100' :
-                  action.icon === 'Ticket' ? 'bg-green-100' : 'bg-purple-100'
+                  action.icon === 'Ticket' ? 'bg-green-100' :
+                  action.icon === 'Lightbulb' ? 'bg-purple-100' :
+                  action.icon === 'User' ? 'bg-blue-100' : 'bg-gray-100'
                 } group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
                   <Icon className={`h-8 w-8 ${
-                    action.icon === 'Clock' ? 'text-blue-600' :
-                    action.icon === 'Ticket' ? 'text-green-600' : 'text-purple-600'
+                    action.icon === 'Ticket' ? 'text-green-600' :
+                    action.icon === 'Lightbulb' ? 'text-purple-600' :
+                    action.icon === 'User' ? 'text-blue-600' : 'text-gray-600'
                   }`} />
                 </div>
                 <div className="flex-1">
@@ -102,11 +105,7 @@ export default function QuickActions() {
         onClose={() => setIsBoldIdeaModalOpen(false)}
       />
 
-      {/* Track Time Modal */}
-      <TrackTimeModal
-        isOpen={isTrackTimeModalOpen}
-        onClose={() => setIsTrackTimeModalOpen(false)}
-      />
+
     </>
   );
 }

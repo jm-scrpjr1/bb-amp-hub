@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
@@ -40,14 +40,13 @@ import {
   User,
   Document,
   Circle,
-  Shield,
-  Clock
+  Shield
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
 import BoldIdeaModal from '@/components/ui/bold-idea-modal';
-import TrackTimeModal from '@/components/ui/track-time-modal';
+
 import { canAccessAdminPanel } from '@/lib/permissions';
 
 const iconMap = {
@@ -70,8 +69,7 @@ const iconMap = {
   User,
   Document,
   Circle,
-  Shield,
-  Clock
+  Shield
 };
 
 interface SidebarProps {
@@ -85,7 +83,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
   const [activeItem, setActiveItem] = useState('home');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
-  const [isTrackTimeModalOpen, setIsTrackTimeModalOpen] = useState(false);
+
 
   // Filter navigation items based on user permissions
   const getFilteredNavigationItems = () => {
@@ -122,14 +120,24 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       setIsBoldIdeaModalOpen(true);
       return;
     }
-    if (itemId === 'track-my-time') {
-      // Open track time modal instead of navigating
-      setIsTrackTimeModalOpen(true);
-      return;
-    }
+
     // Navigate to the route
     router.push(href);
   }, [router]);
+
+  // Listen for search-triggered modal events
+  useEffect(() => {
+    const handleOpenTicketModal = () => setIsTicketModalOpen(true);
+    const handleOpenBoldIdeaModal = () => setIsBoldIdeaModalOpen(true);
+
+    window.addEventListener('openTicketModal', handleOpenTicketModal);
+    window.addEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
+
+    return () => {
+      window.removeEventListener('openTicketModal', handleOpenTicketModal);
+      window.removeEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
+    };
+  }, []);
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
@@ -143,10 +151,10 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </div>
       </div>
 
-      {/* AI Assistants Section */}
+      {/* My AI-Amplifiers Section */}
       <div className="px-4 py-3 border-b border-gray-200">
         <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
-          AI ASSISTANTS
+          MY AI-AMPLIFIERS
         </p>
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(0, 5).map((item) => {
@@ -212,14 +220,14 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
-            const href = item.id === 'submit-bold-idea' || item.id === 'track-my-time' ? '#' : `/${item.id}`;
+            const href = item.id === 'submit-bold-idea' ? '#' : `/${item.id}`;
 
             return (
               <Link
                 key={item.id}
                 href={href}
                 onClick={(e) => {
-                  if (item.id === 'submit-bold-idea' || item.id === 'track-my-time') {
+                  if (item.id === 'submit-bold-idea') {
                     e.preventDefault();
                     handleNavigation(item.id, href);
                   }
@@ -354,11 +362,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         onClose={() => setIsBoldIdeaModalOpen(false)}
       />
 
-      {/* Track Time Modal */}
-      <TrackTimeModal
-        isOpen={isTrackTimeModalOpen}
-        onClose={() => setIsTrackTimeModalOpen(false)}
-      />
+
     </div>
   );
 }

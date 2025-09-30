@@ -173,73 +173,171 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
           >
             <motion.button
               onClick={() => setIsOpen(true)}
-              className="relative w-16 h-16 bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center group overflow-hidden"
+              className="relative w-48 h-48 text-white rounded-full transition-all duration-300 flex items-center justify-center group overflow-hidden"
               style={{
-                background: 'linear-gradient(45deg, #2563eb, #06b6d4, #0ea5e9, #2563eb)',
-                backgroundSize: '400% 400%'
+                background: 'linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a, #1d4ed8)',
+                backgroundSize: '400% 400%',
+                boxShadow: `
+                  0 0 0 4px rgba(29, 78, 216, 0.2),
+                  0 0 0 8px rgba(29, 78, 216, 0.1),
+                  0 20px 40px rgba(29, 78, 216, 0.4),
+                  0 40px 80px rgba(29, 78, 216, 0.2),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                  inset 0 -2px 4px rgba(0, 0, 0, 0.2)
+                `
               }}
               animate={{
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                y: [0, -8, 0],
+                rotateY: [0, 5, -5, 0],
                 boxShadow: [
-                  '0 0 20px rgba(6, 229, 236, 0.3)',
-                  '0 0 40px rgba(6, 229, 236, 0.6)',
-                  '0 0 20px rgba(6, 229, 236, 0.3)'
+                  `0 0 0 4px rgba(29, 78, 216, 0.2),
+                   0 0 0 8px rgba(29, 78, 216, 0.1),
+                   0 20px 40px rgba(29, 78, 216, 0.4),
+                   0 40px 80px rgba(29, 78, 216, 0.2),
+                   inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                   inset 0 -2px 4px rgba(0, 0, 0, 0.2)`,
+                  `0 0 0 6px rgba(29, 78, 216, 0.3),
+                   0 0 0 12px rgba(29, 78, 216, 0.15),
+                   0 30px 60px rgba(29, 78, 216, 0.6),
+                   0 60px 120px rgba(29, 78, 216, 0.3),
+                   inset 0 3px 6px rgba(255, 255, 255, 0.3),
+                   inset 0 -3px 6px rgba(0, 0, 0, 0.3)`,
+                  `0 0 0 4px rgba(29, 78, 216, 0.2),
+                   0 0 0 8px rgba(29, 78, 216, 0.1),
+                   0 20px 40px rgba(29, 78, 216, 0.4),
+                   0 40px 80px rgba(29, 78, 216, 0.2),
+                   inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                   inset 0 -2px 4px rgba(0, 0, 0, 0.2)`
                 ]
               }}
               transition={{
-                backgroundPosition: { duration: 3, repeat: Infinity, ease: "linear" },
-                boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                backgroundPosition: { duration: 4, repeat: Infinity, ease: "linear" },
+                y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                rotateY: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+                boxShadow: { duration: 3, repeat: Infinity, ease: "easeInOut" }
               }}
               whileHover={{
-                scale: 1.1,
-                boxShadow: '0 20px 40px rgba(6, 229, 236, 0.5)'
+                scale: 1.15,
+                y: -12,
+                rotateY: 15,
+                boxShadow: `
+                  0 0 0 8px rgba(29, 78, 216, 0.3),
+                  0 0 0 16px rgba(29, 78, 216, 0.2),
+                  0 40px 80px rgba(29, 78, 216, 0.6),
+                  0 80px 160px rgba(29, 78, 216, 0.4),
+                  inset 0 4px 8px rgba(255, 255, 255, 0.4),
+                  inset 0 -4px 8px rgba(0, 0, 0, 0.4)
+                `,
+                transition: { duration: 0.3 }
               }}
               whileTap={{ scale: 0.95 }}
             >
-              {/* Background decoration */}
-              <div className="absolute inset-0 rounded-full overflow-hidden bg-gradient-to-r from-blue-600/10 to-cyan-500/10"></div>
+              {/* Multiple layered background decorations for 3D depth */}
+              <div className="absolute inset-0 rounded-full overflow-hidden">
+                {/* Base gradient layer matching hero banner */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-700/30 to-blue-800/30 rounded-full"></div>
+
+                {/* Animated gradient overlay */}
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: 'conic-gradient(from 0deg, rgba(29, 78, 216, 0.4), rgba(30, 64, 175, 0.3), rgba(30, 58, 138, 0.4), rgba(29, 78, 216, 0.4))'
+                  }}
+                  animate={{
+                    rotate: [0, 360]
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
+              </div>
+
+              {/* Outer pulsing rings for 3D depth */}
+              <motion.div
+                className="absolute -inset-6 rounded-full border border-blue-400/20"
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.2, 0.5, 0.2]
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
 
               <motion.div
+                className="absolute -inset-3 rounded-full border border-blue-300/30"
                 animate={{
-                  rotate: [0, 5, -5, 0],
-                  scale: [1, 1.05, 1]
+                  scale: [1, 1.25, 1],
+                  opacity: [0.3, 0.6, 0.3]
                 }}
                 transition={{
                   duration: 3,
                   repeat: Infinity,
-                  repeatType: "reverse"
-                }}
-                className="relative z-10"
-              >
-                <RobotIcon className="w-[3.7rem] h-[3.7rem]" />
-              </motion.div>
-
-              {/* Enhanced pulse effects */}
-              <motion.div
-                className="absolute inset-0 rounded-full border-2 border-cyan-400"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.8, 0, 0.8]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeOut"
-                }}
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border border-white"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.6, 0, 0.6]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeOut",
+                  ease: "easeInOut",
                   delay: 0.5
                 }}
               />
+
+              {/* Inner holographic glow */}
+              <motion.div
+                className="absolute inset-6 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, rgba(59, 130, 246, 0.5) 0%, rgba(29, 78, 216, 0.3) 50%, transparent 100%)'
+                }}
+                animate={{
+                  opacity: [0.4, 0.8, 0.4],
+                  scale: [0.8, 1.2, 0.8]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* ARIA Robot - Enhanced with 3D effects */}
+              <motion.div
+                className="relative z-10"
+                animate={{
+                  rotate: [0, 8, -8, 0],
+                  scale: [1, 1.08, 1],
+                  rotateY: [0, 15, -15, 0]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                style={{
+                  transformStyle: 'preserve-3d'
+                }}
+              >
+                <motion.div
+                  style={{
+                    filter: 'drop-shadow(0 12px 24px rgba(29, 78, 216, 0.5)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.7))',
+                    transformStyle: 'preserve-3d'
+                  }}
+                  animate={{
+                    filter: [
+                      'drop-shadow(0 12px 24px rgba(29, 78, 216, 0.5)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.7))',
+                      'drop-shadow(0 16px 32px rgba(29, 78, 216, 0.7)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.9))',
+                      'drop-shadow(0 12px 24px rgba(29, 78, 216, 0.5)) drop-shadow(0 0 30px rgba(59, 130, 246, 0.7))'
+                    ]
+                  }}
+                  transition={{
+                    duration: 3.5,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <RobotIcon className="w-[6rem] h-[6rem]" />
+                </motion.div>
+              </motion.div>
 
               {/* Holographic notification dot */}
               <motion.div
@@ -291,23 +389,23 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
               stiffness: 300,
               damping: 30
             }}
-            className={`fixed ${getPositionClasses()} ${isExpanded ? 'w-[600px]' : 'w-80'} bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-cyan-200/30 overflow-hidden transition-all duration-300`}
+            className={`fixed ${getPositionClasses()} ${isExpanded ? 'w-[600px]' : 'w-80'} bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-blue-300/30 overflow-hidden transition-all duration-300`}
             style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(6, 229, 236, 0.2), 0 0 50px rgba(6, 229, 236, 0.3)'
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(29, 78, 216, 0.3), 0 0 50px rgba(29, 78, 216, 0.4)'
             }}
           >
-            {/* Enhanced Header */}
+            {/* Enhanced Header - Matching Hero Banner */}
             <motion.div
-              className="relative bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 text-white p-4 flex items-center justify-between overflow-hidden"
+              className="relative text-white p-4 flex items-center justify-between overflow-hidden"
               style={{
-                background: 'linear-gradient(45deg, #2563eb, #06b6d4, #0ea5e9, #2563eb)',
+                background: 'linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a, #1d4ed8)',
                 backgroundSize: '400% 400%'
               }}
               animate={{
                 backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
               }}
               transition={{
-                duration: 4,
+                duration: 5,
                 repeat: Infinity,
                 ease: "linear"
               }}

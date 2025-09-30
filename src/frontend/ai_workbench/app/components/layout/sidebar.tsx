@@ -3,6 +3,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 // Temporary: Using custom icons until lucide-react is installed
@@ -143,12 +144,19 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
     <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-200">
-        <div className="text-right">
-          <div className="text-sm text-gray-500 font-medium">Bold Business</div>
-          <div className="text-xl font-bold text-blue-600">
-            AI W<span className="text-cyan-500">o</span>rkbench<span className="text-sm align-super">™</span>
+        <Link href="/" className="block hover:opacity-80 transition-opacity duration-200">
+          <div className="flex flex-col items-center">
+            <div className="text-sm text-gray-500 font-medium mb-2">Bold Business</div>
+            <Image
+              src="/images/AI Workbench Logo.png"
+              alt="AI Workbench Logo"
+              width={180}
+              height={60}
+              className="object-contain"
+              priority
+            />
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* My AI-Amplifiers Section */}

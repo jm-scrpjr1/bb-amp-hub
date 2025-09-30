@@ -63,8 +63,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - auth/signin (sign in page)
      * - auth/error (auth error page)
+     * - images (public images)
      * - / (homepage - make this public for now)
      */
-    '/((?!api/auth|_next/static|_next/image|favicon.ico|auth/signin|auth/error|$).*)',
+    '/((?!api/auth|_next/static|_next/image|favicon.ico|auth/signin|auth/error|images|$).*)',
   ],
 }

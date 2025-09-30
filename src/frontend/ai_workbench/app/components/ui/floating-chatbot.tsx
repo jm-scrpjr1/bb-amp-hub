@@ -173,7 +173,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
           >
             <motion.button
               onClick={() => setIsOpen(true)}
-              className="relative w-48 h-48 text-white rounded-full transition-all duration-300 flex items-center justify-center group overflow-hidden"
+              className="relative w-32 h-32 text-white rounded-full transition-all duration-300 flex items-center justify-center group overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a, #1d4ed8)',
                 backgroundSize: '400% 400%',

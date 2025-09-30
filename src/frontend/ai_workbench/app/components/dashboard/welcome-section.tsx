@@ -81,20 +81,23 @@ export default function WelcomeSection() {
           </ScrollEffects>
         </div>
 
-        {/* AI Assistant Illustration - matches dev.boldbusiness.com */}
+        {/* Robot Team Illustration - Official Marketing Asset */}
         <div className="flex-shrink-0 md:ml-8">
           <ScrollEffects effect="scale" delay={0.6}>
             <div className="relative">
-              <div className="w-32 h-32 md:w-40 md:h-40 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-2xl md:text-3xl">🤖</span>
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm">✓</span>
-                </div>
+              <div className="w-96 h-48 md:w-[32rem] md:h-64 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm p-4 border border-white/20">
+                <img
+                  src="/images/robot-team.png"
+                  alt="Bold Business AI Robot Team"
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <div className="absolute -top-4 -right-4 bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-medium shadow-md">
-                Hello!
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-400 to-blue-400 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg animate-pulse">
+                <Sparkles className="w-4 h-4 inline mr-1" />
+                AI Team Ready!
+              </div>
+              <div className="absolute -bottom-3 -left-3 bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-medium shadow-md">
+                5 AI Assistants
               </div>
             </div>
           </ScrollEffects>

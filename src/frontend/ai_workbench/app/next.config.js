@@ -4,8 +4,8 @@ const path = require('path');
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
   output: process.env.NEXT_OUTPUT_MODE,
+  outputFileTracingRoot: path.join(__dirname, '../'),
   experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../'),
     // Enable optimized page loading
     optimizePackageImports: ['lucide-react', '@radix-ui/react-navigation-menu'],
   },
@@ -16,8 +16,6 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   images: { unoptimized: true },
-  // Enable faster builds and navigation
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

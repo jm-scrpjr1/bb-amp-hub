@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback, memo } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, Ticket } from '@/components/icons';
+import GenieModal from './genie-modal';
 
 interface TicketConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  triggerElement?: HTMLElement | null;
 }
 
-const TicketConfirmationModal = memo(function TicketConfirmationModal({ isOpen, onClose }: TicketConfirmationModalProps) {
+const TicketConfirmationModal = memo(function TicketConfirmationModal({ isOpen, onClose, triggerElement }: TicketConfirmationModalProps) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -19,30 +20,7 @@ const TicketConfirmationModal = memo(function TicketConfirmationModal({ isOpen, 
     setMounted(true);
   }, []);
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -61,93 +39,18 @@ const TicketConfirmationModal = memo(function TicketConfirmationModal({ isOpen, 
 
   if (!mounted) return null;
 
-  const modalContent = (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="modal-overlay fixed inset-0 flex items-center justify-center p-4"
-          onClick={handleBackdropClick}
-          style={{
-            zIndex: 2147483647,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            pointerEvents: 'auto'
-          }}
-        >
-          {/* Enhanced Backdrop with theme-aligned gradient */}
-          <motion.div
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
-            className="absolute inset-0 bg-black/30"
-          >
-            {/* Subtle animated particles effect */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-white/20 rounded-full"
-                  initial={{
-                    x: Math.random() * 100 + '%',
-                    y: Math.random() * 100 + '%',
-                    opacity: 0
-                  }}
-                  animate={{
-                    x: [Math.random() * 100 + '%', Math.random() * 100 + '%'],
-                    y: [Math.random() * 100 + '%', Math.random() * 100 + '%'],
-                    opacity: [0, 0.6, 0]
-                  }}
-                  transition={{
-                    duration: 4 + Math.random() * 2,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: Math.random() * 2
-                  }}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Enhanced Modal with AI styling */}
-          <motion.div
-            initial={{
-              opacity: 0,
-              scale: 0.9,
-              y: 20
-            }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: 0
-            }}
-            exit={{
-              opacity: 0,
-              scale: 0.95,
-              y: 10
-            }}
-            transition={{
-              duration: 0.3,
-              ease: [0.25, 0.46, 0.45, 0.94],
-              type: "spring",
-              stiffness: 400,
-              damping: 30
-            }}
-            className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-blue-300/50"
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(37, 99, 235, 0.2), 0 0 50px rgba(37, 99, 235, 0.2)'
-            }}
-          >
-            {/* Animated border glow */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-600/20 blur-sm -z-10" />
+  return (
+    <GenieModal
+      isOpen={isOpen}
+      onClose={onClose}
+      triggerElement={triggerElement}
+      className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-blue-300/50"
+      style={{
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(37, 99, 235, 0.2), 0 0 50px rgba(37, 99, 235, 0.2)'
+      }}
+    >
+      {/* Animated border glow */}
+      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-blue-600/20 blur-sm -z-10" />
 
             {/* Header with theme-aligned gradient */}
             <div className="relative p-6 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden">
@@ -302,13 +205,8 @@ const TicketConfirmationModal = memo(function TicketConfirmationModal({ isOpen, 
                 </motion.button>
               </motion.div>
             </form>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    </GenieModal>
   );
-
-  return createPortal(modalContent, document.body);
 });
 
 export default TicketConfirmationModal;

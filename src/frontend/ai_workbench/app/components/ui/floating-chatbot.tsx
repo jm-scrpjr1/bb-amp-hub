@@ -8,25 +8,14 @@ import { useSession } from 'next-auth/react';
 // import TextScramble from '@/components/effects/text-scramble';
 // import ParticleField from '@/components/effects/particle-field';
 
-// Robot Icon Component matching the mockup
-const RobotIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+// Robot Icon Component - Official Marketing Asset
+const RobotIcon = ({ className = "w-[2.96rem] h-[2.96rem]" }: { className?: string }) => (
   <div className={`${className} relative flex items-center justify-center`}>
-    {/* Robot Head */}
-    <div className="relative w-full h-full bg-white rounded-full flex items-center justify-center shadow-inner">
-      {/* Robot Face Screen */}
-      <div className="w-5 h-3 bg-gray-900 rounded-sm flex items-center justify-center relative overflow-hidden">
-        {/* Eyes */}
-        <div className="flex space-x-1">
-          <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse"></div>
-          <div className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-        </div>
-        {/* Mouth */}
-        <div className="absolute bottom-0 w-2 h-0.5 bg-cyan-400 rounded-full opacity-80"></div>
-      </div>
-      {/* Antenna */}
-      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-2 bg-gray-300"></div>
-      <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-cyan-400 rounded-full animate-ping"></div>
-    </div>
+    <img
+      src="/images/chatbot-robot.png"
+      alt="ARIA - Bold Business AI Assistant"
+      className="w-full h-full object-contain"
+    />
   </div>
 );
 
@@ -222,7 +211,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                 }}
                 className="relative z-10"
               >
-                <RobotIcon className="w-10 h-10" />
+                <RobotIcon className="w-[3.7rem] h-[3.7rem]" />
               </motion.div>
 
               {/* Enhanced pulse effects */}
@@ -341,7 +330,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                     boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
                   }}
                 >
-                  <RobotIcon className="w-6 h-6" />
+                  <RobotIcon className="w-[2.22rem] h-[2.22rem]" />
                 </motion.div>
                 <div>
                   <h3 className="font-semibold text-sm text-white">ARIA - Your Productivity Engineer</h3>

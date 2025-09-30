@@ -1,16 +1,17 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { createPortal } from 'react-dom';
 import { X, Lightbulb, Sparkles, Target, Zap } from '@/components/icons';
 import { useSession } from 'next-auth/react';
+import GenieModal from './genie-modal';
 
 interface BoldIdeaModalProps {
   isOpen: boolean;
   onClose: () => void;
+  triggerElement?: HTMLElement | null;
 }
 
-const BoldIdeaModal = memo(function BoldIdeaModal({ isOpen, onClose }: BoldIdeaModalProps) {
+const BoldIdeaModal = memo(function BoldIdeaModal({ isOpen, onClose, triggerElement }: BoldIdeaModalProps) {
   const { data: session } = useSession();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -25,30 +26,7 @@ const BoldIdeaModal = memo(function BoldIdeaModal({ isOpen, onClose }: BoldIdeaM
     setMounted(true);
   }, []);
 
-  // Handle keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -96,18 +74,13 @@ const BoldIdeaModal = memo(function BoldIdeaModal({ isOpen, onClose }: BoldIdeaM
 
   if (!mounted) return null;
 
-  const modalContent = (
-    <div className={`fixed inset-0 z-50 transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={handleBackdropClick}
-        >
-          <div className="flex items-center justify-center min-h-screen p-4">
-            <div
-              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300"
-              onClick={(e) => e.stopPropagation()}
-            >
+  return (
+    <GenieModal
+      isOpen={isOpen}
+      onClose={onClose}
+      triggerElement={triggerElement}
+      className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+    >
               {/* Enhanced Header */}
               <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 p-6 rounded-t-2xl overflow-hidden">
                 {/* Animated Background Elements */}
@@ -288,14 +261,8 @@ const BoldIdeaModal = memo(function BoldIdeaModal({ isOpen, onClose }: BoldIdeaM
                 </div>
               </form>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </GenieModal>
   );
-
-  return createPortal(modalContent, document.body);
 });
 
 export default BoldIdeaModal;

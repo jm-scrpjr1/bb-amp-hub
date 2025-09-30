@@ -152,6 +152,7 @@ export const navigationItems = [
   { id: 'resources', name: 'Resources', icon: 'FileText' },
   { id: 'trainings', name: 'Trainings', icon: 'GraduationCap' },
   { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: 'Lightbulb' },
+  { id: 'track-my-time', name: 'Track My Time', icon: 'Clock' },
   { id: 'admin', name: 'Admin Panel', icon: 'Shield', adminOnly: true },
   { id: 'submit-ticket', name: 'Submit Ticket', icon: 'Ticket' },
   { id: 'settings', name: 'Settings', icon: 'Settings' },

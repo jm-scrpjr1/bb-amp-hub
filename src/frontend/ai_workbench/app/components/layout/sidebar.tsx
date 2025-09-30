@@ -40,11 +40,14 @@ import {
   User,
   Document,
   Circle,
-  Shield
+  Shield,
+  Clock
 } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { navigationItems } from '@/lib/mock-data';
 import TicketConfirmationModal from '@/components/ui/ticket-confirmation-modal';
+import BoldIdeaModal from '@/components/ui/bold-idea-modal';
+import TrackTimeModal from '@/components/ui/track-time-modal';
 import { canAccessAdminPanel } from '@/lib/permissions';
 
 const iconMap = {
@@ -67,7 +70,8 @@ const iconMap = {
   User,
   Document,
   Circle,
-  Shield
+  Shield,
+  Clock
 };
 
 interface SidebarProps {
@@ -80,6 +84,8 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
   const { data: session } = useSession();
   const [activeItem, setActiveItem] = useState('home');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
+  const [isTrackTimeModalOpen, setIsTrackTimeModalOpen] = useState(false);
 
   // Filter navigation items based on user permissions
   const getFilteredNavigationItems = () => {
@@ -109,6 +115,16 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
     if (itemId === 'submit-ticket') {
       // Open ticket modal instead of navigating
       setIsTicketModalOpen(true);
+      return;
+    }
+    if (itemId === 'submit-bold-idea') {
+      // Open bold idea modal instead of navigating
+      setIsBoldIdeaModalOpen(true);
+      return;
+    }
+    if (itemId === 'track-my-time') {
+      // Open track time modal instead of navigating
+      setIsTrackTimeModalOpen(true);
       return;
     }
     // Navigate to the route
@@ -145,15 +161,36 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                 href={href}
                 onMouseEnter={() => router.prefetch(href)}
                 className={cn(
-                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group",
                   isActive
-                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
+                    ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-gray-700 shadow-sm"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
-                <Icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <div className={cn(
+                  "relative flex items-center justify-center w-10 h-10 rounded-xl mr-3 transition-all duration-300",
+                  isActive
+                    ? "bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-800/30 ring-2 ring-blue-400/50"
+                    : "bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-700/20",
+                  item.adminOnly && isActive && "ring-purple-400/50",
+                  item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
+                )}>
+                  <Icon className={cn(
+                    "h-5 w-5 transition-all duration-300 relative z-10",
+                    isActive
+                      ? "text-white drop-shadow-sm"
+                      : "text-gray-300 group-hover:text-white"
+                  )} />
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
+                  )}
+                </div>
+                <span className={cn(
+                  "transition-all duration-300",
+                  isActive && "font-semibold"
+                )}>
+                  {item.name}
+                </span>
                 {item.adminOnly && (
                   <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
                     Admin
@@ -168,30 +205,57 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       {/* Other Pages Section */}
       <div className="px-4 py-3 flex-1">
         <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
-          OTHER PAGES
+          EMPLOYEE TOOLS
         </p>
         <nav className="space-y-1">
-          {getFilteredNavigationItems().slice(5, -3).map((item) => {
+          {getFilteredNavigationItems().slice(5, -4).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
-            const href = `/${item.id}`;
+            const href = item.id === 'submit-bold-idea' || item.id === 'track-my-time' ? '#' : `/${item.id}`;
 
             return (
               <Link
                 key={item.id}
                 href={href}
-                onMouseEnter={() => router.prefetch(href)}
+                onClick={(e) => {
+                  if (item.id === 'submit-bold-idea' || item.id === 'track-my-time') {
+                    e.preventDefault();
+                    handleNavigation(item.id, href);
+                  }
+                }}
+                onMouseEnter={() => href !== '#' && router.prefetch(href)}
                 className={cn(
-                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group",
                   isActive
-                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
+                    ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-gray-700 shadow-sm"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
-                <Icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <div className={cn(
+                  "relative flex items-center justify-center w-10 h-10 rounded-xl mr-3 transition-all duration-300",
+                  isActive
+                    ? "bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-800/30 ring-2 ring-blue-400/50"
+                    : "bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-700/20",
+                  item.adminOnly && isActive && "ring-purple-400/50",
+                  item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
+                )}>
+                  <Icon className={cn(
+                    "h-5 w-5 transition-all duration-300 relative z-10",
+                    isActive
+                      ? "text-white drop-shadow-sm"
+                      : "text-gray-300 group-hover:text-white"
+                  )} />
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
+                  )}
+                </div>
+                <span className={cn(
+                  "transition-all duration-300",
+                  isActive && "font-semibold"
+                )}>
+                  {item.name}
+                </span>
                 {item.adminOnly && (
                   <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
                     Admin
@@ -209,7 +273,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER OPTIONS
         </p>
         <nav className="space-y-1">
-          {getFilteredNavigationItems().slice(-3).map((item) => {
+          {getFilteredNavigationItems().slice(-4).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
@@ -227,15 +291,36 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                 }}
                 onMouseEnter={() => href !== '#' && router.prefetch(href)}
                 className={cn(
-                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium",
+                  "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group",
                   isActive
-                    ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-                  item.adminOnly && "bg-purple-50 text-purple-700 hover:bg-purple-100"
+                    ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-gray-700 shadow-sm"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
-                <Icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <div className={cn(
+                  "relative flex items-center justify-center w-10 h-10 rounded-xl mr-3 transition-all duration-300",
+                  isActive
+                    ? "bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-800/30 ring-2 ring-blue-400/50"
+                    : "bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-700/20",
+                  item.adminOnly && isActive && "ring-purple-400/50",
+                  item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
+                )}>
+                  <Icon className={cn(
+                    "h-5 w-5 transition-all duration-300 relative z-10",
+                    isActive
+                      ? "text-white drop-shadow-sm"
+                      : "text-gray-300 group-hover:text-white"
+                  )} />
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
+                  )}
+                </div>
+                <span className={cn(
+                  "transition-all duration-300",
+                  isActive && "font-semibold"
+                )}>
+                  {item.name}
+                </span>
                 {item.adminOnly && (
                   <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
                     Admin
@@ -261,6 +346,18 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       <TicketConfirmationModal
         isOpen={isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
+      />
+
+      {/* Bold Idea Modal */}
+      <BoldIdeaModal
+        isOpen={isBoldIdeaModalOpen}
+        onClose={() => setIsBoldIdeaModalOpen(false)}
+      />
+
+      {/* Track Time Modal */}
+      <TrackTimeModal
+        isOpen={isTrackTimeModalOpen}
+        onClose={() => setIsTrackTimeModalOpen(false)}
       />
     </div>
   );

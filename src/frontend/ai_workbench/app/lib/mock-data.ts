@@ -90,24 +90,24 @@ export const mockBoldUpdates = [
 export const mockQuickActions = [
   {
     id: 1,
-    title: "Submit Ticket",
-    subtitle: "Ask for help with technical issues - get amplified support",
-    icon: "Ticket",
+    title: "Track your time on Tsheets",
+    subtitle: "Open Tsheets",
+    icon: "Clock",
     color: "bg-green-50 border-green-200"
   },
   {
     id: 2,
-    title: "Submit Bold Idea",
-    subtitle: "Start your work with innovative ideas - achieve amplified impact",
-    icon: "Lightbulb",
-    color: "bg-purple-50 border-purple-200"
+    title: "Submit Ticket at IT Department",
+    subtitle: "Open Link",
+    icon: "Ticket",
+    color: "bg-blue-50 border-blue-200"
   },
   {
     id: 3,
-    title: "My Space",
-    subtitle: "Access your personal workspace and preferences",
+    title: "Submit Ticket at HR Department",
+    subtitle: "Open Calendar",
     icon: "User",
-    color: "bg-blue-50 border-blue-200"
+    color: "bg-red-50 border-red-200"
   }
 ];
 

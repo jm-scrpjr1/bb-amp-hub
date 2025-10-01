@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Minimize2, Maximize2 } from '@/components/icons';
+import { X, Send, Minimize2, Maximize2 } from '@/components/icons';
 import { useSession } from 'next-auth/react';
 // import HolographicText from '@/components/effects/holographic-text';
 // import TextScramble from '@/components/effects/text-scramble';
@@ -37,6 +37,16 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
   const [isExpanded, setIsExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [position, setPosition] = useState<'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'>('bottom-right');
+  const [isHovered, setIsHovered] = useState(false);
+  const [currentBubbleMessage, setCurrentBubbleMessage] = useState('');
+
+  const chatBubbleMessages = [
+    "How can I help you today?",
+    "Ready to boost productivity?",
+    "Need AI assistance?",
+    "Let's get amplified results!",
+    "Hi there! I'm ARIA ✨"
+  ];
 
   const getWelcomeMessage = () => {
     if (session?.user?.name) {
@@ -44,6 +54,17 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
       return `Hey ${firstName}! 👋 I'm ARIA, your productivity engineer at BOLD BUSINESS. I'm here to help you select your tools, start your work, and get amplified results. Ready to unlock your potential? What can I help you with today?`;
     }
     return 'Hey there! 👋 I\'m ARIA, your productivity engineer at BOLD BUSINESS. I\'m here to help you select your tools, start your work, and achieve amplified results. What\'s on your mind today?';
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    const randomMessage = chatBubbleMessages[Math.floor(Math.random() * chatBubbleMessages.length)];
+    setCurrentBubbleMessage(randomMessage);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setCurrentBubbleMessage('');
   };
 
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -170,10 +191,32 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             className={`fixed ${getPositionClasses()}`}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
+            {/* Chat Bubble - Positioned to the left like reference */}
+            <AnimatePresence>
+              {isHovered && currentBubbleMessage && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                  className="absolute top-1/2 -left-48 transform -translate-y-1/2 bg-white rounded-full shadow-lg border border-gray-200 px-4 py-2 z-10 whitespace-nowrap"
+                  style={{
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                  }}
+                >
+                  <div className="text-sm text-gray-700 font-medium">
+                    {currentBubbleMessage}
+                  </div>
+                  {/* Chat bubble tail pointing to ARIA */}
+                  <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-4 h-4 bg-white border-r border-b border-gray-200 rotate-45"></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <motion.button
               onClick={() => setIsOpen(true)}
-              className="relative w-32 h-32 text-white rounded-full transition-all duration-300 flex items-center justify-center group overflow-hidden"
+              className="relative w-16 h-16 text-white rounded-full transition-all duration-300 flex items-center justify-center group overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, #1d4ed8, #1e40af, #1e3a8a, #1d4ed8)',
                 backgroundSize: '400% 400%',
@@ -335,7 +378,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                     ease: "easeInOut"
                   }}
                 >
-                  <RobotIcon className="w-[6rem] h-[6rem]" />
+                  <RobotIcon className="w-[3rem] h-[3rem]" />
                 </motion.div>
               </motion.div>
 

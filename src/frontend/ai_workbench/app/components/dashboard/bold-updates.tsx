@@ -8,9 +8,11 @@ import Image from 'next/image';
 import { ChevronRight, TrendingUp } from '@/components/icons';
 import { mockBoldUpdates } from '@/lib/mock-data';
 import { ScrollEffects, AnimatedText } from '@/components/effects';
+import BoldUpdatesModal from '@/components/ui/bold-updates-modal';
 
 export default function BoldUpdates() {
   const [isVisible, setIsVisible] = useState(false);
+  const [isBoldUpdatesModalOpen, setIsBoldUpdatesModalOpen] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -21,6 +23,10 @@ export default function BoldUpdates() {
     // Add navigation logic here
   };
 
+  const handleViewAllClick = () => {
+    setIsBoldUpdatesModalOpen(true);
+  };
+
   return (
     <div className="mb-8">
       <ScrollEffects effect="fadeUp" delay={0.2}>
@@ -29,7 +35,7 @@ export default function BoldUpdates() {
             <TrendingUp className="h-8 w-8 text-blue-600" />
             <AnimatedText
               text="Bold Updates"
-              className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent tracking-wide"
+              className="text-3xl font-bold text-gray-900 tracking-wide"
               animation="fadeUp"
               by="word"
               delay={0.4}
@@ -37,7 +43,7 @@ export default function BoldUpdates() {
           </div>
           <ScrollEffects effect="slideLeft" delay={0.6}>
             <button
-              onClick={() => console.log('View All Bold Updates clicked')}
+              onClick={handleViewAllClick}
               className="flex items-center text-blue-600 hover:text-blue-800 font-semibold text-lg group"
             >
               View All
@@ -85,6 +91,12 @@ export default function BoldUpdates() {
           </ScrollEffects>
         ))}
       </div>
+
+      {/* Bold Updates Modal */}
+      <BoldUpdatesModal
+        isOpen={isBoldUpdatesModalOpen}
+        onClose={() => setIsBoldUpdatesModalOpen(false)}
+      />
     </div>
   );
 }

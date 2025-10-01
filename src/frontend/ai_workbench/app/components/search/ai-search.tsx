@@ -72,6 +72,9 @@ export default function AISearch({ className = "" }: AISearchProps) {
   const [results, setResults] = useState<any[]>([]);
   const [isAIMode, setIsAIMode] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [aiResponse, setAiResponse] = useState<string>('');
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -97,54 +100,148 @@ export default function AISearch({ className = "" }: AISearchProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Search logic
+  // AI-powered natural language processing
+  const processAIQuery = (query: string) => {
+    const lowerQuery = query.toLowerCase();
+
+    // Intent recognition patterns
+    const intents = {
+      timeTracking: ['log time', 'track time', 'timesheet', 'hours', 'log hours', 'time entry'],
+      submitTicket: ['help', 'support', 'issue', 'problem', 'ticket', 'bug', 'error'],
+      submitIdea: ['idea', 'suggestion', 'improve', 'feature', 'innovation', 'bold idea'],
+      training: ['learn', 'training', 'course', 'tutorial', 'education', 'skill'],
+      groups: ['team', 'group', 'collaborate', 'members', 'create team'],
+      resources: ['document', 'policy', 'manual', 'form', 'resource', 'guide'],
+      navigation: ['go to', 'open', 'navigate', 'show me', 'take me to']
+    };
+
+    // Smart suggestions based on query
+    const suggestions = [];
+
+    if (intents.timeTracking.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Open time tracking', 'Start timer', 'View timesheet');
+      setAiResponse('I can help you track your time! Would you like to log hours or start a timer?');
+    } else if (intents.submitTicket.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Submit IT ticket', 'Submit HR ticket', 'View ticket status');
+      setAiResponse('I can help you get support! What type of issue are you experiencing?');
+    } else if (intents.submitIdea.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Submit bold idea', 'View innovation portal', 'Browse ideas');
+      setAiResponse('Great! I love innovative thinking. Let me help you submit your idea.');
+    } else if (intents.training.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Browse trainings', 'My learning path', 'Skill assessments');
+      setAiResponse('Ready to learn something new? I can show you available courses and training materials.');
+    } else if (intents.groups.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Create new group', 'Join existing group', 'Manage teams');
+      setAiResponse('Team collaboration is key! Would you like to create a new group or join an existing one?');
+    } else if (intents.resources.some(intent => lowerQuery.includes(intent))) {
+      suggestions.push('Browse resources', 'Company policies', 'Forms & documents');
+      setAiResponse('I can help you find the right documents and resources. What are you looking for?');
+    } else {
+      suggestions.push('Search everything', 'Browse categories', 'Quick actions');
+      setAiResponse('I\'m here to help! Try asking me something like "I need to log my time" or "How do I submit a ticket?"');
+    }
+
+    return suggestions;
+  };
+
+  // Enhanced search logic with AI mode
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
+      setAiSuggestions([]);
+      setAiResponse('');
       return;
     }
 
-    const searchTerm = query.toLowerCase();
-    const allResults: any[] = [];
+    setIsProcessing(true);
 
-    // Search pages
-    searchData.pages.forEach(item => {
-      if (item.title.toLowerCase().includes(searchTerm) || 
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.category.toLowerCase().includes(searchTerm)) {
-        allResults.push({ ...item, type: 'page' });
+    // Simulate AI processing delay
+    const timer = setTimeout(() => {
+      const searchTerm = query.toLowerCase();
+      const allResults: any[] = [];
+
+      if (isAIMode) {
+        // AI Mode: Enhanced semantic search and suggestions
+        setAiSuggestions(processAIQuery(query));
+
+        // Semantic matching for AI mode
+        const semanticMatches = {
+          'time': ['timesheet', 'hours', 'tracking', 'log'],
+          'help': ['support', 'ticket', 'assistance', 'issue'],
+          'learn': ['training', 'course', 'education', 'skill'],
+          'team': ['group', 'collaborate', 'members', 'together'],
+          'document': ['resource', 'policy', 'manual', 'guide']
+        };
+
+        // Enhanced search with semantic understanding
+        Object.entries(semanticMatches).forEach(([key, synonyms]) => {
+          if (searchTerm.includes(key) || synonyms.some(syn => searchTerm.includes(syn))) {
+            // Add relevant results based on semantic understanding
+            searchData.pages.forEach(item => {
+              if (synonyms.some(syn =>
+                item.title.toLowerCase().includes(syn) ||
+                item.description.toLowerCase().includes(syn)
+              )) {
+                allResults.push({ ...item, type: 'page', aiRelevance: 'high' });
+              }
+            });
+          }
+        });
       }
-    });
 
-    // Search actions
-    searchData.actions.forEach(item => {
-      if (item.title.toLowerCase().includes(searchTerm) || 
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.category.toLowerCase().includes(searchTerm)) {
-        allResults.push({ ...item, type: 'action' });
+      // Standard search (both modes)
+      searchData.pages.forEach(item => {
+        if (item.title.toLowerCase().includes(searchTerm) ||
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.category.toLowerCase().includes(searchTerm)) {
+          allResults.push({ ...item, type: 'page' });
+        }
+      });
+
+      searchData.actions.forEach(item => {
+        if (item.title.toLowerCase().includes(searchTerm) ||
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.category.toLowerCase().includes(searchTerm)) {
+          allResults.push({ ...item, type: 'action' });
+        }
+      });
+
+      searchData.resources.forEach(item => {
+        if (item.title.toLowerCase().includes(searchTerm) ||
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.category.toLowerCase().includes(searchTerm)) {
+          allResults.push({ ...item, type: 'resource' });
+        }
+      });
+
+      searchData.trainings.forEach(item => {
+        if (item.title.toLowerCase().includes(searchTerm) ||
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.category.toLowerCase().includes(searchTerm)) {
+          allResults.push({ ...item, type: 'training' });
+        }
+      });
+
+      // Remove duplicates and prioritize AI-relevant results
+      const uniqueResults = allResults.filter((item, index, self) =>
+        index === self.findIndex(t => t.id === item.id && t.type === item.type)
+      );
+
+      // Sort by AI relevance if in AI mode
+      if (isAIMode) {
+        uniqueResults.sort((a, b) => {
+          if (a.aiRelevance === 'high' && b.aiRelevance !== 'high') return -1;
+          if (b.aiRelevance === 'high' && a.aiRelevance !== 'high') return 1;
+          return 0;
+        });
       }
-    });
 
-    // Search resources
-    searchData.resources.forEach(item => {
-      if (item.title.toLowerCase().includes(searchTerm) || 
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.category.toLowerCase().includes(searchTerm)) {
-        allResults.push({ ...item, type: 'resource' });
-      }
-    });
+      setResults(uniqueResults.slice(0, 8));
+      setIsProcessing(false);
+    }, isAIMode ? 800 : 200); // Longer delay for AI mode to show processing
 
-    // Search trainings
-    searchData.trainings.forEach(item => {
-      if (item.title.toLowerCase().includes(searchTerm) || 
-          item.description.toLowerCase().includes(searchTerm) ||
-          item.category.toLowerCase().includes(searchTerm)) {
-        allResults.push({ ...item, type: 'training' });
-      }
-    });
-
-    setResults(allResults.slice(0, 8)); // Limit to 8 results
-  }, [query]);
+    return () => clearTimeout(timer);
+  }, [query, isAIMode]);
 
   const handleSelect = (item: any) => {
     setIsOpen(false);
@@ -155,11 +252,9 @@ export default function AISearch({ className = "" }: AISearchProps) {
     } else if (item.type === 'action') {
       // Trigger modal actions
       if (item.id === 'submit-ticket') {
-        // Trigger ticket modal
         const event = new CustomEvent('openTicketModal');
         window.dispatchEvent(event);
       } else if (item.id === 'submit-bold-idea') {
-        // Trigger bold idea modal
         const event = new CustomEvent('openBoldIdeaModal');
         window.dispatchEvent(event);
       }
@@ -167,6 +262,46 @@ export default function AISearch({ className = "" }: AISearchProps) {
       router.push('/resources');
     } else if (item.type === 'training') {
       router.push('/trainings');
+    } else if (item.type === 'ai-suggestion') {
+      // Handle AI suggestions
+      handleAISuggestion(item.title);
+    }
+  };
+
+  const handleAISuggestion = (suggestion: string) => {
+    switch (suggestion) {
+      case 'Open time tracking':
+        const trackTimeEvent = new CustomEvent('openTrackTimeModal');
+        window.dispatchEvent(trackTimeEvent);
+        break;
+      case 'Start timer':
+        // Could integrate with actual timer functionality
+        console.log('Starting timer...');
+        break;
+      case 'Submit IT ticket':
+        const itTicketEvent = new CustomEvent('openITTicketModal');
+        window.dispatchEvent(itTicketEvent);
+        break;
+      case 'Submit HR ticket':
+        const hrTicketEvent = new CustomEvent('openHRTicketModal');
+        window.dispatchEvent(hrTicketEvent);
+        break;
+      case 'Submit bold idea':
+        const ideaEvent = new CustomEvent('openBoldIdeaModal');
+        window.dispatchEvent(ideaEvent);
+        break;
+      case 'Browse trainings':
+        router.push('/trainings');
+        break;
+      case 'Create new group':
+        const groupEvent = new CustomEvent('openCreateGroupModal');
+        window.dispatchEvent(groupEvent);
+        break;
+      case 'Browse resources':
+        router.push('/resources');
+        break;
+      default:
+        console.log('AI suggestion:', suggestion);
     }
   };
 
@@ -236,7 +371,7 @@ export default function AISearch({ className = "" }: AISearchProps) {
                   <Sparkles className="h-4 w-4 text-cyan-400 mr-3 animate-pulse flex-shrink-0" />
                   <input
                     type="text"
-                    placeholder="Search pages, actions, resources, trainings..."
+                    placeholder={isAIMode ? "Ask me anything... 'I need to log my time' or 'How do I submit a ticket?'" : "Search pages, actions, resources, trainings..."}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="border-0 focus:ring-0 text-base bg-transparent text-gray-900 placeholder:text-gray-500 flex-1 outline-none w-full h-11 py-3"
@@ -257,24 +392,80 @@ export default function AISearch({ className = "" }: AISearchProps) {
                 </div>
 
                 <CommandList className="max-h-96 overflow-y-auto">
-                  {results.length === 0 && query && (
+                  {/* AI Processing Indicator */}
+                  {isProcessing && isAIMode && (
+                    <div className="py-6 text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Sparkles className="h-5 w-5 text-cyan-400 animate-spin" />
+                          <span className="text-sm text-gray-600">AI is thinking...</span>
+                        </div>
+                        <div className="w-32 h-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI Response */}
+                  {isAIMode && aiResponse && !isProcessing && (
+                    <div className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-blue-50 border-b">
+                      <div className="flex items-start space-x-3">
+                        <Sparkles className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-800 mb-1">ARIA suggests:</p>
+                          <p className="text-sm text-gray-600">{aiResponse}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI Suggestions */}
+                  {isAIMode && aiSuggestions.length > 0 && !isProcessing && (
+                    <CommandGroup heading="🤖 AI Suggestions">
+                      {aiSuggestions.map((suggestion, index) => (
+                        <CommandItem
+                          key={`ai-suggestion-${index}`}
+                          onSelect={() => handleAISuggestion(suggestion)}
+                          className="flex items-center space-x-3 px-4 py-3 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-blue-50 cursor-pointer border-l-2 border-transparent hover:border-cyan-400"
+                        >
+                          <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center">
+                            <Sparkles className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{suggestion}</p>
+                            <p className="text-xs text-gray-500">AI-powered action</p>
+                          </div>
+                          <div className="text-xs px-2 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 rounded-full">
+                            Smart
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+
+                  {results.length === 0 && query && !isProcessing && (
                     <CommandEmpty className="py-8 text-center">
                       <div className="flex flex-col items-center space-y-2">
                         <Sparkles className="h-8 w-8 text-gray-300" />
                         <p className="text-gray-500">No results found</p>
-                        <p className="text-xs text-gray-400">Try different keywords or enable AI Mode</p>
+                        <p className="text-xs text-gray-400">
+                          {isAIMode ? 'Try asking in natural language like "I need help with..."' : 'Try different keywords or enable AI Mode'}
+                        </p>
                       </div>
                     </CommandEmpty>
                   )}
 
-                  {results.length > 0 && (
+                  {results.length > 0 && !isProcessing && (
                     <>
-                      <CommandGroup heading="Search Results">
+                      <CommandGroup heading={isAIMode ? "🔍 Search Results" : "Search Results"}>
                         {results.map((item) => (
                           <CommandItem
                             key={`${item.type}-${item.id}`}
                             onSelect={() => handleSelect(item)}
-                            className="flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 cursor-pointer"
+                            className={`flex items-center space-x-3 px-4 py-3 hover:bg-blue-50 cursor-pointer ${
+                              item.aiRelevance === 'high' ? 'border-l-2 border-cyan-400 bg-cyan-50/30' : ''
+                            }`}
                           >
                             <span className="text-lg">{getItemIcon(item.type, item.category)}</span>
                             <div className="flex-1 min-w-0">
@@ -283,6 +474,11 @@ export default function AISearch({ className = "" }: AISearchProps) {
                                 <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
                                   {item.category}
                                 </span>
+                                {item.aiRelevance === 'high' && (
+                                  <span className="text-xs px-2 py-1 bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-700 rounded-full">
+                                    AI Match
+                                  </span>
+                                )}
                               </div>
                               <p className="text-sm text-gray-500 truncate">{item.description}</p>
                             </div>
@@ -322,12 +518,19 @@ export default function AISearch({ className = "" }: AISearchProps) {
                   )}
                 </CommandList>
 
-                <div className="border-t px-4 py-2 text-xs text-gray-500 bg-gray-50">
+                <div className={`border-t px-4 py-2 text-xs text-gray-500 ${isAIMode ? 'bg-gradient-to-r from-cyan-50 to-blue-50' : 'bg-gray-50'}`}>
                   <div className="flex items-center justify-between">
-                    <span>Press ↵ to select • ⌘K to search • ESC to close</span>
+                    <span>
+                      {isAIMode
+                        ? 'Press ↵ to select • Try natural language • ESC to close'
+                        : 'Press ↵ to select • ⌘K to search • ESC to close'
+                      }
+                    </span>
                     <div className="flex items-center space-x-1">
-                      <Sparkles className="h-3 w-3 text-cyan-400" />
-                      <span>AI-Amplified Search</span>
+                      <Sparkles className={`h-3 w-3 ${isAIMode ? 'text-cyan-500' : 'text-cyan-400'}`} />
+                      <span className={isAIMode ? 'text-cyan-700 font-medium' : ''}>
+                        {isAIMode ? 'AI Mode Active' : 'AI-Amplified Search'}
+                      </span>
                     </div>
                   </div>
                 </div>

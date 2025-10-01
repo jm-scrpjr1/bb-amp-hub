@@ -90,7 +90,7 @@ export default function MySpacePage() {
           </div>
 
           {/* Right Panel */}
-          <div className="w-80 space-y-6">
+          <div className="w-80 space-y-6 relative z-10">
             {/* Resources Section */}
             <ScrollEffects effect="fadeUp" delay={0.2}>
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">

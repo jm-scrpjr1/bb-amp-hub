@@ -90,22 +90,22 @@ export const mockBoldUpdates = [
 export const mockQuickActions = [
   {
     id: 1,
-    title: "Track your time on Tsheets",
-    subtitle: "Open Tsheets",
+    title: "Track my time",
+    subtitle: "Click to track your time on any project",
     icon: "Clock",
     color: "bg-green-50 border-green-200"
   },
   {
     id: 2,
     title: "Submit Ticket at IT Department",
-    subtitle: "Open Link",
+    subtitle: "Submit ticket for any technical issues",
     icon: "Ticket",
     color: "bg-blue-50 border-blue-200"
   },
   {
     id: 3,
     title: "Submit Ticket at HR Department",
-    subtitle: "Open Calendar",
+    subtitle: "Submit HR related concern",
     icon: "User",
     color: "bg-red-50 border-red-200"
   }

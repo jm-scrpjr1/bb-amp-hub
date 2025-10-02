@@ -245,40 +245,40 @@ export default function SignInPage() {
           animationType="bounce"
         />
         <AnimatedRobot
-          src="/images/Cyan.png"
-          alt="Cyan AI Robot"
+          src="/images/AI AGENT 4.png"
+          alt="AI Agent 4 Robot"
           message={robotMessages[1]}
           delay={1000}
           initialPosition={{ x: 88, y: 18 }}
           animationType="float"
         />
         <AnimatedRobot
-          src="/images/Cyan.png"
-          alt="Cyan AI Robot"
+          src="/images/AI AGENT 5.png"
+          alt="AI Agent 5 Robot"
           message={robotMessages[2]}
           delay={1500}
           initialPosition={{ x: 8, y: 82 }}
           animationType="wiggle"
         />
         <AnimatedRobot
-          src="/images/Cyan.png"
-          alt="Cyan AI Robot"
+          src="/images/AUTOMATION 1.png"
+          alt="Automation 1 Robot"
           message={robotMessages[3]}
           delay={2000}
           initialPosition={{ x: 92, y: 85 }}
           animationType="shake"
         />
         <AnimatedRobot
-          src="/images/Cyan.png"
-          alt="Cyan AI Robot"
+          src="/images/AUTOMATION 4.png"
+          alt="Automation 4 Robot"
           message={robotMessages[4]}
           delay={2500}
           initialPosition={{ x: 15, y: 55 }}
           animationType="bounce"
         />
         <AnimatedRobot
-          src="/images/Cyan.png"
-          alt="Cyan AI Robot"
+          src="/images/PROMPT 2.png"
+          alt="Prompt 2 Robot"
           message={robotMessages[5]}
           delay={3000}
           initialPosition={{ x: 85, y: 65 }}
@@ -342,25 +342,53 @@ export default function SignInPage() {
               />
             </motion.div>
 
-            <motion.h1
-              className="text-4xl font-bold text-white mb-3"
+            <motion.div
+              className="mb-3 relative"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
             >
-              <motion.span
-                animate={{
-                  textShadow: [
-                    '0 0 10px rgba(6, 229, 236, 0.5)',
-                    '0 0 20px rgba(6, 229, 236, 0.8)',
-                    '0 0 10px rgba(6, 229, 236, 0.5)'
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              {/* Shadow text positioned behind and to the left */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ transform: 'translate(-20px, 5px)' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
               >
-                AI Workbench™
-              </motion.span>
-            </motion.h1>
+
+              </motion.div>
+
+              {/* Bright white text positioned in front */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center z-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+              >
+
+              </motion.div>
+
+              <motion.img
+                src="/images/AI Workbench Logo.png"
+                alt="AI Workbench Logo"
+                className="h-16 mx-auto relative z-20"
+                animate={{
+                  filter: [
+                    'drop-shadow(0 0 15px rgba(255, 255, 0, 1.0))',
+                    'drop-shadow(0 0 30px rgba(255, 255, 255, 1.0))',
+                    'drop-shadow(0 0 15px rgba(255, 255, 0, 1.0))'
+                  ],
+                  scale: [1, 1.1, 1],
+                  x: [0, 2, -2, 0]
+                }}
+                transition={{
+                  filter: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+                  scale: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+                  x: { duration: 0.5, repeat: Infinity, ease: "easeInOut" }
+                }}
+              />
+            </motion.div>
 
             <motion.p
               className="text-cyan-300 text-xl font-semibold mb-2"

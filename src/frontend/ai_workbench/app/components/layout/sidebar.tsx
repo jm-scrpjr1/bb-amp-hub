@@ -162,7 +162,6 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </p>
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(0, 5).map((item) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}` || (pathname === '/' && item.id === 'home');
 
             const href = item.id === 'home' ? '/' : `/${item.id}`;
@@ -187,12 +186,18 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                   item.adminOnly && isActive && "ring-purple-400/50",
                   item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
                 )}>
-                  <Icon className={cn(
-                    "h-5 w-5 transition-all duration-300 relative z-10",
-                    isActive
-                      ? "text-white drop-shadow-sm"
-                      : "text-gray-300 group-hover:text-white"
-                  )} />
+                  <Image
+                    src={item.icon}
+                    alt={`${item.name} icon`}
+                    width={20}
+                    height={20}
+                    className={cn(
+                      "transition-all duration-300 relative z-10",
+                      isActive
+                        ? "brightness-0 invert drop-shadow-sm"
+                        : "brightness-0 invert opacity-75 group-hover:opacity-100"
+                    )}
+                  />
                   {isActive && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
                   )}
@@ -221,7 +226,6 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </p>
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(5, -2).map((item) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
             const href = item.id === 'submit-bold-idea' ? '#' : `/${item.id}`;
@@ -252,12 +256,18 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                   item.adminOnly && isActive && "ring-purple-400/50",
                   item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
                 )}>
-                  <Icon className={cn(
-                    "h-5 w-5 transition-all duration-300 relative z-10",
-                    isActive
-                      ? "text-white drop-shadow-sm"
-                      : "text-gray-300 group-hover:text-white"
-                  )} />
+                  <Image
+                    src={item.icon}
+                    alt={`${item.name} icon`}
+                    width={20}
+                    height={20}
+                    className={cn(
+                      "transition-all duration-300 relative z-10",
+                      isActive
+                        ? "brightness-0 invert drop-shadow-sm"
+                        : "brightness-0 invert opacity-75 group-hover:opacity-100"
+                    )}
+                  />
                   {isActive && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
                   )}
@@ -288,6 +298,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           {getFilteredNavigationItems().slice(-2).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
+            const isSvgIcon = item.icon.startsWith('/images/');
 
             const href = item.id === 'logout' ? '#' : `/${item.id}`;
 
@@ -321,14 +332,31 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                   item.adminOnly && isActive && "ring-purple-400/50",
                   item.adminOnly && !isActive && "from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700"
                 )}>
-                  <Icon className={cn(
-                    "h-5 w-5 transition-all duration-300 relative z-10",
-                    item.id === 'logout'
-                      ? "text-white drop-shadow-sm"
-                      : isActive
-                      ? "text-white drop-shadow-sm"
-                      : "text-gray-300 group-hover:text-white"
-                  )} />
+                  {isSvgIcon ? (
+                    <Image
+                      src={item.icon}
+                      alt={`${item.name} icon`}
+                      width={20}
+                      height={20}
+                      className={cn(
+                        "transition-all duration-300 relative z-10",
+                        item.id === 'logout'
+                          ? "brightness-0 invert drop-shadow-sm"
+                          : isActive
+                          ? "brightness-0 invert drop-shadow-sm"
+                          : "brightness-0 invert opacity-75 group-hover:opacity-100"
+                      )}
+                    />
+                  ) : (
+                    <Icon className={cn(
+                      "h-5 w-5 transition-all duration-300 relative z-10",
+                      item.id === 'logout'
+                        ? "text-white drop-shadow-sm"
+                        : isActive
+                        ? "text-white drop-shadow-sm"
+                        : "text-gray-300 group-hover:text-white"
+                    )} />
+                  )}
                   {isActive && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
                   )}

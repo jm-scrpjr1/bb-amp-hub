@@ -143,18 +143,18 @@ export const mockActivity = [
 
 export const navigationItems = [
   // MY AI-AMPLIFIERS Section (renamed from AI ASSISTANTS)
-  { id: 'home', name: 'AI Home', icon: 'Home', active: true },
-  { id: 'prompt-tutor', name: 'Prompts', icon: 'BookOpen' },
-  { id: 'automations', name: 'Automations', icon: 'Zap' },
-  { id: 'ai-agents', name: 'AI Agents', icon: 'Bot' },
-  { id: 'trainings', name: 'Trainings', icon: 'GraduationCap' },
+  { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.svg', active: true },
+  { id: 'prompt-tutor', name: 'Prompts', icon: '/images/PROMPT ICON.svg' },
+  { id: 'automations', name: 'Automations', icon: '/images/AUTOMATION ICON.svg' },
+  { id: 'ai-agents', name: 'AI Agents', icon: '/images/AI AGENT ICON.svg' },
+  { id: 'trainings', name: 'Trainings', icon: '/images/TRAINING ICON.svg' },
 
   // EMPLOYEE TOOLS Section
-  { id: 'my-space', name: 'My Space', icon: 'User' },
-  { id: 'activity', name: 'Activity', icon: 'Activity' },
-  { id: 'groups', name: 'Groups', icon: 'Users' },
-  { id: 'resources', name: 'Resources', icon: 'FileText' },
-  { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: 'Lightbulb' },
+  { id: 'my-space', name: 'My Space', icon: '/images/MY SPACE ICON.svg' },
+  { id: 'activity', name: 'Activity', icon: '/images/RESOURCES ICON.svg' },
+  { id: 'groups', name: 'Groups', icon: '/images/GRP ICON.svg' },
+  { id: 'resources', name: 'Resources', icon: '/images/RESOURCES ICON.svg' },
+  { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: '/images/SUBMIT BOLD IDEA ICON.svg' },
 
   // OTHER OPTIONS Section
   { id: 'settings', name: 'Settings', icon: 'Settings' },

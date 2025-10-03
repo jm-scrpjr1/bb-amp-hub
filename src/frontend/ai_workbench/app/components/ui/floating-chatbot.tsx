@@ -39,6 +39,7 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
   const [position, setPosition] = useState<'bottom-right' | 'bottom-left' | 'top-right' | 'top-left'>('bottom-right');
   const [isHovered, setIsHovered] = useState(false);
   const [currentBubbleMessage, setCurrentBubbleMessage] = useState('');
+  const [threadId, setThreadId] = useState<string | null>(null);
 
   const chatBubbleMessages = [
     "How can I help you today?",
@@ -116,11 +117,17 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
         },
         body: JSON.stringify({
           message: currentMessage,
+          threadId: threadId, // Include thread ID for conversation continuity
           conversationHistory: messages.slice(-10) // Send last 10 messages for context
         }),
       });
 
       const data = await response.json();
+
+      // Store thread ID for conversation continuity
+      if (data.threadId && !threadId) {
+        setThreadId(data.threadId);
+      }
 
       // Remove typing indicator and add actual response
       setMessages(prev => {

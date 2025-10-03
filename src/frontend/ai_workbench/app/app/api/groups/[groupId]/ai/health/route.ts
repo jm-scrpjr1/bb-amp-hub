@@ -7,7 +7,7 @@ import { canManageGroup, hasGodMode } from '@/lib/permissions';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
 
     // Check if user can manage this group (or has God mode)
     if (!hasGodMode(user) && !canManageGroup(user, groupId)) {

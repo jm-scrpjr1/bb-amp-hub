@@ -8,7 +8,7 @@ import { RBACLogger } from '@/lib/rbac';
 // GET /api/groups/[groupId] - Get specific group details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -23,7 +23,8 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const group = await GroupService.getGroupById(params.groupId);
+    const { groupId } = await params;
+    const group = await GroupService.getGroupById(groupId);
     
     if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
@@ -37,7 +38,7 @@ export async function GET(
     // Get group members if user can view them
     let members = [];
     if (canViewGroup(user, group)) {
-      members = await GroupService.getGroupMembers(params.groupId);
+      members = await GroupService.getGroupMembers(groupId);
     }
 
     return NextResponse.json({

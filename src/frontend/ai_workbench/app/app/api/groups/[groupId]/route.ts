@@ -8,7 +8,7 @@ import { RBACLogger } from '@/lib/rbac';
 // GET /api/groups/[groupId] - Get specific group details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -23,7 +23,8 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const group = await GroupService.getGroupById(params.groupId);
+    const { groupId } = await params;
+    const group = await GroupService.getGroupById(groupId);
     
     if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
@@ -37,7 +38,7 @@ export async function GET(
     // Get group members if user can view them
     let members = [];
     if (canViewGroup(user, group)) {
-      members = await GroupService.getGroupMembers(params.groupId);
+      members = await GroupService.getGroupMembers(groupId);
     }
 
     return NextResponse.json({
@@ -56,7 +57,7 @@ export async function GET(
 // PATCH /api/groups/[groupId] - Update group
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -71,8 +72,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId } = await params;
+
     // Check if user can manage this group
-    if (!canManageGroup(user, params.groupId)) {
+    if (!canManageGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
@@ -89,7 +92,7 @@ export async function PATCH(
       isActive
     } = body;
 
-    const updatedGroup = await GroupService.updateGroup(params.groupId, {
+    const updatedGroup = await GroupService.updateGroup(groupId, {
       name,
       description,
       type,
@@ -112,7 +115,7 @@ export async function PATCH(
     await RBACLogger.logAction(
       user.id,
       'UPDATE_GROUP',
-      params.groupId,
+      groupId,
       { changes: body },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined
@@ -131,7 +134,7 @@ export async function PATCH(
 // DELETE /api/groups/[groupId] - Delete group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -146,12 +149,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId } = await params;
+
     // Check if user can manage this group
-    if (!canManageGroup(user, params.groupId)) {
+    if (!canManageGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const success = await GroupService.deleteGroup(params.groupId);
+    const success = await GroupService.deleteGroup(groupId);
 
     if (!success) {
       return NextResponse.json(
@@ -164,7 +169,7 @@ export async function DELETE(
     await RBACLogger.logAction(
       user.id,
       'DELETE_GROUP',
-      params.groupId,
+      groupId,
       {},
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined

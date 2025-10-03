@@ -3,8 +3,9 @@ const path = require('path');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.NEXT_DIST_DIR || '.next',
-  output: process.env.NEXT_OUTPUT_MODE,
+  output: process.env.NEXT_OUTPUT_MODE || 'standalone',
   outputFileTracingRoot: path.join(__dirname, '../'),
+  trailingSlash: true,
   experimental: {
     // Enable optimized page loading
     optimizePackageImports: ['lucide-react', '@radix-ui/react-navigation-menu'],

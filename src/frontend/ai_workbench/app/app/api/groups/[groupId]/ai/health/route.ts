@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { UserService } from '@/lib/user-service';
 import { AIGroupService } from '@/lib/ai-group-service';
 import { canManageGroup, hasGodMode } from '@/lib/permissions';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
 
     // Check if user can manage this group (or has God mode)
     if (!hasGodMode(user) && !canManageGroup(user, groupId)) {

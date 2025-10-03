@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
 // DELETE /api/groups/[groupId]/members/[userId] - Remove member from group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { groupId: string; userId: string } }
+  { params }: { params: Promise<{ groupId: string; userId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -24,12 +24,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId, userId } = await params;
+
     // Check if user can manage this group
-    if (!canManageGroup(user, params.groupId)) {
+    if (!canManageGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const success = await GroupService.removeMember(params.groupId, params.userId);
+    const success = await GroupService.removeMember(groupId, userId);
 
     if (!success) {
       return NextResponse.json(
@@ -42,8 +44,8 @@ export async function DELETE(
     await RBACLogger.logAction(
       user.id,
       'REMOVE_MEMBER',
-      params.groupId,
-      { targetUserId: params.userId },
+      groupId,
+      { targetUserId: userId },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined
     );
@@ -61,7 +63,7 @@ export async function DELETE(
 // PATCH /api/groups/[groupId]/members/[userId] - Update member permissions
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { groupId: string; userId: string } }
+  { params }: { params: Promise<{ groupId: string; userId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -76,8 +78,10 @@ export async function PATCH(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId, userId } = await params;
+
     // Check if user can manage this group
-    if (!canManageGroup(user, params.groupId)) {
+    if (!canManageGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
@@ -85,50 +89,34 @@ export async function PATCH(
     const { role, canInvite, canRemove, canEdit } = body;
 
     // Update member permissions
-    const updatedMembership = await prisma.groupMembership.update({
-      where: {
-        userId_groupId: {
-          userId: params.userId,
-          groupId: params.groupId,
-        }
-      },
-      data: {
-        role,
-        canInvite,
-        canRemove,
-        canEdit,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          }
-        },
-        group: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            visibility: true,
-          }
-        }
-      }
-    });
+    // Note: Using direct database access since GroupService doesn't have updateMember method
+    const updatedMembership = await prisma.$executeRaw`
+      UPDATE group_memberships
+      SET role = ${role}, can_invite = ${canInvite}, can_remove = ${canRemove}, can_edit = ${canEdit}, updated_at = NOW()
+      WHERE user_id = ${userId} AND group_id = ${groupId}
+    `;
+
+    // Get the updated membership for response
+    const membership = await prisma.$queryRaw`
+      SELECT gm.*, u.name as user_name, u.email as user_email, u.image as user_image,
+             g.name as group_name, g.type as group_type, g.visibility as group_visibility
+      FROM group_memberships gm
+      JOIN users u ON gm.user_id = u.id
+      JOIN groups g ON gm.group_id = g.id
+      WHERE gm.user_id = ${userId} AND gm.group_id = ${groupId}
+    `;
 
     // Log the action
     await RBACLogger.logAction(
       user.id,
       'UPDATE_MEMBER_PERMISSIONS',
-      params.groupId,
-      { targetUserId: params.userId, changes: body },
+      groupId,
+      { targetUserId: userId, changes: body },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined
     );
 
-    return NextResponse.json(updatedMembership);
+    return NextResponse.json({ membership, success: true });
   } catch (error) {
     console.error('Error updating member permissions:', error);
     return NextResponse.json(

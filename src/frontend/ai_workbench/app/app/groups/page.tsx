@@ -5,8 +5,8 @@ import PageTemplate from '@/components/common/page-template';
 import { useRBAC, useGroupPermissions } from '@/providers/rbac-provider';
 import { GroupType, GroupVisibility, GroupInfo } from '@/lib/permissions';
 import CreateGroupModal from '@/components/groups/create-group-modal-simple';
+import { Users } from '@/components/icons';
 import {
-  Users,
   Plus,
   Search,
   Filter,
@@ -226,7 +226,7 @@ function GroupCard({ group, onUpdate }: { group: GroupInfo; onUpdate: () => void
           </div>
 
           {/* Actions */}
-          {groupPermissions.canManageGroups && (
+          {groupPermissions.canManageGroup(group.id) && (
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setShowDeleteConfirm(true)}

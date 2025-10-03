@@ -2,7 +2,7 @@
 "use client";
 
 import PageTemplate from '@/components/common/page-template';
-import { Settings } from 'lucide-react';
+import { Settings } from '@/components/icons';
 
 export default function SettingsPage() {
   return (

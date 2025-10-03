@@ -27,7 +27,7 @@ export default function AnimatedText({
   once = true
 }: AnimatedTextProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { threshold, once });
+  const isInView = useInView(ref, { amount: threshold, once });
 
   // Split text based on the 'by' prop
   const splitText = () => {

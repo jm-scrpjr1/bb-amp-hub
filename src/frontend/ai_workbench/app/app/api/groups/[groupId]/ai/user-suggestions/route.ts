@@ -23,7 +23,7 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { groupId } = params;
+    const { groupId } = await params;
     const { searchParams } = new URL(request.url);
     const searchTerm = searchParams.get('search');
 

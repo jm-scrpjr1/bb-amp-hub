@@ -23,12 +23,14 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId } = await params;
+
     // Check if user can view group members
-    if (!canManageGroup(user, params.groupId)) {
+    if (!canManageGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    const members = await GroupService.getGroupMembers(params.groupId);
+    const members = await GroupService.getGroupMembers(groupId);
 
     return NextResponse.json({ members });
   } catch (error) {
@@ -58,8 +60,10 @@ export async function POST(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    const { groupId } = await params;
+
     // Check if user can invite to this group
-    if (!canInviteToGroup(user, params.groupId)) {
+    if (!canInviteToGroup(user, groupId)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
@@ -79,7 +83,7 @@ export async function POST(
       return NextResponse.json({ error: 'Target user not found' }, { status: 404 });
     }
 
-    const membership = await GroupService.addMember(params.groupId, {
+    const membership = await GroupService.addMember(groupId, {
       userId: targetUser.id,
       role,
       canInvite: canInvite || false,
@@ -98,7 +102,7 @@ export async function POST(
     await RBACLogger.logAction(
       user.id,
       'ADD_MEMBER',
-      params.groupId,
+      groupId,
       { targetUserId: targetUser.id, role },
       request.headers.get('x-forwarded-for') || undefined,
       request.headers.get('user-agent') || undefined

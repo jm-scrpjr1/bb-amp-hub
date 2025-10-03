@@ -12,8 +12,11 @@ import { RBACProvider } from '@/providers/rbac-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AI Workbench™ - Select Your Tools. Start Your Work. Ask for Help. Get Amplified Results.',
+  title: 'AI Workbench™',
   description: 'Imagine a world where your talent walks into their desktop, selects and uses AI tools, gets help from a productivity engineer... and achieves amplified results.',
+  icons: {
+    icon: '/images/AI AGENT 5.png',
+  },
 };
 
 export default function RootLayout({

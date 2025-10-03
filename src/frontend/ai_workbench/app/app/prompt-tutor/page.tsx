@@ -214,10 +214,32 @@ export default function PromptTutorPage() {
 
   // Filter agents based on search term and category
   const filteredAgents = agents.filter(agent => {
-    const matchesSearch = agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         agent.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (agent.category === 'Human Resources' && 'hr'.includes(searchTerm.toLowerCase()))
+    if (!searchTerm.trim()) {
+      const matchesCategory = activeCategory === 'all' ||
+                             (activeCategory === 'favorites' && likedAgents.includes(agent.id)) ||
+                             agent.category.toLowerCase().trim() === activeCategory.toLowerCase().trim()
+      return matchesCategory;
+    }
+
+    const searchLower = searchTerm.toLowerCase().trim();
+
+    // Create word boundary regex for more precise matching
+    const createWordBoundaryRegex = (term: string) => {
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`\\b${escapedTerm}\\b`, 'i');
+    };
+
+    const matchesSearch =
+      // Exact name match (case insensitive)
+      agent.name.toLowerCase() === searchLower ||
+      // Name contains search term
+      agent.name.toLowerCase().includes(searchLower) ||
+      // Category exact match
+      agent.category.toLowerCase() === searchLower ||
+      // Word boundary match in description for short terms like "IT"
+      (searchLower.length <= 3 ? createWordBoundaryRegex(searchLower).test(agent.description) : agent.description.toLowerCase().includes(searchLower)) ||
+      // Special case for HR
+      (agent.category === 'Human Resources' && searchLower === 'hr');
 
     const matchesCategory = activeCategory === 'all' ||
                            (activeCategory === 'favorites' && likedAgents.includes(agent.id)) ||

@@ -8,6 +8,55 @@ import { useSession } from 'next-auth/react';
 // import TextScramble from '@/components/effects/text-scramble';
 // import ParticleField from '@/components/effects/particle-field';
 
+// Simple markdown parser for ARIA responses - Updated
+const parseMarkdown = (text: string) => {
+  const lines = text.split('\n');
+  const elements: JSX.Element[] = [];
+
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
+
+    if (!trimmedLine) {
+      elements.push(<br key={`br-${index}`} />);
+      return;
+    }
+
+    // Handle numbered lists (1., 2., 3., etc.)
+    const numberedListMatch = trimmedLine.match(/^(\d+\.)\s*(.*)$/);
+    if (numberedListMatch) {
+      const [, number, content] = numberedListMatch;
+      // Parse bold text in content - handle both single and double asterisks
+      const parsedContent = content
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+      elements.push(
+        <div key={`numbered-${index}`} className="flex items-start space-x-2 mb-2">
+          <span className="font-medium text-gray-700 flex-shrink-0">{number}</span>
+          <span
+            className="text-sm"
+            dangerouslySetInnerHTML={{ __html: parsedContent }}
+          />
+        </div>
+      );
+      return;
+    }
+
+    // Handle regular paragraphs with bold text - handle both single and double asterisks
+    const parsedLine = trimmedLine
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<strong>$1</strong>');
+    elements.push(
+      <p
+        key={`p-${index}`}
+        className="text-sm mb-2 last:mb-0"
+        dangerouslySetInnerHTML={{ __html: parsedLine }}
+      />
+    );
+  });
+
+  return elements;
+};
+
 // Robot Icon Component - Official Marketing Asset
 const RobotIcon = ({ className = "w-[2.96rem] h-[2.96rem]" }: { className?: string }) => (
   <div className={`${className} relative flex items-center justify-center`}>
@@ -68,19 +117,96 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
     setCurrentBubbleMessage('');
   };
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      text: getWelcomeMessage(),
-      isBot: true,
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Load conversation from localStorage on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && session?.user?.email) {
+      const storageKey = `aria_conversation_${session.user.email}`;
+      const threadStorageKey = `aria_thread_${session.user.email}`;
+
+      try {
+        const savedMessages = localStorage.getItem(storageKey);
+        const savedThreadId = localStorage.getItem(threadStorageKey);
+
+        if (savedMessages) {
+          const parsedMessages = JSON.parse(savedMessages);
+          // Convert timestamp strings back to Date objects
+          const messagesWithDates = parsedMessages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }));
+          setMessages(messagesWithDates);
+        } else {
+          // Set initial welcome message if no saved conversation
+          setMessages([{
+            id: '1',
+            text: getWelcomeMessage(),
+            isBot: true,
+            timestamp: new Date()
+          }]);
+        }
+
+        if (savedThreadId) {
+          setThreadId(savedThreadId);
+        }
+      } catch (error) {
+        console.error('Error loading conversation:', error);
+        // Fallback to welcome message
+        setMessages([{
+          id: '1',
+          text: getWelcomeMessage(),
+          isBot: true,
+          timestamp: new Date()
+        }]);
+      }
+
+      setIsInitialized(true);
+    }
+  }, [session?.user?.email]);
+
+  // Save conversation to localStorage whenever messages or threadId change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && session?.user?.email && isInitialized) {
+      const storageKey = `aria_conversation_${session.user.email}`;
+      const threadStorageKey = `aria_thread_${session.user.email}`;
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(messages));
+        if (threadId) {
+          localStorage.setItem(threadStorageKey, threadId);
+        }
+      } catch (error) {
+        console.error('Error saving conversation:', error);
+      }
+    }
+  }, [messages, threadId, session?.user?.email, isInitialized]);
+
+  // Clear conversation when user logs out
+  useEffect(() => {
+    if (!session?.user?.email && isInitialized) {
+      // User logged out, clear conversation data
+      setMessages([]);
+      setThreadId(null);
+      setIsInitialized(false);
+
+      // Clear localStorage for all users (since we don't know which user logged out)
+      if (typeof window !== 'undefined') {
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+          if (key.startsWith('aria_conversation_') || key.startsWith('aria_thread_')) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+    }
+  }, [session?.user?.email, isInitialized]);
 
   useEffect(() => {
     scrollToBottom();
@@ -568,7 +694,13 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
                               : 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white'
                           }`}
                         >
-                          <p className="text-sm">{msg.text}</p>
+                          {msg.isBot ? (
+                            <div className="space-y-1">
+                              {parseMarkdown(msg.text)}
+                            </div>
+                          ) : (
+                            <p className="text-sm">{msg.text}</p>
+                          )}
                           <p className={`text-xs mt-1 ${msg.isBot ? 'text-gray-500' : 'text-blue-100'}`}>
                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>

@@ -12,6 +12,17 @@ const ARIA_ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID || 'asst_R5RXI0LcyRxsg
 // Note: ARIA's system prompt is now stored in the OpenAI Assistant (asst_R5RXI0LcyRxsgR80xb05oNQb)
 // This avoids character encoding issues and provides better performance
 
+// Function to format ARIA's response for better readability
+function formatAriaResponse(response: string): string {
+  if (!response || response.trim().length === 0) {
+    return response;
+  }
+
+  // Return the response as-is since OpenAI Assistant already provides proper formatting
+  // and single asterisks already make text bold in the frontend parser
+  return response.trim();
+}
+
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
   IT_SUPPORT: {
@@ -280,14 +291,25 @@ CURRENT CONTEXT:
     let response = "Oops! My circuits got a bit tangled there. Mind trying that again? 🤖";
 
     if (runStatus.status === 'completed') {
-      // Get the assistant's response
-      const messages = await openai.beta.threads.messages.list(thread.id);
+      // Get the assistant's response - ensure we get all content
+      const messages = await openai.beta.threads.messages.list(thread.id, {
+        limit: 20 // Get more messages to ensure we have the complete response
+      });
       const lastMessage = messages.data[0];
 
-      if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content[0]) {
-        const content = lastMessage.content[0];
-        if (content.type === 'text') {
-          response = content.text.value;
+      if (lastMessage && lastMessage.role === 'assistant' && lastMessage.content.length > 0) {
+        // Combine all content parts in case the response is split
+        let fullResponse = '';
+        for (const content of lastMessage.content) {
+          if (content.type === 'text') {
+            fullResponse += content.text.value;
+          }
+        }
+
+        if (fullResponse.trim()) {
+          response = formatAriaResponse(fullResponse);
+          console.log('✅ ARIA response received - Length:', fullResponse.length, 'characters');
+          console.log('📝 First 200 chars:', fullResponse.substring(0, 200) + '...');
         }
       }
 
@@ -338,8 +360,9 @@ User message: ${message}`;
         temperature: 0.7,
       });
 
-      const response = completion.choices[0]?.message?.content ||
+      const rawResponse = completion.choices[0]?.message?.content ||
         "Hi! I'm ARIA, your AI assistant. How can I help you today? 🤖";
+      const response = formatAriaResponse(rawResponse);
 
       // Prepare routing suggestions for the frontend
       const suggestions = routingSuggestions.map(key => ({

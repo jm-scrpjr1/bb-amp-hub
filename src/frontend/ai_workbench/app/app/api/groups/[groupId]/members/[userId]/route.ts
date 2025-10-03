@@ -9,7 +9,7 @@ import { prisma } from '@/lib/db';
 // DELETE /api/groups/[groupId]/members/[userId] - Remove member from group
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { groupId: string; userId: string } }
+  { params }: { params: Promise<{ groupId: string; userId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -61,7 +61,7 @@ export async function DELETE(
 // PATCH /api/groups/[groupId]/members/[userId] - Update member permissions
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { groupId: string; userId: string } }
+  { params }: { params: Promise<{ groupId: string; userId: string }> }
 ) {
   try {
     const session = await getServerSession();

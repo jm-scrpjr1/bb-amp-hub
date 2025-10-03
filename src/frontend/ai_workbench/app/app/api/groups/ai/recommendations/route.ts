@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth';
 import { UserService } from '@/lib/user-service';
 import { AIGroupService } from '@/lib/ai-group-service';
 import { hasGodMode } from '@/lib/permissions';

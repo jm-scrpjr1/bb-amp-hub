@@ -8,7 +8,7 @@ import { RBACLogger } from '@/lib/rbac';
 // GET /api/groups/[groupId]/members - Get group members
 export async function GET(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();
@@ -43,7 +43,7 @@ export async function GET(
 // POST /api/groups/[groupId]/members - Add member to group
 export async function POST(
   request: NextRequest,
-  { params }: { params: { groupId: string } }
+  { params }: { params: Promise<{ groupId: string }> }
 ) {
   try {
     const session = await getServerSession();

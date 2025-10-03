@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import { ScrollEffects, AnimatedText, TextScramble } from '@/components/effects';
 import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Document repository data based on your table
 const documentCategories = [
@@ -85,6 +86,29 @@ export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCountry, setSelectedCountry] = useState('all');
+  const [hoveredRobot, setHoveredRobot] = useState<boolean>(false);
+  const [currentMessage, setCurrentMessage] = useState<string>('');
+
+  const robotMessages = [
+    "Ready to help you find any document! 📄",
+    "I know where everything is stored! 🗂️",
+    "Ask me about policies, forms, or procedures! 💼",
+    "Your personal document assistant at your service! 🤖",
+    "Let's locate that resource together! 🔍"
+  ];
+
+  const getRandomMessage = (messages: string[]) => {
+    return messages[Math.floor(Math.random() * messages.length)];
+  };
+
+  const handleRobotHover = () => {
+    setHoveredRobot(true);
+    setCurrentMessage(getRandomMessage(robotMessages));
+  };
+
+  const handleRobotLeave = () => {
+    setHoveredRobot(false);
+  };
 
   const countries = ['All countries', 'PH', 'COL', 'IN', 'US'];
   const owners = ['HR', 'IT', 'Recruiting'];
@@ -107,6 +131,21 @@ export default function ResourcesPage() {
       green: 'from-green-600 to-green-500 border-green-200 bg-green-50',
     };
     return colors[color as keyof typeof colors] || colors.blue;
+  };
+
+  const getAnimationVariants = () => {
+    return {
+      animate: {
+        y: [0, -15, 0],
+        scale: [1, 1.05, 1],
+        transition: {
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          repeatDelay: 1
+        }
+      }
+    };
   };
 
   return (
@@ -310,14 +349,100 @@ export default function ResourcesPage() {
                 <p className="text-gray-600 mb-4">
                   Ask our AI assistant to help you locate specific documents, understand policies, or get guidance on procedures.
                 </p>
-                <button className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md">
+                <button
+                  onClick={() => {
+                    const event = new CustomEvent('openAISearch');
+                    window.dispatchEvent(event);
+                  }}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md"
+                >
                   Ask AI Assistant
                 </button>
               </div>
-              <div className="hidden md:block">
-                <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">🤖</span>
-                </div>
+              <div className="hidden md:block relative" style={{ marginLeft: '-12px' }}>
+                <motion.div
+                  className="w-24 h-24 flex items-center justify-center relative z-10"
+                  {...getAnimationVariants()}
+                  animate={{
+                    ...getAnimationVariants().animate,
+                    scale: hoveredRobot ? [1, 1.2, 0.9, 1.1, 1] : getAnimationVariants().animate?.scale || 1,
+                    x: hoveredRobot ? [0, -3, 3, -3, 3, 0] : 0,
+                  }}
+                  transition={{
+                    scale: { duration: 0.6, repeat: hoveredRobot ? Infinity : 0 },
+                    x: { duration: 0.3, repeat: hoveredRobot ? Infinity : 0 },
+                    ...getAnimationVariants().animate?.transition
+                  }}
+                  whileHover={{
+                    scale: 1.15,
+                    rotate: [0, -5, 5, -5, 0],
+                    transition: {
+                      scale: { duration: 0.3 },
+                      rotate: { duration: 0.6, repeat: Infinity }
+                    }
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  onMouseEnter={handleRobotHover}
+                  onMouseLeave={handleRobotLeave}
+                >
+                  <motion.img
+                    src="/images/TRAINING 1.png"
+                    alt="AI Training Assistant"
+                    className="w-full h-full object-contain scale-150"
+                    animate={{
+                      filter: hoveredRobot
+                        ? ["brightness(1)", "brightness(1.3)", "brightness(1)"]
+                        : "brightness(1)"
+                    }}
+                    transition={{
+                      duration: 0.8,
+                      repeat: hoveredRobot ? Infinity : 0
+                    }}
+                  />
+                </motion.div>
+
+                {/* Glow effect behind robot */}
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-purple-400 opacity-20 blur-xl"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.2, 0.4, 0.2]
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+
+                {/* Chat Bubble - Left top position */}
+                <AnimatePresence>
+                  {hoveredRobot && currentMessage && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="absolute -top-2 -left-48 z-20 max-w-[200px]"
+                    >
+                      <div className="bg-white rounded-2xl px-3 py-2 shadow-lg border border-gray-200 relative">
+                        {/* Floating bubbles */}
+                        <div className="absolute -top-1 left-2 w-3 h-3 bg-white rounded-full border border-gray-200"></div>
+                        <div className="absolute -top-2 left-4 w-4 h-4 bg-white rounded-full border border-gray-200"></div>
+                        <div className="absolute -top-1 right-3 w-2 h-2 bg-white rounded-full border border-gray-200"></div>
+
+                        <div className="text-xs text-gray-700 font-medium text-center relative z-10">
+                          {currentMessage}
+                        </div>
+
+                        {/* Cloud tail */}
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                          <div className="w-3 h-3 bg-white rounded-full border border-gray-200"></div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>

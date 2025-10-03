@@ -9,8 +9,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const categories = [
   { id: 'all', name: 'All', active: true },
+  { id: 'favorites', name: 'Favorites', active: false },
   { id: 'sales', name: 'Sales', active: false },
-  { id: 'recruiters', name: 'Recruiters', active: false },
+  { id: 'finance', name: 'Finance', active: false },
   { id: 'human resources', name: 'Human Resources', active: false },
   { id: 'marketing', name: 'Marketing', active: false },
   { id: 'coding', name: 'Coding', active: false },
@@ -129,19 +130,19 @@ const agents = [
   },
   {
     id: 4,
-    name: 'Recruiters',
-    description: 'Streamline hiring and talent acquisition processes',
+    name: 'Finance',
+    description: 'Financial analysis and budget management solutions',
     image: '/images/AI AGENT 4.png',
     bgColor: 'bg-sky-300',
-    category: 'Recruiters',
+    category: 'Finance',
     animation: 'circle',
     liked: false,
     wittyMessages: [
-      "Recruitment expert at your service! ⚙️",
-      "Why hire manually when I can automate? 🔄",
-      "Finding talent is my game! 🎯",
-      "Let's streamline your hiring process! 🚀",
-      "I never get tired of finding great candidates! 💪"
+      "Financial expert at your service! 💰",
+      "Let's crunch those numbers together! 📊",
+      "Budget optimization is my specialty! 📈",
+      "Making your finances crystal clear! 💎",
+      "Your money matters, and so do I! 🏦"
     ]
   },
   {
@@ -149,7 +150,7 @@ const agents = [
     name: 'Human Resources',
     description: 'HR management and employee engagement solutions',
     image: '/images/AI AGENT 5.png',
-    bgColor: 'bg-gray-300',
+    bgColor: 'bg-gray-600',
     category: 'Human Resources',
     animation: 'float',
     liked: false,
@@ -218,7 +219,9 @@ export default function AIAgentsPage() {
                          agent.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (agent.category === 'Human Resources' && 'hr'.includes(searchTerm.toLowerCase()))
 
-    const matchesCategory = activeCategory === 'all' || agent.category.toLowerCase() === activeCategory.toLowerCase()
+    const matchesCategory = activeCategory === 'all' ||
+                           (activeCategory === 'favorites' && likedAgents.includes(agent.id)) ||
+                           agent.category.toLowerCase().trim() === activeCategory.toLowerCase().trim()
 
     return matchesSearch && matchesCategory
   });
@@ -396,14 +399,7 @@ export default function AIAgentsPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        className={`absolute z-40 ${
-                          agent.id === 1 ? 'top-4 right-4' :
-                          agent.id === 2 ? 'top-6 left-4' :
-                          agent.id === 3 ? 'bottom-20 right-4' :
-                          agent.id === 4 ? 'top-4 left-6' :
-                          agent.id === 5 ? 'bottom-20 left-4' :
-                          'top-6 right-6'
-                        }`}
+                        className="absolute z-40 top-4 left-4"
                       >
                         <div className="relative">
                           {/* Cloud-like bubble */}

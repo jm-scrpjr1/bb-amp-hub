@@ -111,11 +111,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       console.log('Logout clicked');
       return;
     }
-    if (itemId === 'submit-ticket') {
-      // Open ticket modal instead of navigating
-      setIsTicketModalOpen(true);
-      return;
-    }
+
     if (itemId === 'submit-bold-idea') {
       // Open bold idea modal instead of navigating
       setIsBoldIdeaModalOpen(true);
@@ -141,7 +137,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
   }, []);
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-full flex flex-col">
+    <div className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col overflow-hidden">
       {/* Logo Section */}
       <div className="p-6 border-b border-gray-200">
         <Link href="/" className="block hover:opacity-80 transition-opacity duration-200">
@@ -219,12 +215,12 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
       </div>
 
       {/* Other Pages Section */}
-      <div className="px-4 py-3 flex-1">
+      <div className="px-4 py-3">
         <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mb-2">
           EMPLOYEE TOOLS
         </p>
         <nav className="space-y-1">
-          {getFilteredNavigationItems().slice(5, -4).map((item) => {
+          {getFilteredNavigationItems().slice(5, -2).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
@@ -289,18 +285,18 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
           OTHER OPTIONS
         </p>
         <nav className="space-y-1">
-          {getFilteredNavigationItems().slice(-4).map((item) => {
+          {getFilteredNavigationItems().slice(-2).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
             const isActive = pathname === `/${item.id}`;
 
-            const href = item.id === 'logout' || item.id === 'submit-ticket' ? '#' : `/${item.id}`;
+            const href = item.id === 'logout' ? '#' : `/${item.id}`;
 
             return (
               <Link
                 key={item.id}
                 href={href}
                 onClick={(e) => {
-                  if (item.id === 'logout' || item.id === 'submit-ticket') {
+                  if (item.id === 'logout') {
                     e.preventDefault();
                     handleNavigation(item.id, href);
                   }
@@ -308,14 +304,18 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                 onMouseEnter={() => href !== '#' && router.prefetch(href)}
                 className={cn(
                   "nav-link flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group",
-                  isActive
+                  item.id === 'logout'
+                    ? "text-red-700 hover:text-red-900 hover:bg-red-50"
+                    : isActive
                     ? "bg-gradient-to-r from-purple-100 to-indigo-100 text-gray-700 shadow-sm"
                     : "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 )}
               >
                 <div className={cn(
                   "relative flex items-center justify-center w-10 h-10 rounded-xl mr-3 transition-all duration-300",
-                  isActive
+                  item.id === 'logout'
+                    ? "bg-gradient-to-br from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 hover:shadow-md hover:shadow-red-700/20"
+                    : isActive
                     ? "bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-800/30 ring-2 ring-blue-400/50"
                     : "bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-700/20",
                   item.adminOnly && isActive && "ring-purple-400/50",
@@ -323,7 +323,9 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                 )}>
                   <Icon className={cn(
                     "h-5 w-5 transition-all duration-300 relative z-10",
-                    isActive
+                    item.id === 'logout'
+                      ? "text-white drop-shadow-sm"
+                      : isActive
                       ? "text-white drop-shadow-sm"
                       : "text-gray-300 group-hover:text-white"
                   )} />
@@ -348,15 +350,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </nav>
       </div>
 
-      {/* Tutorial Button */}
-      <div className="p-4 border-t border-gray-200">
-        <div
-          onClick={onStartTour}
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer text-center"
-        >
-          Start Tutorial Tour
-        </div>
-      </div>
+
 
       {/* Ticket Confirmation Modal */}
       <TicketConfirmationModal

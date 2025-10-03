@@ -83,7 +83,7 @@ export default function AISearch({ className = "" }: AISearchProps) {
     setIsMounted(true);
   }, []);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts and custom events
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -96,8 +96,18 @@ export default function AISearch({ className = "" }: AISearchProps) {
       }
     };
 
+    const handleOpenAISearch = () => {
+      setIsOpen(true);
+      setIsAIMode(true); // Open in AI mode for better assistance
+    };
+
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('openAISearch', handleOpenAISearch);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('openAISearch', handleOpenAISearch);
+    };
   }, []);
 
   // AI-powered natural language processing

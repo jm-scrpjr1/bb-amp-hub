@@ -8,6 +8,7 @@ import { createPortal } from 'react-dom';
 import GoogleSignIn from '@/components/auth/google-signin';
 import { mockUser } from '@/lib/mock-data';
 import AISearch from '@/components/search/ai-search';
+import { canAccessAdminPanel } from '@/lib/permissions';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -74,6 +75,21 @@ export default function Header() {
   const handleSettings = () => {
     setIsDropdownOpen(false);
     window.location.href = '/settings';
+  };
+
+  const handleAdminPanel = () => {
+    setIsDropdownOpen(false);
+    window.location.href = '/admin';
+  };
+
+  // Check if user can access admin panel
+  const canShowAdminPanel = () => {
+    const user = session?.user as any;
+    // Temporary: Show admin panel for owner email during development
+    if (user?.email === 'jlope@boldbusiness.com') {
+      return true;
+    }
+    return canAccessAdminPanel(user);
   };
 
   return (
@@ -188,6 +204,21 @@ export default function Header() {
               </svg>
               Settings
             </button>
+
+            {canShowAdminPanel() && (
+              <button
+                onClick={handleAdminPanel}
+                className="flex items-center w-full px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 transition-colors duration-150"
+              >
+                <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                Admin Panel
+                <span className="ml-auto text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">
+                  Admin
+                </span>
+              </button>
+            )}
           </div>
 
           <div className="border-t border-gray-100 py-1">

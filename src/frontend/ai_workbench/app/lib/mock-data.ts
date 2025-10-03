@@ -157,8 +157,6 @@ export const navigationItems = [
   { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: 'Lightbulb' },
 
   // OTHER OPTIONS Section
-  { id: 'admin', name: 'Admin Panel', icon: 'Shield', adminOnly: true },
-  { id: 'submit-ticket', name: 'Submit Ticket', icon: 'Ticket' },
   { id: 'settings', name: 'Settings', icon: 'Settings' },
   { id: 'logout', name: 'Logout', icon: 'LogOut' }
 ];

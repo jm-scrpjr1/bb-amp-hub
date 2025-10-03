@@ -26,7 +26,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="h-screen bg-gray-100 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="sidebar flex-shrink-0">
+      <div className="sidebar flex-shrink-0 h-screen">
         <Sidebar onStartTour={startTour} />
       </div>
 

@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 // Temporary: Using custom icons until lucide-react is installed
 // import {
 //   Home,
@@ -104,11 +104,11 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
     });
   };
 
-  const handleNavigation = useCallback((itemId: string, href: string) => {
+  const handleNavigation = useCallback(async (itemId: string, href: string) => {
     setActiveItem(itemId);
     if (itemId === 'logout') {
-      // Handle logout logic here
-      console.log('Logout clicked');
+      // Mirror the same functionality from Sign Out button
+      await signOut({ callbackUrl: '/auth/signin' });
       return;
     }
 

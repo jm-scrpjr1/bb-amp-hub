@@ -162,7 +162,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </p>
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(0, 5).map((item) => {
-            const isActive = pathname === `/${item.id}` || (pathname === '/' && item.id === 'home');
+            const isActive = pathname === `/${item.id}` || pathname === `/${item.id}/` || (pathname === '/' && item.id === 'home');
 
             const href = item.id === 'home' ? '/' : `/${item.id}`;
 
@@ -189,13 +189,11 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                   <Image
                     src={item.icon}
                     alt={`${item.name} icon`}
-                    width={20}
-                    height={20}
+                    width={16}
+                    height={16}
                     className={cn(
                       "transition-all duration-300 relative z-10",
-                      isActive
-                        ? "brightness-0 invert drop-shadow-sm"
-                        : "brightness-0 invert opacity-75 group-hover:opacity-100"
+                      item.id === 'home' && "brightness-0 invert"
                     )}
                   />
                   {isActive && (
@@ -226,7 +224,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         </p>
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(5, -2).map((item) => {
-            const isActive = pathname === `/${item.id}`;
+            const isActive = pathname === `/${item.id}` || pathname === `/${item.id}/`;
 
             const href = item.id === 'submit-bold-idea' ? '#' : `/${item.id}`;
 
@@ -259,14 +257,9 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                   <Image
                     src={item.icon}
                     alt={`${item.name} icon`}
-                    width={20}
-                    height={20}
-                    className={cn(
-                      "transition-all duration-300 relative z-10",
-                      isActive
-                        ? "brightness-0 invert drop-shadow-sm"
-                        : "brightness-0 invert opacity-75 group-hover:opacity-100"
-                    )}
+                    width={16}
+                    height={16}
+                    className="transition-all duration-300 relative z-10"
                   />
                   {isActive && (
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent opacity-50 animate-pulse pointer-events-none"></div>
@@ -297,7 +290,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
         <nav className="space-y-1">
           {getFilteredNavigationItems().slice(-2).map((item) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap];
-            const isActive = pathname === `/${item.id}`;
+            const isActive = pathname === `/${item.id}` || pathname === `/${item.id}/`;
             const isSvgIcon = item.icon.startsWith('/images/');
 
             const href = item.id === 'logout' ? '#' : `/${item.id}`;
@@ -325,7 +318,7 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                 <div className={cn(
                   "relative flex items-center justify-center w-10 h-10 rounded-xl mr-3 transition-all duration-300",
                   item.id === 'logout'
-                    ? "bg-gradient-to-br from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 hover:shadow-md hover:shadow-red-700/20"
+                    ? "bg-white hover:bg-gray-50 shadow-sm"
                     : isActive
                     ? "bg-gradient-to-br from-slate-800 to-slate-900 shadow-lg shadow-slate-800/30 ring-2 ring-blue-400/50"
                     : "bg-gradient-to-br from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 hover:shadow-md hover:shadow-slate-700/20",
@@ -336,16 +329,9 @@ export default function Sidebar({ onStartTour }: SidebarProps) {
                     <Image
                       src={item.icon}
                       alt={`${item.name} icon`}
-                      width={20}
-                      height={20}
-                      className={cn(
-                        "transition-all duration-300 relative z-10",
-                        item.id === 'logout'
-                          ? "brightness-0 invert drop-shadow-sm"
-                          : isActive
-                          ? "brightness-0 invert drop-shadow-sm"
-                          : "brightness-0 invert opacity-75 group-hover:opacity-100"
-                      )}
+                      width={item.id === 'logout' ? 24 : 16}
+                      height={item.id === 'logout' ? 24 : 16}
+                      className="transition-all duration-300 relative z-10"
                     />
                   ) : (
                     <Icon className={cn(

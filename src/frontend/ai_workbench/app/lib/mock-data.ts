@@ -143,20 +143,20 @@ export const mockActivity = [
 
 export const navigationItems = [
   // MY AI-AMPLIFIERS Section (renamed from AI ASSISTANTS)
-  { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.svg', active: true },
-  { id: 'prompt-tutor', name: 'Prompts', icon: '/images/PROMPT ICON.svg' },
-  { id: 'automations', name: 'Automations', icon: '/images/AUTOMATION ICON.svg' },
-  { id: 'ai-agents', name: 'AI Agents', icon: '/images/AI AGENT ICON.svg' },
+  { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.png', active: true },
+  { id: 'prompt-tutor', name: 'Prompts', icon: '/images/PROMPT ICON.png' },
+  { id: 'automations', name: 'Automations', icon: '/images/AUTOMATION ICON.png' },
+  { id: 'ai-agents', name: 'AI Agents', icon: '/images/AI AGENT ICON.png' },
   { id: 'trainings', name: 'Trainings', icon: '/images/TRAINING ICON.svg' },
 
   // EMPLOYEE TOOLS Section
-  { id: 'my-space', name: 'My Space', icon: '/images/MY SPACE ICON.svg' },
-  { id: 'activity', name: 'Activity', icon: '/images/RESOURCES ICON.svg' },
-  { id: 'groups', name: 'Groups', icon: '/images/GRP ICON.svg' },
-  { id: 'resources', name: 'Resources', icon: '/images/RESOURCES ICON.svg' },
-  { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: '/images/SUBMIT BOLD IDEA ICON.svg' },
+  { id: 'my-space', name: 'My Space', icon: '/images/MY SPACE ICON.png' },
+  { id: 'activity', name: 'Activity', icon: '/images/RESOURCES ICON.png' },
+  { id: 'groups', name: 'Groups', icon: '/images/GRP ICON.png' },
+  { id: 'resources', name: 'Resources', icon: '/images/RESOURCES ICON.png' },
+  { id: 'submit-bold-idea', name: 'Submit Bold Idea', icon: '/images/SUBMIT BOLD IDEA ICON.png' },
 
   // OTHER OPTIONS Section
-  { id: 'settings', name: 'Settings', icon: 'Settings' },
-  { id: 'logout', name: 'Logout', icon: 'LogOut' }
+  { id: 'settings', name: 'Settings', icon: '/images/SETTINGS.png' },
+  { id: 'logout', name: 'Logout', icon: '/images/Logout.png' }
 ];

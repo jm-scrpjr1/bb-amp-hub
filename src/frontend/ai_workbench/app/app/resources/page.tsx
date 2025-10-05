@@ -4,83 +4,112 @@
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/main-layout';
 import { ScrollEffects, AnimatedText, TextScramble } from '@/components/effects';
-import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building } from 'lucide-react';
+import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building, X, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Document repository data based on your table
-const documentCategories = [
-  {
-    id: 'pre-employment',
-    name: 'Pre-employment Requirements',
-    icon: Users,
-    color: 'blue',
-    stakeholder: 'New Hires',
-    documents: [
-      { name: 'Employee Information Form', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Employee Information Form', country: 'COL', owner: 'HR', link: '#' },
-      { name: 'Employee Information Form', country: 'IN', owner: 'HR', link: '#' },
-      { name: 'Employee Information Form', country: 'US', owner: 'HR', link: '#' },
-    ]
-  },
-  {
-    id: 'important-tools',
-    name: 'Important Tools',
-    icon: FileText,
-    color: 'cyan',
-    stakeholder: 'All Teams',
-    documents: [
-      { name: 'Quickbooks Timesheets manual (employee user)', country: 'All countries', owner: 'IT', link: '#' },
-      { name: 'Acceptable Use Policy (AUP)', country: 'All countries', owner: 'IT', link: '#' },
-      { name: 'Payroll Sprout', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Sprout Manager Training Module', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Sprout Employee Training Module', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Payroll Aleluya', country: 'COL', owner: 'HR', link: '#' },
-      { name: 'Rippling Account', country: 'US', owner: 'HR', link: '#' },
-      { name: 'HR Service Desk (Monday.com)', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'IT Service Desk (JIRA)', country: 'All countries', owner: 'IT', link: '#' },
-    ]
-  },
-  {
-    id: 'reading-manuals',
-    name: 'Important Reading Manuals',
-    icon: Building,
-    color: 'purple',
-    stakeholder: 'All Teams',
-    documents: [
-      { name: 'Leave Application Policy', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Leave Application Policy', country: 'COL', owner: 'HR', link: '#' },
-      { name: 'BBPH Referral Program (needs update)', country: 'PH', owner: 'Recruiting', link: '#' },
-      { name: 'BBPH Referral Program (needs update)', country: 'All countries', owner: 'Recruiting', link: '#' },
-      { name: 'Code of Conduct (currently being revamped)', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Code of Conduct (currently being revamped)', country: 'COL', owner: 'HR', link: '#' },
-      { name: 'Code of Conduct (currently being revamped)', country: 'IN', owner: 'HR', link: '#' },
-      { name: 'BB Email Signature', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'Out of Office Email template', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'Bank Information Update form', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'HMO form', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'GLI form', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'SSS/HDMF Loan Form (Existing/Active Loans)', country: 'PH', owner: 'HR', link: '#' },
-    ]
-  },
-  {
-    id: 'supervisor-toolkit',
-    name: 'Supervisor Tool Kit',
-    icon: Globe,
-    color: 'green',
-    stakeholder: 'Leaders',
-    documents: [
-      { name: 'Coaching Log form', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'Corrective Action Form Implementing Guidelines', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'CAF form', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'Performance Improvement Plan Implementing Guidelines', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'PIP form', country: 'All countries', owner: 'HR', link: '#' },
-      { name: 'Quickbooks Timesheets manual (supervisory) - needs update', country: 'All countries', owner: 'IT', link: '#' },
-      { name: 'Performance Evaluation Form (for Probationary)', country: 'PH', owner: 'HR', link: '#' },
-      { name: 'Performance Evaluation Form (for Probationary)', country: 'COL', owner: 'HR', link: '#' },
-      { name: 'Incident Report Form', country: 'All countries', owner: 'HR', link: '#' },
-    ]
-  }
+// Document repository data from CSV - source of truth
+const csvDocuments = [
+  { stakeholder: 'New Hires', category: 'Pre-employment Requirements', country: 'PH', name: 'Employee Information Form', owner: 'HR', link: 'https://forms.gle/7RAEPUtUd9qNESeG7' },
+  { stakeholder: 'New Hires', category: 'Pre-employment Requirements', country: 'COL', name: 'Employee Information Form', owner: 'HR', link: 'https://forms.gle/CiXUGzp9qFe7uh9f7' },
+  { stakeholder: 'New Hires', category: 'Pre-employment Requirements', country: 'IN', name: 'Employee Information Form', owner: 'HR', link: '' },
+  { stakeholder: 'New Hires', category: 'Pre-employment Requirements', country: 'US', name: 'Employee Information Form', owner: 'HR', link: '' },
+  { stakeholder: 'All Employees', category: 'Important Tools', country: 'All countries', name: 'Quickbooks Timesheets manual (employee user)', owner: 'IT', link: 'https://docs.google.com/document/d/1Xg6LR5qFIK_MpAuqbKyutjcyrgmARUJjR6FqNSVWHkM/edit' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'All countries', name: 'Acceptable Use Policy (AUP)', owner: 'IT', link: 'https://docs.google.com/document/d/1TdwZvk-WM7yMfZnO2qf-zYq0M2sX_72L/edit' },
+  { stakeholder: 'All Employees', category: 'Time Keeping', country: 'PH', name: 'Payroll Sprout', owner: 'HR', link: 'https://sso.sprout.ph/realms/boldbusiness/protocol/openid-connect/auth?client_id=SproutSSO&redirect_uri=https%3A%2F%2Fboldbusiness.hrhub.ph%2F&response_type=code%20id_token&scope=openid%20profile&state=OpenIdConnect.AuthenticationProperties%3DxyHkJwBNCPVeyLt90QUQ8cestKkk1ZQRrUBbEAb0LATdzs5HF1jrsb1JVq9k29tzVg60mxmyJGpCVUoUURAMgd5JnEeJR59vYxRTEix9JvVnsEBvpS415RbtaFvjoFo4Exsy9nO8SKFidScjalAWgc29Oo0LwMHV5c2QauXgWU1Uk02WMdAMeKyd_wlVBSir17aNCA&response_mode=form_post&nonce=638932224909690080.NzliY2QwOGItZjM4OS00MmIxLWJkZGItYTY3MDRhZjQyNmI1YTlhNDZmOTAtYmJjOS00NGFjLTkxMDItMzA3ZjdjOTAzMDA5&x-client-SKU=ID_NET461&x-client-ver=5.3.0.0' },
+  { stakeholder: 'Leaders', category: 'Training', country: 'PH', name: 'Sprout Manager Training Module', owner: '', link: 'https://sprout-academy.thinkific.com/courses/sprout-hr-manager-training' },
+  { stakeholder: 'Leaders', category: 'Training', country: 'PH', name: 'Sprout Employee Training Module', owner: '', link: 'https://sprout-academy.thinkific.com/courses/sprout-hr-employee-training' },
+  { stakeholder: 'All Employees', category: 'Time Keeping', country: 'COL', name: 'Payroll Aleluya', owner: 'HR', link: 'https://tranqui.aleluya.com/novelties_request_history' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'US', name: 'Rippling Account', owner: '', link: '' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'All countries', name: 'HR Service Desk (Monday.com)', owner: 'HR', link: 'https://wkf.ms/3HK6bac' },
+  { stakeholder: 'All Employees', category: 'IT', country: 'All countries', name: 'IT Service Desk (JIRA)', owner: 'IT', link: 'https://boldbusiness.atlassian.net/servicedesk/customer/portals' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'PH', name: 'Leave Application Policy', owner: 'HR', link: 'https://drive.google.com/file/d/13cFY_LaLtD3Xay-OwSMtnrHpisZBEo64/view?ts=63bdb124' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'COL', name: 'Leave Application Policy', owner: 'HR', link: 'https://docs.google.com/document/d/1XVopK5L5VdsJ1d23nNbMwAbu5DKfqJmk/edit?usp=sharing&ouid=110065246222523466622&rtpof=true&sd=true' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'PH', name: 'BBPH Referral Program (needs update)', owner: 'Recruiting', link: 'https://docs.google.com/document/d/1gKHSeKb2r1nKstzRMaa-3mF3FJ90MLlZ2X9Kr6rNeU4/edit?usp=sharing' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'All countries', name: 'BBPH Referral Program (needs update)', owner: 'Recruiting', link: 'https://docs.google.com/forms/d/e/1FAIpQLSfSSRswifI5R1hm12NNA3IJDIZafeCHgoKoYs9CFai3stUhhw/viewform' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'PH', name: 'Code of Conduct (currently being revamped)', owner: 'HR', link: '' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'COL', name: 'Code of Conduct (currently being revamped)', owner: 'HR', link: '' },
+  { stakeholder: 'All Employees', category: 'Policies', country: 'IN', name: 'Code of Conduct (currently being revamped)', owner: 'HR', link: '' },
+  { stakeholder: 'All Employees', category: 'General', country: 'All countries', name: 'BB Email Signature', owner: 'HR', link: 'https://docs.google.com/document/d/1u2rorITdyDUWW0OcN4hB_Kijjhbpx-b9b22it61beVI/edit' },
+  { stakeholder: 'All Employees', category: 'General', country: 'All countries', name: 'Out of Office Email template', owner: 'HR', link: 'https://docs.google.com/document/d/1U4E2m20rYoKpotzpnfiq90OMGdPIbi8qnNRTJZ8toNU/edit?usp=sharing' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'PH', name: 'Bank Information Update form', owner: 'HR', link: 'https://forms.gle/AxoacZb8h6ht9D3H6' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'PH', name: 'HMO form', owner: 'HR', link: 'https://docs.google.com/forms/d/e/1FAIpQLSePDb7Ap-Q6OLjUyXXvBir7b9SceG1C44klyDZi1FyGazUmsw/viewform?vc=0&c=0&w=1&flr=0&pli=1' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'PH', name: 'GLI form', owner: 'HR', link: 'https://drive.google.com/file/d/11yYMKupr_5cGrcCBqeHtQjEGoV2Y3rFc/view' },
+  { stakeholder: 'All Employees', category: 'HR', country: 'PH', name: 'SSS/HDMF Loan Form (Existing/Active Loans)', owner: 'HR', link: 'https://docs.google.com/forms/d/e/1FAIpQLSc-eTrsdK2iPSzATG6xNrmvcOAUpNm0rQyOrHNL14i5wjzoWQ/viewform' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'Coaching Log form', owner: 'HR', link: 'https://docs.google.com/document/d/1TvySizTdxWsCM0XO7t3TSrrAVrX6zNU03dONEufnQvY/edit?usp=sharing' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'Corrective Action Form Implementing Guidelines', owner: 'HR', link: 'https://docs.google.com/document/d/1GNx4XHZwMCNLc5887vKgxaW--PpoaaykCn3N2rejTFo/edit?usp=sharing' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'CAF form', owner: 'HR', link: 'https://docs.google.com/spreadsheets/d/183CWRYqHGhs5ySfAe0KW4MCe1xgF-_b62UksDJ3V5Hs/edit?usp=sharing' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'Performance Improvement Plan Implementing Guidelines', owner: 'HR', link: 'https://docs.google.com/document/d/1x3X0Wg8SrcZskHJzq5HId0pV2aZcu9Ny-ghVJaBcAN8/edit?usp=sharing' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'PIP form', owner: 'HR', link: 'https://docs.google.com/spreadsheets/d/1vF3Doc7A9n0S9icjMGLguIekG4D4L7nfF9JgWt4Rwog/edit?usp=sharing' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'Quickbooks Timesheets manual (supervisory) - needs update', owner: 'IT', link: 'https://docs.google.com/document/d/17zYc0wtkYZFKre6J22q3eFwi03XgjQOtxxV9wXInM6k/edit?tab=t.0' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'PH', name: 'Performance Evaluation Form (for Probationary)', owner: 'HR', link: 'https://forms.gle/JRaxWuSc1wxbjn1D8' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'COL', name: 'Performance Evaluation Form (for Probationary)', owner: 'HR', link: 'https://forms.gle/JRaxWuSc1wxbjn1D8' },
+  { stakeholder: 'Leaders', category: 'Supervisor Tool kit', country: 'All countries', name: 'Incident Report Form', owner: 'HR', link: 'https://forms.gle/vkQYfamAVWdhLc9H8' },
+  { stakeholder: 'All Employees', category: 'Employee Perks / Benefits', country: 'PH', name: 'Laptop Reselling Program', owner: '', link: 'https://forms.gle/9aFhtmwgGwadbchy6' },
 ];
+
+// Transform CSV data into categories
+const getDocumentCategories = () => {
+  const categoryMap = new Map();
+
+  csvDocuments.forEach(doc => {
+    const categoryKey = doc.category.toLowerCase().replace(/\s+/g, '-');
+
+    if (!categoryMap.has(categoryKey)) {
+      categoryMap.set(categoryKey, {
+        id: categoryKey,
+        name: doc.category,
+        icon: getCategoryIcon(doc.category),
+        color: getCategoryColor(doc.category),
+        stakeholder: doc.stakeholder,
+        documents: []
+      });
+    }
+
+    categoryMap.get(categoryKey).documents.push({
+      name: doc.name,
+      country: doc.country,
+      owner: doc.owner,
+      link: doc.link,
+      stakeholder: doc.stakeholder
+    });
+  });
+
+  return Array.from(categoryMap.values());
+};
+
+const getCategoryIcon = (category: string) => {
+  const iconMap: { [key: string]: any } = {
+    'Pre-employment Requirements': Users,
+    'Important Tools': FileText,
+    'Policies': Building,
+    'Time Keeping': Globe,
+    'Training': Users,
+    'HR': Users,
+    'IT': FileText,
+    'Supervisor Tool kit': Globe,
+    'General': Building,
+    'Employee Perks / Benefits': Users
+  };
+  return iconMap[category] || FileText;
+};
+
+const getCategoryColor = (category: string) => {
+  const colorMap: { [key: string]: string } = {
+    'Pre-employment Requirements': 'blue',
+    'Important Tools': 'cyan',
+    'Policies': 'purple',
+    'Time Keeping': 'green',
+    'Training': 'blue',
+    'HR': 'cyan',
+    'IT': 'purple',
+    'Supervisor Tool kit': 'green',
+    'General': 'blue',
+    'Employee Perks / Benefits': 'cyan'
+  };
+  return colorMap[category] || 'blue';
+};
+
+const documentCategories = getDocumentCategories();
 
 export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,6 +117,8 @@ export default function ResourcesPage() {
   const [selectedCountry, setSelectedCountry] = useState('all');
   const [hoveredRobot, setHoveredRobot] = useState<boolean>(false);
   const [currentMessage, setCurrentMessage] = useState<string>('');
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const robotMessages = [
     "Ready to help you find any document! 📄",
@@ -110,7 +141,31 @@ export default function ResourcesPage() {
     setHoveredRobot(false);
   };
 
-  const countries = ['All countries', 'PH', 'COL', 'IN', 'US'];
+  const handleViewDocument = (document: any) => {
+    setSelectedDocument(document);
+    setShowModal(true);
+  };
+
+  const handleExternalLink = (link: string) => {
+    if (link && link.trim() !== '') {
+      window.open(link, '_blank');
+    }
+  };
+
+  const handleDownload = (document: any) => {
+    // TODO: Implement download functionality with user access rights check
+    if (document.link && document.link.trim() !== '') {
+      // For now, just open the link - in production this would check user permissions
+      window.open(document.link, '_blank');
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedDocument(null);
+  };
+
+  const countries = ['PH', 'COL', 'IN', 'US']; // Exclude "All countries" from filter options
   const owners = ['HR', 'IT', 'Recruiting'];
 
   const filteredCategories = documentCategories.map(category => ({
@@ -299,10 +354,23 @@ export default function ResourcesPage() {
                                 </div>
                               </div>
                               <div className="flex space-x-2 ml-2">
-                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">
+                                <button
+                                  onClick={() => handleDownload(document)}
+                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                  title="Download document"
+                                >
                                   <Download className="h-4 w-4" />
                                 </button>
-                                <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors">
+                                <button
+                                  onClick={() => handleExternalLink(document.link)}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    document.link && document.link.trim() !== ''
+                                      ? 'text-gray-400 hover:text-blue-600 hover:bg-blue-100'
+                                      : 'text-gray-300 cursor-not-allowed'
+                                  }`}
+                                  title={document.link && document.link.trim() !== '' ? "Open in new tab" : "No link available"}
+                                  disabled={!document.link || document.link.trim() === ''}
+                                >
                                   <ExternalLink className="h-4 w-4" />
                                 </button>
                               </div>
@@ -310,10 +378,14 @@ export default function ResourcesPage() {
 
                             <div className="flex items-center justify-between">
                               <div className="text-xs text-gray-500">
-                                Last updated: 2 days ago
+                                Owner: {document.owner || 'N/A'}
                               </div>
-                              <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                                View Document
+                              <button
+                                onClick={() => handleViewDocument(document)}
+                                className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                                <span>View Document</span>
                               </button>
                             </div>
                           </div>
@@ -447,6 +519,102 @@ export default function ResourcesPage() {
             </div>
           </div>
         </ScrollEffects>
+
+        {/* Document View Modal */}
+        <AnimatePresence>
+          {showModal && selectedDocument && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+              onClick={closeModal}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">{selectedDocument.name}</h2>
+                      <div className="flex items-center space-x-4 text-blue-100">
+                        <span className="flex items-center space-x-1">
+                          <Globe className="h-4 w-4" />
+                          <span>{selectedDocument.country}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <Users className="h-4 w-4" />
+                          <span>{selectedDocument.owner || 'N/A'}</span>
+                        </span>
+                        <span className="flex items-center space-x-1">
+                          <Building className="h-4 w-4" />
+                          <span>{selectedDocument.stakeholder}</span>
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={closeModal}
+                      className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                    >
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6">
+                  {selectedDocument.link && selectedDocument.link.trim() !== '' ? (
+                    <div className="space-y-4">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-blue-900 mb-2">Document Preview</h3>
+                        <p className="text-blue-700 text-sm mb-4">
+                          This document is hosted externally. Click the button below to view it in a new tab.
+                        </p>
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => handleExternalLink(selectedDocument.link)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            <span>Open Document</span>
+                          </button>
+                          <button
+                            onClick={() => handleDownload(selectedDocument)}
+                            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
+                          >
+                            <Download className="h-4 w-4" />
+                            <span>Download</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Document Link Display */}
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-2">Document URL:</h4>
+                        <div className="bg-white border rounded p-3 text-sm text-gray-600 break-all">
+                          {selectedDocument.link}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No Link Available</h3>
+                      <p className="text-gray-500">
+                        This document doesn't have an associated link yet. Please contact {selectedDocument.owner || 'the document owner'} for access.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MainLayout>
   );

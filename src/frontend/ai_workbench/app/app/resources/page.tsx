@@ -458,7 +458,7 @@ export default function ResourcesPage() {
                   onMouseLeave={handleRobotLeave}
                 >
                   <motion.img
-                    src="/images/TRAINING 1.png"
+                    src="/images/AI TRAINING 1.png"
                     alt="AI Training Assistant"
                     className="w-full h-full object-contain scale-150"
                     animate={{

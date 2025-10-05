@@ -54,6 +54,20 @@ const searchData = {
     { id: 'referral-program', title: 'BBPH Referral Program', description: 'Employee referral guidelines', category: 'Reading Manuals' },
     { id: 'code-conduct', title: 'Code of Conduct', description: 'Company conduct guidelines', category: 'Reading Manuals' },
     { id: 'pip-form', title: 'PIP Form', description: 'Performance Improvement Plan documentation', category: 'Supervisor Tools' },
+    { id: 'laptop-reselling', title: 'Laptop Reselling Program', description: 'Employee laptop reselling program for PH', category: 'Employee Benefits' },
+    { id: 'hr-service-desk', title: 'HR Service Desk', description: 'Monday.com HR support portal', category: 'Important Tools' },
+    { id: 'it-service-desk', title: 'IT Service Desk', description: 'JIRA IT support portal', category: 'Important Tools' },
+    { id: 'sprout-training', title: 'Sprout Training Modules', description: 'Manager and employee training for Sprout system', category: 'Training' },
+    { id: 'email-signature', title: 'BB Email Signature', description: 'Company email signature template', category: 'General' },
+    { id: 'ooo-template', title: 'Out of Office Template', description: 'Email template for out of office messages', category: 'General' },
+    { id: 'bank-info-form', title: 'Bank Information Update', description: 'Form to update banking details (PH)', category: 'HR Forms' },
+    { id: 'hmo-form', title: 'HMO Form', description: 'Health maintenance organization form (PH)', category: 'HR Forms' },
+    { id: 'gli-form', title: 'GLI Form', description: 'Group life insurance form (PH)', category: 'HR Forms' },
+    { id: 'sss-loan-form', title: 'SSS/HDMF Loan Form', description: 'Social security loan form (PH)', category: 'HR Forms' },
+    { id: 'coaching-log', title: 'Coaching Log Form', description: 'Employee coaching documentation', category: 'Supervisor Tools' },
+    { id: 'caf-form', title: 'CAF Form', description: 'Corrective Action Form for supervisors', category: 'Supervisor Tools' },
+    { id: 'performance-eval', title: 'Performance Evaluation Form', description: 'Probationary employee evaluation', category: 'Supervisor Tools' },
+    { id: 'incident-report', title: 'Incident Report Form', description: 'Workplace incident reporting form', category: 'Supervisor Tools' },
   ],
   trainings: [
     { id: 'react-basics', title: 'React Basics', description: '2h 30min course on React fundamentals', category: 'Development' },
@@ -165,93 +179,165 @@ export default function AISearch({ className = "" }: AISearchProps) {
 
     setIsProcessing(true);
 
-    // Simulate AI processing delay
-    const timer = setTimeout(() => {
-      const searchTerm = query.toLowerCase();
-      const allResults: any[] = [];
+    if (isAIMode) {
+      // AI Mode: Call ARIA to scan the site and provide intelligent responses
+      const callARIA = async () => {
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: query
+            })
+          });
 
-      if (isAIMode) {
-        // AI Mode: Enhanced semantic search and suggestions
-        setAiSuggestions(processAIQuery(query));
+          const data = await response.json();
 
-        // Semantic matching for AI mode
-        const semanticMatches = {
-          'time': ['timesheet', 'hours', 'tracking', 'log'],
-          'help': ['support', 'ticket', 'assistance', 'issue'],
-          'learn': ['training', 'course', 'education', 'skill'],
-          'team': ['group', 'collaborate', 'members', 'together'],
-          'document': ['resource', 'policy', 'manual', 'guide']
-        };
+          if (data.success) {
+            // Set ARIA's response
+            setAiResponse(data.response);
 
-        // Enhanced search with semantic understanding
-        Object.entries(semanticMatches).forEach(([key, synonyms]) => {
-          if (searchTerm.includes(key) || synonyms.some(syn => searchTerm.includes(syn))) {
-            // Add relevant results based on semantic understanding
-            searchData.pages.forEach(item => {
-              if (synonyms.some(syn =>
-                item.title.toLowerCase().includes(syn) ||
-                item.description.toLowerCase().includes(syn)
-              )) {
-                allResults.push({ ...item, type: 'page', aiRelevance: 'high' });
+            // Process routing suggestions from ARIA
+            const ariaResults: any[] = [];
+
+            if (data.routingSuggestions && data.routingSuggestions.length > 0) {
+              data.routingSuggestions.forEach((suggestion: any) => {
+                ariaResults.push({
+                  id: suggestion.key,
+                  title: suggestion.title,
+                  description: suggestion.description,
+                  type: 'ai-suggestion',
+                  category: 'ARIA Suggestion',
+                  aiRelevance: 'high',
+                  path: suggestion.path,
+                  action: suggestion.action
+                });
+              });
+            }
+
+            // Also do semantic search for additional context
+            const searchTerm = query.toLowerCase();
+            const semanticMatches = {
+              'time': ['timesheet', 'hours', 'tracking', 'log'],
+              'help': ['support', 'ticket', 'assistance', 'issue'],
+              'learn': ['training', 'course', 'education', 'skill'],
+              'team': ['group', 'collaborate', 'members', 'together'],
+              'document': ['resource', 'policy', 'manual', 'guide']
+            };
+
+            // Enhanced search with semantic understanding
+            Object.entries(semanticMatches).forEach(([key, synonyms]) => {
+              if (searchTerm.includes(key) || synonyms.some(syn => searchTerm.includes(syn))) {
+                searchData.pages.forEach(item => {
+                  if (synonyms.some(syn =>
+                    item.title.toLowerCase().includes(syn) ||
+                    item.description.toLowerCase().includes(syn)
+                  )) {
+                    ariaResults.push({ ...item, type: 'page', aiRelevance: 'high' });
+                  }
+                });
               }
             });
+
+            // Remove duplicates and prioritize ARIA suggestions
+            const uniqueResults = ariaResults.filter((item, index, self) =>
+              index === self.findIndex(t => t.id === item.id && t.type === item.type)
+            );
+
+            // Sort by AI relevance - ARIA suggestions first
+            uniqueResults.sort((a, b) => {
+              if (a.type === 'ai-suggestion' && b.type !== 'ai-suggestion') return -1;
+              if (b.type === 'ai-suggestion' && a.type !== 'ai-suggestion') return 1;
+              if (a.aiRelevance === 'high' && b.aiRelevance !== 'high') return -1;
+              if (b.aiRelevance === 'high' && a.aiRelevance !== 'high') return 1;
+              return 0;
+            });
+
+            setResults(uniqueResults.slice(0, 8));
+            setAiSuggestions(processAIQuery(query));
+          } else {
+            // Fallback to local processing if ARIA fails
+            setAiResponse('I\'m having trouble connecting to ARIA. Let me help you with local search.');
+            setAiSuggestions(processAIQuery(query));
+            performLocalSearch(query);
           }
-        });
-      }
-
-      // Standard search (both modes)
-      searchData.pages.forEach(item => {
-        if (item.title.toLowerCase().includes(searchTerm) ||
-            item.description.toLowerCase().includes(searchTerm) ||
-            item.category.toLowerCase().includes(searchTerm)) {
-          allResults.push({ ...item, type: 'page' });
+        } catch (error) {
+          console.error('Error calling ARIA:', error);
+          // Fallback to local processing
+          setAiResponse('I\'m having trouble connecting to ARIA. Let me help you with local search.');
+          setAiSuggestions(processAIQuery(query));
+          performLocalSearch(query);
         }
-      });
 
-      searchData.actions.forEach(item => {
-        if (item.title.toLowerCase().includes(searchTerm) ||
-            item.description.toLowerCase().includes(searchTerm) ||
-            item.category.toLowerCase().includes(searchTerm)) {
-          allResults.push({ ...item, type: 'action' });
-        }
-      });
+        setIsProcessing(false);
+      };
 
-      searchData.resources.forEach(item => {
-        if (item.title.toLowerCase().includes(searchTerm) ||
-            item.description.toLowerCase().includes(searchTerm) ||
-            item.category.toLowerCase().includes(searchTerm)) {
-          allResults.push({ ...item, type: 'resource' });
-        }
-      });
+      callARIA();
+      return; // Don't continue with the timer-based approach for AI mode
+    }
 
-      searchData.trainings.forEach(item => {
-        if (item.title.toLowerCase().includes(searchTerm) ||
-            item.description.toLowerCase().includes(searchTerm) ||
-            item.category.toLowerCase().includes(searchTerm)) {
-          allResults.push({ ...item, type: 'training' });
-        }
-      });
-
-      // Remove duplicates and prioritize AI-relevant results
-      const uniqueResults = allResults.filter((item, index, self) =>
-        index === self.findIndex(t => t.id === item.id && t.type === item.type)
-      );
-
-      // Sort by AI relevance if in AI mode
-      if (isAIMode) {
-        uniqueResults.sort((a, b) => {
-          if (a.aiRelevance === 'high' && b.aiRelevance !== 'high') return -1;
-          if (b.aiRelevance === 'high' && a.aiRelevance !== 'high') return 1;
-          return 0;
-        });
-      }
-
-      setResults(uniqueResults.slice(0, 8));
+    // Standard mode: Use timer-based local search
+    const timer = setTimeout(() => {
+      // Clear AI-related states in normal mode
+      setAiSuggestions([]);
+      setAiResponse('');
+      performLocalSearch(query);
       setIsProcessing(false);
-    }, isAIMode ? 800 : 200); // Longer delay for AI mode to show processing
+    }, 200);
 
     return () => clearTimeout(timer);
   }, [query, isAIMode]);
+
+  // Local search function for standard mode and AI fallback
+  const performLocalSearch = (searchQuery: string) => {
+    const searchTerm = searchQuery.toLowerCase();
+    const allResults: any[] = [];
+
+    console.log('Performing local search for:', searchTerm);
+
+    // Standard search (both modes)
+    searchData.pages.forEach(item => {
+      if (item.title.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.category.toLowerCase().includes(searchTerm)) {
+        allResults.push({ ...item, type: 'page' });
+      }
+    });
+
+    searchData.actions.forEach(item => {
+      if (item.title.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.category.toLowerCase().includes(searchTerm)) {
+        allResults.push({ ...item, type: 'action' });
+      }
+    });
+
+    searchData.resources.forEach(item => {
+      if (item.title.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.category.toLowerCase().includes(searchTerm)) {
+        allResults.push({ ...item, type: 'resource' });
+      }
+    });
+
+    searchData.trainings.forEach(item => {
+      if (item.title.toLowerCase().includes(searchTerm) ||
+          item.description.toLowerCase().includes(searchTerm) ||
+          item.category.toLowerCase().includes(searchTerm)) {
+        allResults.push({ ...item, type: 'training' });
+      }
+    });
+
+    // Remove duplicates
+    const uniqueResults = allResults.filter((item, index, self) =>
+      index === self.findIndex(t => t.id === item.id && t.type === item.type)
+    );
+
+    console.log('Search results found:', uniqueResults.length, uniqueResults);
+    setResults(uniqueResults.slice(0, 8));
+  };
 
   const handleSelect = (item: any) => {
     setIsOpen(false);
@@ -273,8 +359,17 @@ export default function AISearch({ className = "" }: AISearchProps) {
     } else if (item.type === 'training') {
       router.push('/trainings');
     } else if (item.type === 'ai-suggestion') {
-      // Handle AI suggestions
-      handleAISuggestion(item.title);
+      // Handle ARIA suggestions
+      if (item.path) {
+        router.push(item.path);
+      } else if (item.action) {
+        // Handle custom actions from ARIA
+        const event = new CustomEvent(item.action);
+        window.dispatchEvent(event);
+      } else {
+        // Fallback to title-based handling
+        handleAISuggestion(item.title);
+      }
     }
   };
 

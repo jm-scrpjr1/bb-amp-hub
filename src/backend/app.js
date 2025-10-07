@@ -1,15 +1,570 @@
 
+// Load environment variables
+require('dotenv').config();
+
 const express = require("express");
+const cors = require("cors");
+const openaiService = require('./services/openaiService');
 const app = express();
 
+// Middleware
+app.use(cors());
+app.use(express.json());
 
+// Import services
+const { UserService } = require('./services/userService');
+const { AIGroupService } = require('./services/aiGroupService');
+const { GroupService } = require('./services/groupService');
+const { PermissionService } = require('./services/permissionService');
+
+// INTELLIGENT ROUTING SYSTEM
+const NAVIGATION_OPTIONS = {
+  IT_SUPPORT: {
+    title: "IT Support Portal",
+    description: "Submit tickets, track issues, get technical help",
+    path: "/support"
+  },
+  AI_LEARNING: {
+    title: "AI Learning Hub",
+    description: "Explore AI courses, tutorials, and resources",
+    path: "/ai-learning"
+  },
+  INNOVATION: {
+    title: "Innovation Lab",
+    description: "Submit ideas, collaborate on projects",
+    path: "/submit-bold-idea"
+  },
+  HR_SUPPORT: {
+    title: "HR Resources",
+    description: "Policies, benefits, team information",
+    path: "/hr"
+  },
+  ASSESSMENTS: {
+    title: "AI Assessments",
+    description: "Evaluate AI readiness and capabilities",
+    path: "/ai-assessments"
+  },
+  DASHBOARD: {
+    title: "Dashboard",
+    description: "Overview of activities and metrics",
+    path: "/"
+  }
+};
+
+// ADVANCED INTENT DETECTION
+function detectIntent(message) {
+  const msg = message.toLowerCase();
+
+  const intentPatterns = {
+    RESOURCES_SPECIFIC: [
+      'pip form', 'pip', 'performance improvement plan', 'corrective action', 'caf form',
+      'coaching log', 'incident report', 'performance evaluation', 'supervisor tool',
+      'leave policy', 'leave application', 'payroll', 'sprout', 'aleluya', 'rippling',
+      'quickbooks', 'timesheets', 'acceptable use policy', 'aup', 'code of conduct',
+      'referral program', 'where is', 'find', 'locate', 'document', 'form', 'manual'
+    ],
+    TIME_TRACKING: [
+      'time tracking', 'track time', 'tsheets', 'sprout', 'aleluya', 'clock in', 'clock out',
+      'timesheet', 'hours', 'time entry', 'payroll time'
+    ],
+    IT_SUPPORT: [
+      'computer problem', 'laptop issue', 'software bug', 'password reset', 'email problem',
+      'network issue', 'printer problem', 'technical support', 'it help', 'system error',
+      'login issue', 'access problem', 'vpn', 'wifi', 'internet'
+    ],
+    AI_LEARNING: [
+      'ai training', 'machine learning', 'artificial intelligence', 'prompt engineering',
+      'chatgpt', 'openai', 'ai course', 'ai tutorial', 'learn ai', 'ai skills'
+    ],
+    INNOVATION: [
+      'idea', 'suggestion', 'improvement', 'innovation', 'proposal', 'feedback',
+      'bold idea', 'submit idea', 'new feature', 'enhancement'
+    ],
+    HR_SUPPORT: [
+      'hr', 'human resources', 'benefits', 'policy', 'vacation', 'sick leave',
+      'employee handbook', 'onboarding', 'offboarding', 'performance review'
+    ],
+    GENERAL_HELP: [
+      'help', 'assist', 'support', 'guide', 'how to', 'what is', 'explain'
+    ]
+  };
+
+  let bestMatch = { intent: 'GENERAL_HELP', confidence: 0.1 };
+
+  for (const [intent, patterns] of Object.entries(intentPatterns)) {
+    for (const pattern of patterns) {
+      if (msg.includes(pattern)) {
+        const confidence = Math.min(0.95, 0.3 + (pattern.length / msg.length) * 0.7);
+        if (confidence > bestMatch.confidence) {
+          bestMatch = { intent, confidence };
+        }
+      }
+    }
+  }
+
+  return bestMatch;
+}
+
+// Generate routing suggestions based on intent
+function generateRoutingSuggestions(intent, confidence) {
+  const suggestions = [];
+
+  switch (intent) {
+    case 'RESOURCES_SPECIFIC':
+      suggestions.push('HR_SUPPORT', 'IT_SUPPORT');
+      break;
+    case 'TIME_TRACKING':
+      suggestions.push('DASHBOARD');
+      break;
+    case 'IT_SUPPORT':
+      suggestions.push('IT_SUPPORT', 'DASHBOARD');
+      break;
+    case 'AI_LEARNING':
+      suggestions.push('AI_LEARNING', 'ASSESSMENTS');
+      break;
+    case 'INNOVATION':
+      suggestions.push('INNOVATION', 'DASHBOARD');
+      break;
+    case 'HR_SUPPORT':
+      suggestions.push('HR_SUPPORT', 'DASHBOARD');
+      break;
+    default:
+      suggestions.push('DASHBOARD', 'AI_LEARNING');
+  }
+
+  // Always include dashboard as fallback
+  if (!suggestions.includes('DASHBOARD')) {
+    suggestions.push('DASHBOARD');
+  }
+
+  return suggestions.slice(0, 3); // Limit to 3 suggestions
+}
+
+// Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "bb-amp-hub-backend" });
 });
 
-// test test test test
+// Test endpoint
 app.get("/api/hello", (req, res) => {
   res.send("Hello from Bold Amp Hub backend!");
+});
+
+// Authentication middleware
+const authenticateUser = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+    // For now, we'll use a simple token validation
+    // In production, you'd validate JWT tokens properly
+    if (!token) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Mock user for development - in production, decode JWT and get user
+    req.user = await UserService.getUserByEmail('jlope@boldbusiness.com');
+    next();
+  } catch (error) {
+    console.error('Authentication error:', error);
+    res.status(401).json({ error: 'Authentication failed' });
+  }
+};
+
+// Chat API with OpenAI Assistant integration
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, threadId, conversationHistory } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    console.log('🤖 ARIA received message:', message);
+    console.log('🧵 Thread ID:', threadId || 'new');
+
+    // Use OpenAI Assistant API
+    const result = await openaiService.sendMessage(message, threadId);
+
+    // If OpenAI fails, fall back to intent-based system
+    if (!result.success) {
+      console.log('🔄 Falling back to intent-based system');
+
+      // Detect intent and generate suggestions as fallback
+      const intentAnalysis = detectIntent(message);
+      const routingSuggestions = generateRoutingSuggestions(
+        intentAnalysis.intent,
+        intentAnalysis.confidence
+      );
+
+      const suggestions = routingSuggestions.map(key => ({
+        key,
+        ...NAVIGATION_OPTIONS[key]
+      }));
+
+      // Generate fallback response
+      let fallbackResponse = "I'm having some connection issues, but I can still help! 🤖";
+
+      switch (intentAnalysis.intent) {
+        case 'TIME_TRACKING':
+          fallbackResponse = "For time tracking, click **Track My Time** in the sidebar! Choose from TSheets, Sprout, or Aleluya based on your location.";
+          break;
+        case 'IT_SUPPORT':
+          fallbackResponse = "I can see you're having technical issues! 💻\n\nPlease **Submit a Ticket** - you can find the button on the homepage or in the lower left menu.";
+          break;
+        case 'INNOVATION':
+          fallbackResponse = "Love the innovative thinking! 💡\n\nClick **Submit Bold Idea** in the Employee Tools section or use the quick action on the homepage!";
+          break;
+        default:
+          fallbackResponse = "I'm ARIA, your AI assistant! I can help you navigate to the right tools. How can I assist you today?";
+      }
+
+      return res.json({
+        response: fallbackResponse,
+        success: true,
+        fallback: true,
+        suggestions,
+        threadId: result.threadId,
+        intent: intentAnalysis.intent
+      });
+    }
+
+    // Return successful OpenAI response
+    res.json({
+      response: result.response,
+      success: true,
+      threadId: result.threadId,
+      aiPowered: true,
+      assistantId: 'asst_R5RXI0LcyRxsgR80xb05oNQb'
+    });
+
+  } catch (error) {
+    console.error('Chat error:', error);
+    res.status(500).json({
+      error: 'Chat request failed',
+      message: 'ARIA is temporarily unavailable. Please try again later! 🤖⚡'
+    });
+  }
+});
+
+// OpenAI Health Check API
+app.get('/api/chat/health', async (req, res) => {
+  try {
+    const health = await openaiService.healthCheck();
+    res.json(health);
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      apiKeyConfigured: !!process.env.OPENAI_API_KEY
+    });
+  }
+});
+
+// Groups API
+app.get('/api/groups', authenticateUser, async (req, res) => {
+  try {
+    const groups = await GroupService.getGroups(req.query);
+    res.json({
+      success: true,
+      groups: groups.groups,
+      total: groups.total,
+      page: groups.page,
+      totalPages: groups.totalPages
+    });
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).json({ error: 'Failed to fetch groups' });
+  }
+});
+
+app.post('/api/groups', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canCreateGroups(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const group = await GroupService.createGroup(req.body, req.user.id);
+    res.json({
+      success: true,
+      group
+    });
+  } catch (error) {
+    console.error('Error creating group:', error);
+    res.status(500).json({ error: 'Failed to create group' });
+  }
+});
+
+// Group health analysis endpoint
+app.get('/api/groups/:groupId/ai/health', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Check if user can manage this group (or has God mode)
+    if (!PermissionService.hasGodMode(req.user) && !PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // Get AI-powered group health analysis
+    const healthAnalysis = await AIGroupService.analyzeGroupHealth(groupId);
+
+    res.json({
+      success: true,
+      analysis: healthAnalysis,
+      aiPowered: true,
+      godMode: PermissionService.hasGodMode(req.user)
+    });
+
+  } catch (error) {
+    console.error('Error analyzing group health:', error);
+    res.status(500).json({ error: 'Failed to analyze group health' });
+  }
+});
+
+// Group recommendations endpoint
+app.get('/api/groups/ai/recommendations', authenticateUser, async (req, res) => {
+  try {
+    // Get AI-powered group recommendations
+    const recommendations = await AIGroupService.getGroupRecommendations(req.user);
+
+    res.json({
+      success: true,
+      recommendations,
+      aiPowered: true,
+      godMode: PermissionService.hasGodMode(req.user)
+    });
+
+  } catch (error) {
+    console.error('Error getting group recommendations:', error);
+    res.status(500).json({ error: 'Failed to get group recommendations' });
+  }
+});
+
+// User assignment suggestions endpoint
+app.get('/api/groups/:groupId/ai/user-suggestions', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { search } = req.query;
+
+    // Check if user can invite to this group (or has God mode)
+    if (!PermissionService.hasGodMode(req.user) && !PermissionService.canInviteToGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // Get AI-powered user assignment suggestions
+    const suggestions = await AIGroupService.suggestUserAssignments(groupId, search);
+
+    res.json({
+      success: true,
+      suggestions,
+      aiPowered: true,
+      godMode: PermissionService.hasGodMode(req.user)
+    });
+
+  } catch (error) {
+    console.error('Error getting user assignment suggestions:', error);
+    res.status(500).json({ error: 'Failed to get user suggestions' });
+  }
+});
+
+// Group creation suggestions endpoint
+app.post('/api/groups/ai/suggestions', authenticateUser, async (req, res) => {
+  try {
+    const { groupName, description } = req.body;
+
+    if (!groupName) {
+      return res.status(400).json({ error: 'Group name is required' });
+    }
+
+    // Get AI-powered group creation suggestions
+    const suggestions = await AIGroupService.suggestGroupCreation(groupName, description, req.user);
+
+    res.json({
+      success: true,
+      suggestions,
+      aiPowered: true,
+      godMode: PermissionService.hasGodMode(req.user)
+    });
+
+  } catch (error) {
+    console.error('Error getting group creation suggestions:', error);
+    res.status(500).json({ error: 'Failed to get AI suggestions' });
+  }
+});
+
+// Users API
+app.get('/api/users', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const users = await UserService.getUsers(req.query);
+    res.json({
+      success: true,
+      users: users.users,
+      total: users.total,
+      page: users.page,
+      totalPages: users.totalPages
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+app.put('/api/users/:userId', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { userId } = req.params;
+    const user = await UserService.updateUser(userId, req.body);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+app.delete('/api/users/:userId', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { userId } = req.params;
+    const success = await UserService.updateUser(userId, { status: 'INACTIVE' });
+
+    if (!success) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'User deactivated successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
+// Permissions API
+app.get('/api/permissions/user/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Users can view their own permissions, or admins can view any
+    if (req.user.id !== userId && !PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const user = await UserService.getUserByEmail(req.user.email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      permissions: user.permissions,
+      role: user.role,
+      godMode: PermissionService.hasGodMode(user)
+    });
+  } catch (error) {
+    console.error('Error fetching permissions:', error);
+    res.status(500).json({ error: 'Failed to fetch permissions' });
+  }
+});
+
+app.put('/api/permissions/user/:userId', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { userId } = req.params;
+    const { permissions } = req.body;
+
+    // For now, just return success - in production, update user permissions
+    res.json({
+      success: true,
+      message: 'Permissions updated successfully',
+      permissions
+    });
+  } catch (error) {
+    console.error('Error updating permissions:', error);
+    res.status(500).json({ error: 'Failed to update permissions' });
+  }
+});
+
+// User profile endpoints
+app.get('/api/user/profile', authenticateUser, async (req, res) => {
+  try {
+    // Get user with full permissions and group memberships
+    const user = req.user;
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get user's group memberships
+    const userGroups = await GroupService.getUserGroups(user.id);
+
+    // Get managed groups (mock for now)
+    const managedGroups = userGroups.filter(group => group.membershipRole === 'MANAGER');
+
+    const userWithGroups = {
+      ...user,
+      groupMemberships: userGroups,
+      managedGroups
+    };
+
+    res.json(userWithGroups);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.patch('/api/user/profile', authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const { name, image } = req.body;
+
+    // Update user profile
+    const updatedUser = await UserService.updateUser(user.id, {
+      name,
+      image,
+    });
+
+    if (!updatedUser) {
+      return res.status(500).json({ error: 'Failed to update user' });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

@@ -92,6 +92,8 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/auth/signin" element={<SignInPage />} />
+            <Route path="/auth/signin/" element={<SignInPage />} />
+            <Route path="/signin" element={<SignInPage />} />
             
             {/* Protected Routes */}
             <Route path="/" element={

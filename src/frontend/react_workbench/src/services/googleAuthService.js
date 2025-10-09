@@ -1,5 +1,6 @@
 import { createUserWithRole } from '../lib/permissions.js';
 import environmentConfig from '../config/environment.js';
+import backendAuthService from './backendAuthService.js';
 
 class GoogleAuthService {
   constructor() {
@@ -84,9 +85,18 @@ class GoogleAuthService {
         try {
           window.google.accounts.id.initialize({
             client_id: this.clientId,
-            callback: (response) => {
+            callback: async (response) => {
               console.log('Google OAuth callback received:', response);
               try {
+                // If backend authentication is enabled, use it
+                if (environmentConfig.enableBackendAuth) {
+                  console.log('🔄 Using backend authentication...');
+                  const user = await backendAuthService.authenticateWithGoogle(response.credential);
+                  resolve(user);
+                  return;
+                }
+
+                // Fallback to frontend-only authentication
                 const userData = this.parseJWT(response.credential);
                 console.log('Parsed user data:', userData);
 
@@ -104,8 +114,8 @@ class GoogleAuthService {
                   token: response.credential
                 });
               } catch (error) {
-                console.error('Failed to parse JWT:', error);
-                console.log('Falling back to mock authentication due to JWT parse error');
+                console.error('Authentication failed:', error);
+                console.log('Falling back to mock authentication due to error');
                 resolve(this.getMockUser());
               }
             },

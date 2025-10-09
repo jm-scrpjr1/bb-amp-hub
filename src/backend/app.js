@@ -5,6 +5,8 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const openaiService = require('./services/openaiService');
+const { testConnection } = require('./lib/db');
+const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
 const app = express();
 
 // Middleware
@@ -141,14 +143,66 @@ function generateRoutingSuggestions(intent, confidence) {
 }
 
 // Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", service: "bb-amp-hub-backend" });
+app.get("/health", async (req, res) => {
+  const dbConnected = await testConnection();
+  res.json({
+    status: "ok",
+    service: "bb-amp-hub-backend",
+    database: dbConnected ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Test endpoint
 app.get("/api/hello", (req, res) => {
   res.send("Hello from Bold Amp Hub backend!");
 });
+
+// Google OAuth authentication endpoint
+app.post("/api/auth/google", async (req, res) => {
+  try {
+    const { credential, userInfo } = req.body;
+
+    if (!userInfo || !userInfo.email) {
+      return res.status(400).json({ error: 'User information is required' });
+    }
+
+    console.log('🔄 Authenticating user:', userInfo.email);
+
+    // Create or update user in our system
+    const user = await UserService.upsertUserFromAuth(userInfo);
+
+    if (!user) {
+      return res.status(500).json({ error: 'Failed to create/update user' });
+    }
+
+    // Generate a simple token (in production, use proper JWT)
+    const token = Buffer.from(`${user.email}:${Date.now()}`).toString('base64');
+
+    console.log('✅ User authenticated successfully:', user.email);
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        role: user.role,
+        status: user.status,
+        permissions: user.permissions || [],
+        groupMemberships: user.groupMemberships || [],
+        managedGroups: user.managedGroups || []
+      },
+      token
+    });
+  } catch (error) {
+    console.error('Error in Google authentication:', error);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
+// Placeholder for sync endpoints - will be added after authenticateUser is defined
 
 // Authentication middleware
 const authenticateUser = async (req, res, next) => {
@@ -173,6 +227,71 @@ const authenticateUser = async (req, res, next) => {
     res.status(401).json({ error: 'Authentication failed' });
   }
 };
+
+// Database and Google Workspace sync endpoints
+app.post("/api/admin/sync-users", authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Only allow admins and owners to sync users
+    if (!PermissionService.canManageUsers(user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const googleWorkspace = new GoogleWorkspaceService();
+    const initialized = await googleWorkspace.initialize();
+
+    if (!initialized) {
+      return res.status(500).json({
+        error: 'Failed to initialize Google Workspace service',
+        message: 'Check Google service account configuration'
+      });
+    }
+
+    const result = await googleWorkspace.syncUsersFromWorkspace();
+
+    res.json({
+      message: 'User sync completed',
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error syncing users:', error);
+    res.status(500).json({ error: 'Failed to sync users from Google Workspace' });
+  }
+});
+
+app.post("/api/admin/sync-groups", authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    // Only allow admins and owners to sync groups
+    if (!PermissionService.canManageUsers(user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const googleWorkspace = new GoogleWorkspaceService();
+    const initialized = await googleWorkspace.initialize();
+
+    if (!initialized) {
+      return res.status(500).json({
+        error: 'Failed to initialize Google Workspace service',
+        message: 'Check Google service account configuration'
+      });
+    }
+
+    const result = await googleWorkspace.syncGroupsFromWorkspace();
+
+    res.json({
+      message: 'Group sync completed',
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error syncing groups:', error);
+    res.status(500).json({ error: 'Failed to sync groups from Google Workspace' });
+  }
+});
 
 // Chat API with OpenAI Assistant integration
 app.post('/api/chat', async (req, res) => {
@@ -567,7 +686,39 @@ app.patch('/api/user/profile', authenticateUser, async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+// Initialize application
+async function initializeApp() {
+  console.log('🚀 Initializing Bold Business AI Workbench Backend...');
+
+  // Test database connection
+  const dbConnected = await testConnection();
+  if (dbConnected) {
+    console.log('✅ Database connection established');
+
+    // Optional: Auto-sync users on startup (can be disabled in production)
+    if (process.env.AUTO_SYNC_ON_STARTUP === 'true') {
+      try {
+        console.log('🔄 Auto-syncing users from Google Workspace...');
+        const googleWorkspace = new GoogleWorkspaceService();
+        const initialized = await googleWorkspace.initialize();
+
+        if (initialized) {
+          await googleWorkspace.syncUsersFromWorkspace();
+          console.log('✅ Auto-sync completed');
+        } else {
+          console.log('⚠️ Google Workspace not configured, skipping auto-sync');
+        }
+      } catch (error) {
+        console.error('❌ Auto-sync failed:', error);
+      }
+    }
+  } else {
+    console.log('⚠️ Database not available, using fallback mode');
+  }
+}
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, async () => {
+  console.log(`🌟 Backend running on port ${PORT}`);
+  await initializeApp();
 });

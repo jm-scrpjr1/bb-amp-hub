@@ -4,13 +4,15 @@ const config = {
   development: {
     apiUrl: 'http://localhost:3001/api',
     googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
-    enableMockAuth: true,
+    enableMockAuth: false, // Use backend authentication
+    enableBackendAuth: true,
     environment: 'development'
   },
   production: {
     apiUrl: process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com',
     googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
     enableMockAuth: process.env.REACT_APP_GOOGLE_CLIENT_ID === 'demo-client-id',
+    enableBackendAuth: true,
     environment: 'production'
   }
 };

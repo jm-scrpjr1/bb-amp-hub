@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
 import googleAuthService from '../services/googleAuthService';
+import backendAuthService from '../services/backendAuthService';
+import environmentConfig from '../config/environment';
 
 const AuthContext = createContext();
 
@@ -23,6 +25,23 @@ const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      // Check backend authentication first if enabled
+      if (environmentConfig.enableBackendAuth && backendAuthService.isAuthenticated()) {
+        try {
+          const userData = await backendAuthService.getUserProfile();
+          if (userData) {
+            setUser(userData);
+            setIsAuthenticated(true);
+            setLoading(false);
+            return;
+          }
+        } catch (error) {
+          console.error('Backend auth check failed:', error);
+          backendAuthService.logout();
+        }
+      }
+
+      // Fallback to frontend token validation
       const token = localStorage.getItem('authToken');
       if (token) {
         const userData = await authService.validateToken(token);
@@ -36,6 +55,9 @@ const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Auth check failed:', error);
       localStorage.removeItem('authToken');
+      if (environmentConfig.enableBackendAuth) {
+        backendAuthService.logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -81,12 +103,29 @@ const AuthProvider = ({ children }) => {
     try {
       googleAuthService.signOut();
       localStorage.removeItem('authToken');
+      if (environmentConfig.enableBackendAuth) {
+        backendAuthService.logout();
+      }
       setUser(null);
       setIsAuthenticated(false);
       console.log('Sign out successful');
     } catch (error) {
       console.error('Sign out failed:', error);
     }
+  };
+
+  const syncUsersFromWorkspace = async () => {
+    if (!environmentConfig.enableBackendAuth) {
+      throw new Error('Backend authentication not enabled');
+    }
+    return await backendAuthService.syncUsersFromWorkspace();
+  };
+
+  const syncGroupsFromWorkspace = async () => {
+    if (!environmentConfig.enableBackendAuth) {
+      throw new Error('Backend authentication not enabled');
+    }
+    return await backendAuthService.syncGroupsFromWorkspace();
   };
 
   const value = {
@@ -96,7 +135,9 @@ const AuthProvider = ({ children }) => {
     signIn,
     signInWithGoogle,
     signOut,
-    checkAuthStatus
+    checkAuthStatus,
+    syncUsersFromWorkspace,
+    syncGroupsFromWorkspace
   };
 
   return (

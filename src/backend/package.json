@@ -11,6 +11,14 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^4.18.2",
-    "openai": "^6.1.0"
+    "openai": "^6.1.0",
+    "@prisma/client": "^5.6.0",
+    "prisma": "^5.6.0",
+    "pg": "^8.11.3",
+    "googleapis": "^128.0.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.7"
   }
 }

@@ -1,7 +1,10 @@
 // User service for managing users and permissions
 // JavaScript version converted from TypeScript
 
-// Mock database for development - in production, use actual database
+const { prisma } = require('../lib/db');
+const { GoogleWorkspaceService } = require('./googleWorkspaceService');
+
+// Mock database for development - fallback when database is not available
 const mockUsers = new Map();
 
 // User roles and statuses
@@ -18,22 +21,84 @@ const UserStatus = {
   PENDING: 'PENDING'
 };
 
-// Owner email for God mode
-const OWNER_EMAIL = 'jlope@boldbusiness.com';
+// Owner emails for God mode
+const OWNER_EMAILS = ['jlope@boldbusiness.com', 'jmadrino@boldbusiness.com'];
 
 function isOwnerEmail(email) {
-  return email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  return OWNER_EMAILS.some(ownerEmail =>
+    email.toLowerCase() === ownerEmail.toLowerCase()
+  );
 }
 
 class UserService {
   // Get user by email with permissions
   static async getUserByEmail(email) {
     try {
-      // For development, create a fallback user
+      // Try to get user from database first
+      const user = await prisma.user.findUnique({
+        where: { email: email.toLowerCase() },
+        include: {
+          team: {
+            select: {
+              id: true,
+              name: true,
+              managerId: true,
+            }
+          },
+          managedTeams: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          groupMemberships: {
+            include: {
+              group: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true,
+                }
+              }
+            }
+          },
+          managedGroups: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+            }
+          },
+          permissions: {
+            select: {
+              permission: true,
+              resource: true,
+            }
+          }
+        }
+      });
+
+      if (user) {
+        return user;
+      }
+
+      // If not found in database, try to sync from Google Workspace
+      const googleWorkspace = new GoogleWorkspaceService();
+      await googleWorkspace.initialize();
+
+      const workspaceUser = await googleWorkspace.getUserFromWorkspace(email);
+      if (workspaceUser) {
+        console.log(`User ${email} found in Google Workspace, syncing...`);
+        return await googleWorkspace.syncSingleUser(workspaceUser);
+      }
+
+      // Fallback to mock user for development
+      console.log(`User ${email} not found in database or Google Workspace, using fallback`);
       return this.createFallbackUser(email);
     } catch (error) {
       console.error('Error fetching user by email:', error);
-      return null;
+      // Fallback to mock user on database error
+      return this.createFallbackUser(email);
     }
   }
 
@@ -41,30 +106,98 @@ class UserService {
   static async upsertUserFromAuth(authUser) {
     try {
       const email = authUser.email.toLowerCase();
-      
+
       // God mode: Owner email always gets OWNER role
       const role = isOwnerEmail(email) ? UserRole.OWNER : UserRole.MEMBER;
 
-      const user = {
-        id: 'user-' + email.replace('@', '-').replace('.', '-'),
-        email,
-        name: authUser.name,
-        image: authUser.image,
-        role,
-        status: UserStatus.ACTIVE,
-        lastLoginAt: new Date(),
-        loginCount: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        teamId: null,
-        team: null,
-        permissions: [],
-        groupMemberships: [],
-        managedGroups: []
-      };
+      // Try to upsert in database first
+      try {
+        const user = await prisma.user.upsert({
+          where: { email },
+          update: {
+            name: authUser.name,
+            image: authUser.image,
+            lastLoginAt: new Date(),
+            loginCount: {
+              increment: 1
+            }
+          },
+          create: {
+            email,
+            name: authUser.name,
+            image: authUser.image,
+            role,
+            status: UserStatus.ACTIVE,
+            lastLoginAt: new Date(),
+            loginCount: 1,
+          },
+          include: {
+            team: {
+              select: {
+                id: true,
+                name: true,
+                managerId: true,
+              }
+            },
+            managedTeams: {
+              select: {
+                id: true,
+                name: true,
+              }
+            },
+            groupMemberships: {
+              include: {
+                group: {
+                  select: {
+                    id: true,
+                    name: true,
+                    type: true,
+                  }
+                }
+              }
+            },
+            managedGroups: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+              }
+            },
+            permissions: {
+              select: {
+                permission: true,
+                resource: true,
+              }
+            }
+          }
+        });
 
-      mockUsers.set(email, user);
-      return user;
+        return user;
+      } catch (dbError) {
+        console.error('Database upsert failed, using fallback:', dbError);
+
+        // Fallback to mock user
+        const user = {
+          id: 'user-' + email.replace('@', '-').replace('.', '-'),
+          email,
+          name: authUser.name,
+          image: authUser.image,
+          role,
+          status: UserStatus.ACTIVE,
+          lastLoginAt: new Date(),
+          loginCount: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          teamId: null,
+          team: null,
+          permissions: [],
+          groupMemberships: [],
+          managedGroups: []
+        };
+
+        mockUsers.set(email, user);
+        return user;
+      }
     } catch (error) {
       console.error('Error upserting user from auth:', error);
       return null;
@@ -212,6 +345,6 @@ module.exports = {
   UserService,
   UserRole,
   UserStatus,
-  OWNER_EMAIL,
+  OWNER_EMAILS,
   isOwnerEmail
 };

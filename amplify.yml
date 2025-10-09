@@ -6,7 +6,7 @@ applications:
         preBuild:
           commands:
             - echo "Installing dependencies for React PURE workbench..."
-            - npm ci
+            - npm install
             - echo "Verifying tailwindcss-animate installation..."
             - npm list tailwindcss-animate || npm install tailwindcss-animate
         build:

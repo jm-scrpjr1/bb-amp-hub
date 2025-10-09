@@ -88,15 +88,22 @@ class GoogleAuthService {
             callback: async (response) => {
               console.log('Google OAuth callback received:', response);
               try {
-                // If backend authentication is enabled, use it
+                // If backend authentication is enabled, try it first
                 if (environmentConfig.enableBackendAuth) {
                   console.log('🔄 Using backend authentication...');
-                  const user = await backendAuthService.authenticateWithGoogle(response.credential);
-                  resolve(user);
-                  return;
+                  try {
+                    const user = await backendAuthService.authenticateWithGoogle(response.credential);
+                    console.log('✅ Backend authentication successful:', user);
+                    resolve(user);
+                    return;
+                  } catch (backendError) {
+                    console.error('❌ Backend authentication failed, falling back to frontend auth:', backendError);
+                    // Continue to frontend authentication fallback
+                  }
                 }
 
                 // Fallback to frontend-only authentication
+                console.log('🔄 Using frontend authentication...');
                 const userData = this.parseJWT(response.credential);
                 console.log('Parsed user data:', userData);
 
@@ -114,7 +121,7 @@ class GoogleAuthService {
                   token: response.credential
                 });
               } catch (error) {
-                console.error('Authentication failed:', error);
+                console.error('All authentication methods failed:', error);
                 console.log('Falling back to mock authentication due to error');
                 resolve(this.getMockUser());
               }

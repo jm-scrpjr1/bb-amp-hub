@@ -9,40 +9,53 @@ class BackendAuthService {
   async authenticateWithGoogle(googleCredential) {
     try {
       console.log('🔄 Authenticating with backend using Google credential...');
-      
+      console.log('API URL:', this.apiUrl);
+
       // Parse the Google JWT to get user info
       const userInfo = this.parseJWT(googleCredential);
-      
+      console.log('Parsed user info:', userInfo);
+
       // Send to backend for authentication and user creation/update
+      const requestBody = {
+        credential: googleCredential,
+        userInfo: {
+          email: userInfo.email,
+          name: userInfo.name,
+          image: userInfo.picture,
+        }
+      };
+
+      console.log('Sending request to backend:', requestBody);
+
       const response = await fetch(`${this.apiUrl}/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          credential: googleCredential,
-          userInfo: {
-            email: userInfo.email,
-            name: userInfo.name,
-            image: userInfo.picture,
-          }
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('Backend response status:', response.status);
+      console.log('Backend response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error(`Authentication failed: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Backend error response:', errorText);
+        throw new Error(`Authentication failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
       const authResult = await response.json();
-      
+      console.log('Backend auth result:', authResult);
+
       // Store the backend token
       this.token = authResult.token;
       localStorage.setItem('auth_token', this.token);
-      
+
       console.log('✅ Backend authentication successful');
       return authResult.user;
     } catch (error) {
       console.error('❌ Backend authentication failed:', error);
+      console.error('Error details:', error.message);
       throw error;
     }
   }

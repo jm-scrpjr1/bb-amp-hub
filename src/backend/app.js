@@ -219,14 +219,50 @@ const authenticateUser = async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    // Mock user for development - in production, decode JWT and get user
-    req.user = await UserService.getUserByEmail('jlope@boldbusiness.com');
+    // Extract email from token (simple base64 decode for development)
+    try {
+      const decoded = Buffer.from(token, 'base64').toString('utf-8');
+      const email = decoded.split(':')[0];
+      req.user = await UserService.getUserByEmail(email);
+      if (!req.user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+    } catch (decodeError) {
+      // Fallback to mock user for development
+      req.user = await UserService.getUserByEmail('jlope@boldbusiness.com');
+    }
+
     next();
   } catch (error) {
     console.error('Authentication error:', error);
     res.status(401).json({ error: 'Authentication failed' });
   }
 };
+
+// User profile endpoint
+app.get("/api/user/profile", authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        role: user.role,
+        status: user.status,
+        permissions: user.permissions || [],
+        groupMemberships: user.groupMemberships || [],
+        managedGroups: user.managedGroups || []
+      }
+    });
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    res.status(500).json({ error: 'Failed to get user profile' });
+  }
+});
 
 // Database and Google Workspace sync endpoints
 app.post("/api/admin/sync-users", authenticateUser, async (req, res) => {

@@ -107,9 +107,11 @@ Ensure your EC2 security group allows:
 After backend deployment, update AWS Amplify environment variables:
 
 ```
-REACT_APP_API_URL=http://YOUR_EC2_IP:3001/api
+REACT_APP_API_URL=https://YOUR_EC2_IP/api
 REACT_APP_ENABLE_BACKEND_AUTH=true
 ```
+
+**Note**: Backend now uses HTTPS with Nginx reverse proxy and 7-day JWT token expiration.
 
 ### 🧪 Testing
 

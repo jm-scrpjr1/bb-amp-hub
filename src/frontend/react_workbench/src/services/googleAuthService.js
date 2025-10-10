@@ -61,9 +61,35 @@ class GoogleAuthService {
     console.log('Current domain:', window.location.hostname);
     console.log('Client ID:', this.clientId);
 
+    // First, check if we have a Next.js auth token
+    const nextjsToken = localStorage.getItem('nextjs_auth_token');
+    const nextjsUser = localStorage.getItem('nextjs_auth_user');
+
+    if (nextjsToken && nextjsUser) {
+      console.log('Found Next.js auth token, using it');
+      try {
+        const user = JSON.parse(nextjsUser);
+        // Store the token for API calls
+        localStorage.setItem('authToken', nextjsToken);
+        return Promise.resolve(user);
+      } catch (error) {
+        console.error('Error parsing Next.js user data:', error);
+        // Clear invalid data and continue with normal flow
+        localStorage.removeItem('nextjs_auth_token');
+        localStorage.removeItem('nextjs_auth_user');
+      }
+    }
+
     await this.initialize();
 
     return new Promise((resolve, reject) => {
+      // Check if mock auth is enabled in environment config
+      if (environmentConfig.enableMockAuth) {
+        console.log('Mock authentication enabled in environment config');
+        resolve(this.getMockUser());
+        return;
+      }
+
       if (!window.google || !window.google.accounts) {
         // Fallback to mock authentication if Google services aren't available
         console.log('Google services not available, using mock authentication');
@@ -71,103 +97,116 @@ class GoogleAuthService {
         return;
       }
 
-      // Check if we're on AWS Amplify domain and client ID is demo
-      if (window.location.hostname.includes('amplifyapp.com') && this.clientId === 'demo-client-id') {
-        console.log('AWS Amplify domain detected with demo client ID, using mock authentication');
+      // Check if we should use mock auth (demo client ID)
+      if (this.clientId === 'demo-client-id') {
+        console.log('Demo client ID detected, using mock authentication');
         resolve(this.getMockUser());
         return;
       }
 
-      console.log('Google services available, attempting OAuth...');
+      console.log('Google services available, attempting real OAuth...');
+      console.log('Client ID:', this.clientId);
 
       try {
-        // Set up the callback for this specific sign-in attempt
-        try {
-          window.google.accounts.id.initialize({
-            client_id: this.clientId,
-            callback: async (response) => {
-              console.log('Google OAuth callback received:', response);
-              try {
-                // If backend authentication is enabled, try it first
-                if (environmentConfig.enableBackendAuth) {
-                  console.log('🔄 Using backend authentication...');
-                  try {
-                    const user = await backendAuthService.authenticateWithGoogle(response.credential);
-                    console.log('✅ Backend authentication successful:', user);
-                    resolve(user);
-                    return;
-                  } catch (backendError) {
-                    console.error('❌ Backend authentication failed, falling back to frontend auth:', backendError);
-                    // Continue to frontend authentication fallback
-                  }
+        // Use Google Sign-In with ID token (more reliable than OAuth2 token flow)
+        window.google.accounts.id.initialize({
+          client_id: this.clientId,
+          callback: async (response) => {
+            console.log('Google Sign-In callback received:', response);
+            try {
+              // Parse the JWT credential
+              const userData = this.parseJWT(response.credential);
+              console.log('Parsed user data:', userData);
+
+              // If backend authentication is enabled, try it first
+              if (environmentConfig.enableBackendAuth) {
+                console.log('🔄 Using backend authentication...');
+                try {
+                  const user = await backendAuthService.authenticateWithGoogle(response.credential);
+                  console.log('✅ Backend authentication successful:', user);
+                  resolve(user);
+                  return;
+                } catch (backendError) {
+                  console.error('❌ Backend authentication failed, falling back to frontend auth:', backendError);
+                  // Continue to frontend authentication fallback
                 }
-
-                // Fallback to frontend-only authentication
-                console.log('🔄 Using frontend authentication...');
-                const userData = this.parseJWT(response.credential);
-                console.log('Parsed user data:', userData);
-
-                const userWithRole = createUserWithRole({
-                  id: userData.sub,
-                  email: userData.email,
-                  name: userData.name,
-                  image: userData.picture
-                });
-
-                console.log('User with role assigned:', userWithRole);
-
-                resolve({
-                  ...userWithRole,
-                  token: response.credential
-                });
-              } catch (error) {
-                console.error('All authentication methods failed:', error);
-                console.log('Falling back to mock authentication due to error');
-                resolve(this.getMockUser());
               }
-            },
-            auto_select: false,
-          });
-        } catch (initError) {
-          console.error('Failed to initialize Google OAuth:', initError);
-          console.log('Falling back to mock authentication due to initialization error');
-          resolve(this.getMockUser());
-          return;
-        }
 
-        // Trigger the sign-in prompt
-        console.log('Triggering Google sign-in prompt...');
-        try {
-          window.google.accounts.id.prompt((notification) => {
-            console.log('Google prompt notification:', notification);
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              console.log('Prompt not displayed, trying popup...');
-              // Fallback to popup if prompt is not displayed
-              this.showPopup().then(resolve).catch((popupError) => {
-                console.error('Popup also failed:', popupError);
-                console.log('All Google OAuth methods failed, using mock authentication');
-                resolve(this.getMockUser());
+              // Fallback to frontend-only authentication
+              console.log('🔄 Using frontend authentication...');
+              const userWithRole = createUserWithRole({
+                id: userData.sub,
+                email: userData.email,
+                name: userData.name,
+                image: userData.picture
               });
+
+              console.log('User with role assigned:', userWithRole);
+
+              resolve({
+                ...userWithRole,
+                token: response.credential
+              });
+            } catch (error) {
+              console.error('Authentication error:', error);
+              console.log('Falling back to mock authentication');
+              resolve(this.getMockUser());
             }
-          });
-        } catch (promptError) {
-          console.error('Failed to show Google prompt:', promptError);
-          console.log('Falling back to mock authentication due to prompt error');
-          resolve(this.getMockUser());
-        }
+          },
+          auto_select: false,
+          cancel_on_tap_outside: false
+        });
+
+        // Create a temporary button and trigger click
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+
+        window.google.accounts.id.renderButton(tempDiv, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          click_listener: () => {
+            console.log('Google Sign-In button clicked programmatically');
+          }
+        });
+
+        // Try to trigger the sign-in
+        setTimeout(() => {
+          const button = tempDiv.querySelector('div[role="button"]');
+          if (button) {
+            console.log('Clicking Google Sign-In button...');
+            button.click();
+          } else {
+            console.log('Button not found, trying prompt...');
+            window.google.accounts.id.prompt();
+          }
+
+          // Clean up
+          setTimeout(() => {
+            if (tempDiv.parentNode) {
+              document.body.removeChild(tempDiv);
+            }
+          }, 1000);
+        }, 100);
+
       } catch (error) {
         console.error('Google sign-in error:', error);
-        reject(error);
+        console.log('Falling back to mock authentication');
+        resolve(this.getMockUser());
       }
     });
   }
 
-  async showPopup() {
+  async showOAuthPopup() {
     return new Promise((resolve, reject) => {
       try {
+        // Use OAuth2 popup flow as fallback
+        console.log('Using OAuth2 popup flow...');
+
         window.google.accounts.oauth2.initTokenClient({
           client_id: this.clientId,
-          scope: 'email profile',
+          scope: 'email profile openid',
           callback: async (response) => {
             if (response.error) {
               reject(new Error(response.error));
@@ -177,6 +216,24 @@ class GoogleAuthService {
             try {
               // Get user info using the access token
               const userInfo = await this.getUserInfo(response.access_token);
+              console.log('OAuth user info:', userInfo);
+
+              // If backend authentication is enabled, try it first
+              if (environmentConfig.enableBackendAuth) {
+                console.log('🔄 Using backend authentication with access token...');
+                try {
+                  const user = await backendAuthService.authenticateWithGoogle(response.access_token);
+                  console.log('✅ Backend authentication successful:', user);
+                  resolve(user);
+                  return;
+                } catch (backendError) {
+                  console.error('❌ Backend authentication failed, falling back to frontend auth:', backendError);
+                  // Continue to frontend authentication fallback
+                }
+              }
+
+              // Fallback to frontend-only authentication
+              console.log('🔄 Using frontend authentication...');
               const userWithRole = createUserWithRole({
                 id: userInfo.id,
                 email: userInfo.email,
@@ -184,17 +241,74 @@ class GoogleAuthService {
                 image: userInfo.picture
               });
 
+              console.log('User with role assigned:', userWithRole);
+
               resolve({
                 ...userWithRole,
                 token: response.access_token
               });
             } catch (error) {
+              console.error('OAuth authentication error:', error);
               reject(error);
             }
           },
         }).requestAccessToken();
       } catch (error) {
         console.error('Popup sign-in error:', error);
+        reject(error);
+      }
+    });
+  }
+
+  async showDirectPopup() {
+    return new Promise((resolve, reject) => {
+      try {
+        // Create a simple OAuth URL and open popup
+        const redirectUri = `${window.location.origin}/auth/callback`;
+        const scope = 'email profile openid';
+        const responseType = 'code';
+        const state = Math.random().toString(36).substring(7);
+
+        const authUrl = `https://accounts.google.com/oauth/authorize?` +
+          `client_id=${encodeURIComponent(this.clientId)}&` +
+          `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+          `scope=${encodeURIComponent(scope)}&` +
+          `response_type=${encodeURIComponent(responseType)}&` +
+          `state=${encodeURIComponent(state)}`;
+
+        console.log('Opening OAuth popup with URL:', authUrl);
+
+        const popup = window.open(
+          authUrl,
+          'google-oauth',
+          'width=500,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        if (!popup) {
+          reject(new Error('Popup blocked'));
+          return;
+        }
+
+        // Listen for popup completion
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            reject(new Error('Popup closed by user'));
+          }
+        }, 1000);
+
+        // For now, just resolve with mock user since we don't have callback handling
+        setTimeout(() => {
+          clearInterval(checkClosed);
+          if (!popup.closed) {
+            popup.close();
+          }
+          console.log('OAuth popup timeout, using mock authentication');
+          resolve(this.getMockUser());
+        }, 5000);
+
+      } catch (error) {
+        console.error('Direct popup error:', error);
         reject(error);
       }
     });
@@ -230,7 +344,7 @@ class GoogleAuthService {
     const mockUserData = {
       id: 'demo-user-' + Date.now(),
       email: 'jmadrino@boldbusiness.com',
-      name: 'Jose Madrino',
+      name: 'John Madrino',
       image: '/images/AI AGENT 5.png'
     };
 

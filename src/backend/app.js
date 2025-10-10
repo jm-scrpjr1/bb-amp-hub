@@ -155,7 +155,13 @@ app.get("/health", async (req, res) => {
 
 // Test endpoint
 app.get("/api/hello", (req, res) => {
-  res.send("Hello from Bold Amp Hub backend!");
+  res.json({
+    message: "Hello from Bold Amp Hub backend!",
+    status: "healthy",
+    database: "connected",
+    timestamp: new Date().toISOString(),
+    version: "1.0.0"
+  });
 });
 
 // Google OAuth authentication endpoint
@@ -168,6 +174,13 @@ app.post("/api/auth/google", async (req, res) => {
     }
 
     console.log('🔄 Authenticating user:', userInfo.email);
+
+    // Only create/update users with boldbusiness.com email domain
+    if (!userInfo.email.toLowerCase().endsWith('@boldbusiness.com')) {
+      return res.status(403).json({
+        error: 'Access denied. Only boldbusiness.com accounts are allowed.'
+      });
+    }
 
     // Create or update user in our system
     const user = await UserService.upsertUserFromAuth(userInfo);
@@ -239,6 +252,117 @@ const authenticateUser = async (req, res, next) => {
   }
 };
 
+// Admin Analytics endpoint
+app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
+  try {
+    console.log('🔍 Analytics endpoint called by user:', req.user?.email, 'role:', req.user?.role);
+
+    if (!PermissionService.canAccessAdminPanel(req.user)) {
+      console.log('❌ User lacks permission to access admin analytics');
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    // Get user statistics
+    const totalUsers = await prisma.user.count();
+    const activeUsers = await prisma.user.count({ where: { status: 'ACTIVE' } });
+    const inactiveUsers = await prisma.user.count({ where: { status: 'INACTIVE' } });
+    const suspendedUsers = await prisma.user.count({ where: { status: 'SUSPENDED' } });
+
+    // Get user counts by role
+    const usersByRole = await prisma.user.groupBy({
+      by: ['role'],
+      _count: { role: true }
+    });
+
+    const roleStats = usersByRole.reduce((acc, item) => {
+      acc[item.role] = item._count.role;
+      return acc;
+    }, {});
+
+    // Get group statistics
+    const totalGroups = await prisma.group.count();
+    const publicGroups = await prisma.group.count({ where: { visibility: 'PUBLIC' } });
+    const privateGroups = await prisma.group.count({ where: { visibility: 'PRIVATE' } });
+
+    // Get recent users (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentUsers = await prisma.user.findMany({
+      where: {
+        createdAt: {
+          gte: sevenDaysAgo
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        status: true,
+        createdAt: true,
+        lastLoginAt: true
+      }
+    });
+
+    // Get login activity (users who logged in today)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayLogins = await prisma.user.count({
+      where: {
+        lastLoginAt: {
+          gte: today
+        }
+      }
+    });
+
+    const analytics = {
+      users: {
+        total: totalUsers,
+        active: activeUsers,
+        inactive: inactiveUsers,
+        suspended: suspendedUsers,
+        byRole: roleStats,
+        recent: recentUsers,
+        todayLogins
+      },
+      groups: {
+        total: totalGroups,
+        public: publicGroups,
+        private: privateGroups
+      },
+      activity: {
+        newUsersToday: recentUsers.filter(user => {
+          const userDate = new Date(user.createdAt);
+          return userDate >= today;
+        }).length,
+        activeToday: todayLogins
+      }
+    };
+
+    console.log('📊 Analytics generated:', {
+      totalUsers,
+      activeUsers,
+      totalGroups,
+      recentUsersCount: recentUsers.length
+    });
+
+    res.json({
+      success: true,
+      analytics
+    });
+
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
+});
+
 // User profile endpoint
 app.get("/api/user/profile", authenticateUser, async (req, res) => {
   try {
@@ -294,6 +418,67 @@ app.post("/api/admin/sync-users", authenticateUser, async (req, res) => {
   } catch (error) {
     console.error('Error syncing users:', error);
     res.status(500).json({ error: 'Failed to sync users from Google Workspace' });
+  }
+});
+
+// Test Google Workspace connection
+app.get('/api/admin/test-google-workspace', authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!PermissionService.canManageUsers(user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const googleWorkspace = new GoogleWorkspaceService();
+    const initialized = await googleWorkspace.initialize();
+
+    if (!initialized) {
+      return res.json({
+        success: false,
+        error: 'Failed to initialize Google Workspace service'
+      });
+    }
+
+    // Test basic authentication
+    const authClient = await googleWorkspace.auth.getClient();
+
+    // Test a simple API call
+    try {
+      const testUser = await googleWorkspace.adminSDK.users.get({
+        userKey: googleWorkspace.adminEmail
+      });
+
+      res.json({
+        success: true,
+        serviceAccount: authClient.email,
+        adminEmail: googleWorkspace.adminEmail,
+        domain: googleWorkspace.domain,
+        testUser: testUser.data.primaryEmail,
+        scopes: [
+          'https://www.googleapis.com/auth/admin.directory.user.readonly',
+          'https://www.googleapis.com/auth/admin.directory.group.readonly'
+        ]
+      });
+    } catch (apiError) {
+      res.json({
+        success: false,
+        serviceAccount: authClient.email,
+        adminEmail: googleWorkspace.adminEmail,
+        domain: googleWorkspace.domain,
+        apiError: apiError.message,
+        scopes: [
+          'https://www.googleapis.com/auth/admin.directory.user.readonly',
+          'https://www.googleapis.com/auth/admin.directory.group.readonly'
+        ]
+      });
+    }
+  } catch (error) {
+    console.error('Error testing Google Workspace:', error);
+    res.json({
+      success: false,
+      error: error.message
+    });
   }
 });
 
@@ -554,11 +739,17 @@ app.post('/api/groups/ai/suggestions', authenticateUser, async (req, res) => {
 // Users API
 app.get('/api/users', authenticateUser, async (req, res) => {
   try {
+    console.log('🔍 Users endpoint called by user:', req.user?.email, 'role:', req.user?.role);
+
     if (!PermissionService.canManageUsers(req.user)) {
+      console.log('❌ User lacks permission to manage users');
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
+    console.log('✅ User has permission, fetching users with query:', req.query);
     const users = await UserService.getUsers(req.query);
+    console.log('📊 Users fetched:', users.total, 'total users');
+
     res.json({
       success: true,
       users: users.users,

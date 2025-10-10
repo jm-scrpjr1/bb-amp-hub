@@ -31,6 +31,45 @@ class GoogleWorkspaceService {
     }
   }
 
+  async testConnection() {
+    try {
+      if (!this.adminSDK) {
+        await this.initialize();
+      }
+
+      const authClient = await this.auth.getClient();
+
+      // Test with a simple API call that requires less permissions
+      try {
+        // Try to get the service account info first
+        const tokenInfo = await authClient.getAccessToken();
+
+        return {
+          authenticated: true,
+          serviceAccount: authClient.email,
+          adminEmail: this.adminEmail,
+          domain: this.domain,
+          hasToken: !!tokenInfo.token,
+          tokenScopes: authClient.scopes
+        };
+      } catch (apiError) {
+        return {
+          authenticated: true,
+          serviceAccount: authClient.email,
+          adminEmail: this.adminEmail,
+          domain: this.domain,
+          apiError: apiError.message,
+          hasToken: false
+        };
+      }
+    } catch (error) {
+      return {
+        authenticated: false,
+        error: error.message
+      };
+    }
+  }
+
   async syncUsersFromWorkspace() {
     try {
       if (!this.adminSDK) {
@@ -39,6 +78,19 @@ class GoogleWorkspaceService {
       }
 
       console.log('🔄 Syncing users from Google Workspace...');
+      console.log(`📧 Using admin email: ${this.adminEmail}`);
+      console.log(`🌐 Using domain: ${this.domain}`);
+      console.log(`🔑 Service account path: ${this.serviceAccountPath}`);
+
+      // Test authentication first
+      try {
+        const authClient = await this.auth.getClient();
+        console.log('✅ Authentication client obtained successfully');
+        console.log(`🔐 Client email: ${authClient.email}`);
+      } catch (authError) {
+        console.error('❌ Authentication failed:', authError.message);
+        throw authError;
+      }
 
       // Get all users from Google Workspace
       const response = await this.adminSDK.users.list({

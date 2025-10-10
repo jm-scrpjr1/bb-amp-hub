@@ -208,37 +208,58 @@ class UserService {
   static async getUsers(options = {}) {
     try {
       const { page = 1, limit = 20, search, role, status } = options;
-      
-      let users = Array.from(mockUsers.values());
-      
-      // Apply filters
+
+      // Convert string parameters to integers
+      const pageNum = parseInt(page, 10) || 1;
+      const limitNum = parseInt(limit, 10) || 20;
+
+      // Build where clause for filtering
+      const where = {};
+
       if (search) {
-        const searchLower = search.toLowerCase();
-        users = users.filter(user => 
-          user.name?.toLowerCase().includes(searchLower) ||
-          user.email.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      if (role) {
-        users = users.filter(user => user.role === role);
-      }
-      
-      if (status) {
-        users = users.filter(user => user.status === status);
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } }
+        ];
       }
 
-      // Pagination
-      const total = users.length;
-      const skip = (page - 1) * limit;
-      const paginatedUsers = users.slice(skip, skip + limit);
+      if (role) {
+        where.role = role;
+      }
+
+      if (status) {
+        where.status = status;
+      }
+
+      // Get total count
+      const total = await prisma.user.count({ where });
+
+      // Get paginated users
+      const skip = (pageNum - 1) * limitNum;
+      const users = await prisma.user.findMany({
+        where,
+        skip,
+        take: limitNum,
+        include: {
+          groupMemberships: {
+            include: {
+              group: true
+            }
+          },
+          managedGroups: true,
+          permissions: true
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
 
       return {
-        users: paginatedUsers,
+        users,
         total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum)
       };
     } catch (error) {
       console.error('Error fetching users:', error);

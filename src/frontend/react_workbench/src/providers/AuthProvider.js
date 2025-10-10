@@ -25,6 +25,21 @@ const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      // Check if mock authentication is enabled
+      if (environmentConfig.enableMockAuth) {
+        const mockUser = {
+          id: 'mock-user-id',
+          email: 'jmadrino@boldbusiness.com',
+          name: 'Jose Madrino',
+          picture: 'https://via.placeholder.com/40',
+          role: 'owner'
+        };
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setLoading(false);
+        return;
+      }
+
       // Check backend authentication first if enabled
       if (environmentConfig.enableBackendAuth && backendAuthService.isAuthenticated()) {
         try {

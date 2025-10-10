@@ -145,10 +145,12 @@ export interface UserWithPermissions {
 }
 
 // Permission checking functions
-export const OWNER_EMAIL = 'jlope@boldbusiness.com';
+export const OWNER_EMAILS = ['jlope@boldbusiness.com', 'jmadrino@boldbusiness.com'];
 
 export function isOwnerEmail(email: string): boolean {
-  return email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+  return OWNER_EMAILS.some(ownerEmail =>
+    email.toLowerCase() === ownerEmail.toLowerCase()
+  );
 }
 
 // God mode check - ensures owner email always has access

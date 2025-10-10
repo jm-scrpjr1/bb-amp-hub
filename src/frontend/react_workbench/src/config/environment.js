@@ -3,9 +3,9 @@
 const config = {
   development: {
     apiUrl: 'http://localhost:3001/api',
-    googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
-    enableMockAuth: false, // Use backend authentication
-    enableBackendAuth: true,
+    googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+    enableMockAuth: false, // Disable mock auth - use real Google OAuth
+    enableBackendAuth: true, // Re-enable backend auth
     environment: 'development'
   },
   production: {
@@ -36,8 +36,11 @@ const getCurrentEnvironment = () => {
 const currentEnv = getCurrentEnvironment();
 const environmentConfig = config[currentEnv];
 
-console.log('Environment detected:', currentEnv);
-console.log('Environment config:', environmentConfig);
+// Only log in development to avoid console spam in production
+if (currentEnv === 'development') {
+  console.log('Environment detected:', currentEnv);
+  console.log('Environment config:', environmentConfig);
+}
 
 export default environmentConfig;
 export { getCurrentEnvironment };

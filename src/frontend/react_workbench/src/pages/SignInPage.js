@@ -220,19 +220,32 @@ const SignInPage = () => {
     console.log('Sign-in button clicked');
 
     try {
-      console.log('Calling signInWithGoogle...');
+      // Check if we already have Next.js auth
+      const nextjsToken = localStorage.getItem('nextjs_auth_token');
+      const nextjsUser = localStorage.getItem('nextjs_auth_user');
+
+      if (nextjsToken && nextjsUser) {
+        console.log('Using existing Next.js authentication');
+        const user = JSON.parse(nextjsUser);
+        localStorage.setItem('authToken', nextjsToken);
+        toast.success(`Welcome back, ${user?.name || 'User'}!`);
+        navigate(from, { replace: true });
+        return;
+      }
+
+      // Use React app's native Google authentication
+      console.log('Using React app native Google authentication...');
       const result = await signInWithGoogle();
-      console.log('SignInWithGoogle result:', result);
+      console.log('Google sign-in result:', result);
 
       if (result.success) {
         toast.success(`Welcome to AI Workbench, ${result.user?.name || 'User'}!`);
-        console.log('Navigating to:', from);
-        // Navigate to the intended page or home
+        console.log('Google sign-in successful, navigating to:', from);
         navigate(from, { replace: true });
       } else {
-        console.error('Sign-in failed:', result.error);
-        toast.error(result.error || 'Google sign in failed');
+        toast.error(result.error || 'Google sign-in failed');
       }
+
     } catch (error) {
       console.error('Sign-in error:', error);
       toast.error(`Sign-in error: ${error.message}`);

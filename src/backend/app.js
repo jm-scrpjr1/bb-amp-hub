@@ -42,24 +42,9 @@ if (!isProduction || !behindProxy) {
   app.use(cors(corsOptions));
   console.log('🌐 CORS enabled in Node.js');
 } else {
-  // Production behind Nginx proxy - Add credentials support
-  console.log('🌐 CORS handled by Nginx proxy - Adding credentials support');
-  app.use((req, res, next) => {
-    // Add credentials support for CORS requests
-    const origin = req.headers.origin;
-    const allowedOrigins = [
-      'https://main.d1wapgj6lifsrx.amplifyapp.com',
-      'http://localhost:3000'
-    ];
-
-    if (allowedOrigins.includes(origin)) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    }
-    next();
-  });
+  // Production behind Nginx proxy - CORS handled by Nginx
+  console.log('🌐 CORS handled by Nginx proxy - Backend CORS disabled');
+  // No CORS headers needed - Nginx handles everything
 }
 
 // Middleware

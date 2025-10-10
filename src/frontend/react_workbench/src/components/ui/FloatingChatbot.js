@@ -548,8 +548,15 @@ const FloatingChatbot = ({ className = '' }) => {
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}
+                        className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'} items-end space-x-2`}
                       >
+                        {/* Bot Avatar */}
+                        {msg.isBot && (
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mb-1">
+                            <RobotIcon className="w-5 h-5" />
+                          </div>
+                        )}
+
                         <div
                           className={`max-w-[80%] p-4 rounded-3xl ${
                             msg.isBot
@@ -568,6 +575,23 @@ const FloatingChatbot = ({ className = '' }) => {
                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
+
+                        {/* User Avatar */}
+                        {!msg.isBot && (
+                          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mb-1 overflow-hidden">
+                            {user?.image ? (
+                              <img
+                                src={user.image}
+                                alt={user?.name || 'User'}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-white text-xs font-medium">
+                                {user?.name?.charAt(0) || 'U'}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </motion.div>
                     ))}
                     <div ref={messagesEndRef} />

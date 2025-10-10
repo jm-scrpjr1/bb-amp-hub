@@ -70,6 +70,25 @@ const WelcomeSection = ({ showWelcomeBanner = true }) => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full opacity-10 transform translate-x-32 -translate-y-32"></div>
 
           <div className="relative z-10 text-center">
+            {/* User Profile Photo */}
+            {!loading && user?.image && (
+              <ScrollEffects effect="scale" delay={0.2}>
+                <div className="flex justify-center mb-6">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white/30 overflow-hidden bg-white/10 backdrop-blur-sm">
+                    <img
+                      src={user.image}
+                      alt={user?.name || 'User'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Hide the image container if it fails to load
+                        e.target.parentElement.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                </div>
+              </ScrollEffects>
+            )}
+
             {/* Large Welcome Message */}
             {loading ? (
               <div className="space-y-4 flex justify-center">

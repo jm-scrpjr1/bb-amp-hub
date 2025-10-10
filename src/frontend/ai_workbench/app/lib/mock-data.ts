@@ -108,6 +108,13 @@ export const mockQuickActions = [
     subtitle: "Submit HR related concern",
     icon: "User",
     color: "bg-red-50 border-red-200"
+  },
+  {
+    id: 4,
+    title: "Submit Bold Idea",
+    subtitle: "Share innovative suggestions",
+    icon: "Lightbulb",
+    color: "bg-yellow-50 border-yellow-200"
   }
 ];
 

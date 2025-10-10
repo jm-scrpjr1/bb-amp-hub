@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
 import { Search, Heart, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedRobot from '../components/ui/AnimatedRobot';
 
 const categories = [
   { id: 'all', name: 'All', active: true },
@@ -83,6 +84,7 @@ const trainings = [
     category: 'Sales',
     animation: 'bounce',
     liked: false,
+    size: 'w-36 h-36', // 1.5x size
     wittyMessages: [
       "Ready to boost your sales training! 🚀",
       "I'm here to help you learn sales skills! ✨",
@@ -100,6 +102,7 @@ const trainings = [
     category: 'Marketing',
     animation: 'shake',
     liked: false,
+    size: 'w-43 h-43', // 1.8x size
     wittyMessages: [
       "Marketing training magic awaits! ✨",
       "Let's learn to create campaigns that convert! 📈",
@@ -112,11 +115,12 @@ const trainings = [
     id: 3,
     name: 'Finance',
     description: 'Optimize your financial processes and analysis',
-    image: '/images/AI AGENT 3.png',
+    image: '/images/AI TRAINING 1.png',
     bgColor: 'bg-yellow-500',
     category: 'Finance',
-    animation: 'circle',
+    animation: 'float',
     liked: false,
+    size: 'w-48 h-48', // 2x size
     wittyMessages: [
       "Numbers training - let's make it fun! 📊",
       "I'll teach you financial clarity! 💎",
@@ -134,6 +138,7 @@ const trainings = [
     category: 'Human Resources',
     animation: 'float',
     liked: false,
+    size: 'w-36 h-36', // 1.5x size
     wittyMessages: [
       "People skills training is my specialty! 👥",
       "Let's learn HR processes together! 🎯",
@@ -151,6 +156,7 @@ const trainings = [
     category: 'IT',
     animation: 'bounce',
     liked: false,
+    size: 'w-36 h-36', // 1.5x size
     wittyMessages: [
       "Tech training? I've got the solutions! 🔧",
       "Let's learn IT infrastructure together! ⚙️",
@@ -163,11 +169,12 @@ const trainings = [
     id: 6,
     name: 'Coding',
     description: 'Accelerate your development with AI assistance',
-    image: '/images/AI AGENT 6.png',
+    image: '/images/AI TRAINING 3.png',
     bgColor: 'bg-blue-700',
     category: 'Coding',
     animation: 'shake',
     liked: false,
+    size: 'w-36 h-36', // 1.5x size
     wittyMessages: [
       "Learn to code like a wizard! 🧙‍♂️",
       "Let's debug and learn together! 🐛",
@@ -312,57 +319,16 @@ const TrainingsPage = () => {
 
                   {/* Robot Image */}
                   <div className="flex justify-center mb-6 relative">
-                    <motion.div
-                      className="w-24 h-24 flex items-center justify-center relative"
-                      {...getAnimationVariants(training.animation)}
-                      animate={{
-                        ...getAnimationVariants(training.animation).animate,
-                        scale: hoveredTraining === training.id ? [1, 1.2, 0.9, 1.1, 1] : getAnimationVariants(training.animation).animate?.scale || 1,
-                      }}
-                      transition={{
-                        scale: { duration: 0.6, repeat: hoveredTraining === training.id ? Infinity : 0 },
-                        ...getAnimationVariants(training.animation).animate?.transition
-                      }}
-                    >
-                      <img
-                        src={training.image}
-                        alt={training.name}
-                        className="w-full h-full object-contain"
-                      />
-
-                      {/* Floating Bubbles on Hover */}
-                      <AnimatePresence>
-                        {hoveredTraining === training.id && (
-                          <>
-                            {[...Array(3)].map((_, i) => (
-                              <motion.div
-                                key={i}
-                                className="absolute w-2 h-2 bg-blue-400 rounded-full opacity-60"
-                                initial={{
-                                  opacity: 0,
-                                  scale: 0,
-                                  x: Math.random() * 40 - 20,
-                                  y: Math.random() * 40 - 20
-                                }}
-                                animate={{
-                                  opacity: [0, 1, 0],
-                                  scale: [0, 1, 0],
-                                  y: [0, -30],
-                                  x: [0, (Math.random() - 0.5) * 20]
-                                }}
-                                exit={{ opacity: 0, scale: 0 }}
-                                transition={{
-                                  duration: 2,
-                                  repeat: Infinity,
-                                  delay: i * 0.3,
-                                  ease: "easeOut"
-                                }}
-                              />
-                            ))}
-                          </>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
+                    <AnimatedRobot
+                      src={training.image}
+                      alt={training.name}
+                      size={training.size || 'w-36 h-36'}
+                      animationType={training.animation}
+                      showMessage={hoveredTraining === training.id}
+                      message={currentMessages[training.id]}
+                      showGlow={true}
+                      className="mx-auto"
+                    />
                   </div>
 
                   {/* Training Info */}

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedRobot from '../ui/AnimatedRobot';
 
 const quickstartTiles = [
   {
     id: 'prompts',
     title: 'Prompts',
-    image: '/images/PROMPT 2.png',
+    image: '/images/PROMPT 1.png',
     animation: 'bounce',
     color: 'cyan',
     wittyMessages: [
@@ -19,13 +20,13 @@ const quickstartTiles = [
   {
     id: 'automations',
     title: 'Automations',
-    image: '/images/AUTOMATION 4.png',
+    image: '/images/AUTOMATION 3.png',
     animation: 'bounce',
     color: 'yellow',
     wittyMessages: [
       "Why do it manually when I can automate it? ⚡",
       "Sit back, relax, I'll handle the repetitive stuff! 🛋️",
-      "Automation is my middle name! Well, actually it's 4000... 🤖",
+      "Automation is my middle name! Well, actually it's 3000... 🤖",
       "Let's turn your workflows into smooth sailing! ⛵",
       "I never get tired of doing the same thing perfectly! 💪"
     ]
@@ -33,7 +34,7 @@ const quickstartTiles = [
   {
     id: 'ai-agents',
     title: 'AI Agents',
-    image: '/images/AI AGENT 5.png',
+    image: '/images/AI AGENT 1.png',
     animation: 'bounce',
     color: 'red',
     wittyMessages: [
@@ -47,7 +48,7 @@ const quickstartTiles = [
   {
     id: 'training',
     title: 'Training',
-    image: '/images/AI AGENT 4.png',
+    image: '/images/AI TRAINING 3.png',
     animation: 'bounce',
     color: 'purple',
     wittyMessages: [
@@ -147,29 +148,15 @@ const WorkspaceQuickstart = () => {
               )}
             </AnimatePresence>
 
-            <div className="mb-4 relative">
-              <motion.img
+            <div className="mb-4 relative flex justify-center">
+              <AnimatedRobot
                 src={tile.image}
                 alt={tile.title}
-                className="w-20 h-20 mx-auto object-contain"
-                animate={hoveredTile === tile.id ? {
-                  scale: [1, 1.1, 1],
-                  rotate: [0, -2, 2, 0],
-                  filter: [
-                    "drop-shadow(0 0 0px rgba(59, 130, 246, 0))",
-                    "drop-shadow(0 0 20px rgba(59, 130, 246, 0.5))",
-                    "drop-shadow(0 0 0px rgba(59, 130, 246, 0))"
-                  ],
-                  transition: {
-                    duration: 0.6,
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }
-                } : {
-                  scale: 1,
-                  rotate: 0,
-                  filter: "drop-shadow(0 0 0px rgba(59, 130, 246, 0))"
-                }}
+                size="w-30 h-30"
+                animationType={tile.animation}
+                showMessage={false}
+                showGlow={hoveredTile === tile.id}
+                className="mx-auto"
               />
             </div>
             <h3 className="font-semibold text-gray-900 text-lg">

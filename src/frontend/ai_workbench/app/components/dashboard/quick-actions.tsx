@@ -27,6 +27,7 @@ export default function QuickActions() {
   const [isTrackTimeModalOpen, setIsTrackTimeModalOpen] = useState(false);
   const [isITTicketModalOpen, setIsITTicketModalOpen] = useState(false);
   const [isHRTicketModalOpen, setIsHRTicketModalOpen] = useState(false);
+  const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
 
   const handleActionClick = (actionId: number) => {
     console.log(`Quick action ${actionId} clicked`);
@@ -46,6 +47,12 @@ export default function QuickActions() {
     // Handle Submit HR Ticket action
     if (actionId === 3) {
       setIsHRTicketModalOpen(true);
+      return;
+    }
+
+    // Handle Submit Bold Idea action
+    if (actionId === 4) {
+      setIsBoldIdeaModalOpen(true);
       return;
     }
 
@@ -72,12 +79,14 @@ export default function QuickActions() {
                 <div className={`p-3 rounded-xl ${
                   action.icon === 'Clock' ? 'bg-green-100' :
                   action.icon === 'Ticket' ? 'bg-blue-100' :
-                  action.icon === 'User' ? 'bg-red-100' : 'bg-gray-100'
+                  action.icon === 'User' ? 'bg-red-100' :
+                  action.icon === 'Lightbulb' ? 'bg-yellow-100' : 'bg-gray-100'
                 } group-hover:scale-110 transition-transform duration-300 shadow-sm`}>
                   <Icon className={`h-6 w-6 ${
                     action.icon === 'Clock' ? 'text-green-600' :
                     action.icon === 'Ticket' ? 'text-blue-600' :
-                    action.icon === 'User' ? 'text-red-600' : 'text-gray-600'
+                    action.icon === 'User' ? 'text-red-600' :
+                    action.icon === 'Lightbulb' ? 'text-yellow-600' : 'text-gray-600'
                   }`} />
                 </div>
                 <div className="flex-1">
@@ -113,6 +122,11 @@ export default function QuickActions() {
         onClose={() => setIsHRTicketModalOpen(false)}
       />
 
+      {/* Bold Idea Modal */}
+      <BoldIdeaModal
+        isOpen={isBoldIdeaModalOpen}
+        onClose={() => setIsBoldIdeaModalOpen(false)}
+      />
 
     </>
   );

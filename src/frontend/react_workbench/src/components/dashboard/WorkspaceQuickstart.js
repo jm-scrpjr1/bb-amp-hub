@@ -122,33 +122,7 @@ const WorkspaceQuickstart = () => {
             }}
             whileTap={{ scale: 0.98 }}
           >
-            {/* Cloud Chat Bubble Thought */}
-            <AnimatePresence>
-              {hoveredTile === tile.id && currentMessages[tile.id] && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-50"
-                >
-                  <div className="relative bg-white rounded-3xl px-6 py-4 shadow-xl border border-gray-100 max-w-xs">
-                    <p className="text-sm text-gray-700 font-medium leading-relaxed text-center">
-                      {currentMessages[tile.id]}
-                    </p>
 
-                    {/* Cloud-like tail with multiple bubbles */}
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1">
-                      {/* Large bubble */}
-                      <div className="w-4 h-4 bg-white rounded-full border border-gray-100 shadow-md"></div>
-                      {/* Medium bubble */}
-                      <div className="absolute top-2 left-2 w-3 h-3 bg-white rounded-full border border-gray-100 shadow-md"></div>
-                      {/* Small bubble */}
-                      <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full border border-gray-100 shadow-sm"></div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
             <div className="mb-4 relative flex justify-center">
               <AnimatedRobot

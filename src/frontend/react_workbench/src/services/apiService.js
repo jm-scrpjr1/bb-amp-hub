@@ -6,6 +6,7 @@ class ApiService {
   constructor() {
     this.api = axios.create({
       baseURL: API_BASE_URL,
+      withCredentials: true, // Enable CORS credentials
       headers: {
         'Content-Type': 'application/json',
       },

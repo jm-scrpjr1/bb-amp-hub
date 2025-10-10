@@ -29,6 +29,7 @@ class BackendAuthService {
 
       const response = await fetch(`${this.apiUrl}/auth/google`, {
         method: 'POST',
+        credentials: 'include', // Enable CORS credentials
         headers: {
           'Content-Type': 'application/json',
         },
@@ -67,6 +68,7 @@ class BackendAuthService {
       }
 
       const response = await fetch(`${this.apiUrl}/user/profile`, {
+        credentials: 'include', // Enable CORS credentials
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
@@ -99,6 +101,7 @@ class BackendAuthService {
       
       const response = await fetch(`${this.apiUrl}/admin/sync-users`, {
         method: 'POST',
+        credentials: 'include', // Enable CORS credentials
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
@@ -128,6 +131,7 @@ class BackendAuthService {
       
       const response = await fetch(`${this.apiUrl}/admin/sync-groups`, {
         method: 'POST',
+        credentials: 'include', // Enable CORS credentials
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
@@ -155,6 +159,7 @@ class BackendAuthService {
 
       const response = await fetch(`${this.apiUrl}${endpoint}`, {
         ...options,
+        credentials: 'include', // Enable CORS credentials
         headers: {
           'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',

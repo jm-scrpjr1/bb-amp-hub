@@ -6,7 +6,7 @@ import {
 } from '../components/dashboard';
 import WorkspaceQuickstart from '../components/dashboard/WorkspaceQuickstart';
 import ProjectsSection from '../components/dashboard/ProjectsSection';
-import FloatingARIA from '../components/chat/FloatingARIA';
+
 import { useAuth } from '../providers/AuthProvider';
 
 const HomePage = () => {
@@ -42,8 +42,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Floating ARIA Chat */}
-      <FloatingARIA />
+
     </MainLayout>
   );
 };

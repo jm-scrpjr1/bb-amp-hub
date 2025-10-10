@@ -114,6 +114,10 @@ JWT_SECRET=\${JWT_SECRET}
 # CORS Configuration
 CORS_ORIGIN=https://main.d1wapgj6lifsrx.amplifyapp.com,http://localhost:3000
 
+# Production environment settings
+NODE_ENV=production
+BEHIND_PROXY=true
+
 # Auto-sync disabled in production
 AUTO_SYNC_ON_STARTUP=false
 EOF

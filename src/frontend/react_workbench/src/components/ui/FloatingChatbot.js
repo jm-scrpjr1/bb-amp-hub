@@ -296,6 +296,11 @@ const FloatingChatbot = ({ className = '' }) => {
     }
   };
 
+  // Don't render ARIA if user is not authenticated
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className={`fixed z-[100000] ${className}`}>
       {/* Floating Chat Button */}

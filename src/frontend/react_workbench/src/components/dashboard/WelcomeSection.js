@@ -71,7 +71,7 @@ const WelcomeSection = ({ showWelcomeBanner = true }) => {
 
           <div className="relative z-10 text-center">
             {/* User Profile Photo */}
-            {!loading && user?.image && (
+            {!loading && user?.image && user.image !== '/images/AI AGENT 5.png' && (
               <ScrollEffects effect="scale" delay={0.2}>
                 <div className="flex justify-center mb-6">
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white/30 overflow-hidden bg-white/10 backdrop-blur-sm">

@@ -117,6 +117,7 @@ class GoogleAuthService {
               // Parse the JWT credential
               const userData = this.parseJWT(response.credential);
               console.log('Parsed user data:', userData);
+              console.log('Profile picture URL:', userData.picture);
 
               // If backend authentication is enabled, try it first
               if (environmentConfig.enableBackendAuth) {
@@ -143,6 +144,7 @@ class GoogleAuthService {
               });
 
               console.log('User with role assigned:', userWithRole);
+              console.log('Final user image field:', userWithRole.image);
 
               resolve({
                 ...userWithRole,

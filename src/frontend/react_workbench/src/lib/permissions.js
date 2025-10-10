@@ -135,7 +135,7 @@ export function createUserWithRole(userData) {
     id: userData.id || 'user-' + Date.now(),
     email: userData.email,
     name: userData.name || 'User',
-    image: userData.image || '/images/AI AGENT 5.png',
+    image: userData.image || null, // Don't default to robot image, let components handle fallback
     status: UserStatus.ACTIVE,
     permissions: [],
     createdAt: new Date(),

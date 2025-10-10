@@ -579,7 +579,7 @@ const FloatingChatbot = ({ className = '' }) => {
                         {/* User Avatar */}
                         {!msg.isBot && (
                           <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mb-1 overflow-hidden">
-                            {user?.image ? (
+                            {user?.image && user.image !== '/images/AI AGENT 5.png' ? (
                               <img
                                 src={user.image}
                                 alt={user?.name || 'User'}

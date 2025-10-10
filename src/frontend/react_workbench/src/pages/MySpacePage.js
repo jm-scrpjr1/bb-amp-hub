@@ -5,6 +5,8 @@ import BoldUpdates from '../components/dashboard/BoldUpdates';
 import ActivitySection from '../components/dashboard/ActivitySection';
 import DirectMessageModal from '../components/ui/DirectMessageModal';
 import GroupChatModal from '../components/ui/GroupChatModal';
+import TutorialButton from '../components/dashboard/TutorialButton';
+import AmplificationOnboarding from '../components/onboarding/AmplificationOnboarding';
 import { useAuth } from '../providers/AuthProvider';
 import { ScrollEffects } from '../components/effects';
 
@@ -234,6 +236,12 @@ const MySpacePage = () => {
         onClose={() => setGroupChatModal({ isOpen: false, groupName: '' })}
         groupName={groupChatModal.groupName}
         memberCount={5}
+      />
+
+      {/* Amplification Onboarding Modal */}
+      <AmplificationOnboarding
+        isOpen={showOnboarding}
+        onClose={handleCloseOnboarding}
       />
     </MainLayout>
   );

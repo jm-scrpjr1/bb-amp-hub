@@ -6,6 +6,7 @@ import {
 } from '../components/dashboard';
 import WorkspaceQuickstart from '../components/dashboard/WorkspaceQuickstart';
 import ProjectsSection from '../components/dashboard/ProjectsSection';
+import AmplificationOnboarding from '../components/onboarding/AmplificationOnboarding';
 
 import { useAuth } from '../providers/AuthProvider';
 
@@ -19,6 +20,16 @@ const HomePage = () => {
     if (!hasSeenOnboarding) {
       setShowOnboarding(true);
     }
+
+    // Listen for manual onboarding trigger
+    const handleShowOnboarding = () => {
+      setShowOnboarding(true);
+    };
+
+    window.addEventListener('showAmplificationOnboarding', handleShowOnboarding);
+    return () => {
+      window.removeEventListener('showAmplificationOnboarding', handleShowOnboarding);
+    };
   }, []);
 
   const handleCloseOnboarding = () => {
@@ -42,7 +53,11 @@ const HomePage = () => {
         </div>
       </div>
 
-
+      {/* Amplification Onboarding Modal */}
+      <AmplificationOnboarding
+        isOpen={showOnboarding}
+        onClose={handleCloseOnboarding}
+      />
     </MainLayout>
   );
 };

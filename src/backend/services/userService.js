@@ -36,33 +36,7 @@ class UserService {
     try {
       // Try to get user from database first
       const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase() },
-        include: {
-          groupMemberships: {
-            include: {
-              group: {
-                select: {
-                  id: true,
-                  name: true,
-                  type: true,
-                }
-              }
-            }
-          },
-          managedGroups: {
-            select: {
-              id: true,
-              name: true,
-              type: true,
-            }
-          },
-          permissions: {
-            select: {
-              permission: true,
-              resource: true,
-            }
-          }
-        }
+        where: { email: email.toLowerCase() }
       });
 
       if (user) {
@@ -118,32 +92,7 @@ class UserService {
             lastLoginAt: new Date(),
             loginCount: 1,
           },
-          include: {
-            groupMemberships: {
-              include: {
-                group: {
-                  select: {
-                    id: true,
-                    name: true,
-                    type: true,
-                  }
-                }
-              }
-            },
-            managedGroups: {
-              select: {
-                id: true,
-                name: true,
-                type: true,
-              }
-            },
-            permissions: {
-              select: {
-                permission: true,
-                resource: true,
-              }
-            }
-          }
+
         });
 
         return user;
@@ -161,10 +110,7 @@ class UserService {
           lastLoginAt: new Date(),
           loginCount: 1,
           createdAt: new Date(),
-          updatedAt: new Date(),
-          permissions: [],
-          groupMemberships: [],
-          managedGroups: []
+          updatedAt: new Date()
         };
 
         mockUsers.set(email, user);
@@ -212,22 +158,21 @@ class UserService {
         where,
         skip,
         take: limitNum,
-        include: {
-          groupMemberships: {
-            include: {
-              group: true
-            }
-          },
-          managedGroups: true,
-          permissions: true
-        },
         orderBy: {
           createdAt: 'desc'
         }
       });
 
+      // Add missing fields that frontend expects
+      const usersWithFields = users.map(user => ({
+        ...user,
+        permissions: [],
+        groupMemberships: [],
+        managedGroups: []
+      }));
+
       return {
-        users,
+        users: usersWithFields,
         total,
         page: pageNum,
         limit: limitNum,
@@ -324,10 +269,7 @@ class UserService {
       loginCount: 0,
       lastLoginAt: new Date(),
       createdAt: new Date(),
-      updatedAt: new Date(),
-      permissions: [],
-      groupMemberships: [],
-      managedGroups: []
+      updatedAt: new Date()
     };
   }
 }

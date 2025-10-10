@@ -5,7 +5,7 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const openaiService = require('./services/openaiService');
-const { testConnection } = require('./lib/db');
+const { testConnection, prisma } = require('./lib/db');
 const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
 const app = express();
 

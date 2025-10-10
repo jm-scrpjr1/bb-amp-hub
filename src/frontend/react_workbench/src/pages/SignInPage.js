@@ -169,6 +169,10 @@ const AnimatedRobot = ({
           src={src}
           alt={alt}
           className="w-full h-full object-contain drop-shadow-lg"
+          onError={(e) => {
+            console.warn(`Failed to load robot image: ${src}`);
+            e.target.src = '/images/default.png'; // Fallback to default image
+          }}
         />
 
         {/* Glowing effect */}

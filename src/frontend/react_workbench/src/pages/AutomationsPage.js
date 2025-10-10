@@ -112,7 +112,7 @@ const agents = [
     id: 3,
     name: 'Finance',
     description: 'Optimize your financial processes and analysis',
-    image: '/images/Automation 4.png',
+    image: '/images/AUTOMATION 4.png',
     bgColor: 'bg-yellow-500',
     category: 'Finance',
     animation: 'circle',

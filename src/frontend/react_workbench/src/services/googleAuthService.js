@@ -128,6 +128,7 @@ class GoogleAuthService {
                   return;
                 } catch (backendError) {
                   console.error('❌ Backend authentication failed, falling back to frontend auth:', backendError);
+                  console.log('💡 To fix: Set REACT_APP_ENABLE_BACKEND_AUTH=false or deploy backend server');
                   // Continue to frontend authentication fallback
                 }
               }

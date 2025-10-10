@@ -42,7 +42,21 @@ if (!isProduction || !behindProxy) {
   app.use(cors(corsOptions));
   console.log('🌐 CORS enabled in Node.js');
 } else {
-  console.log('🌐 CORS handled by Nginx proxy');
+  // Production behind Nginx proxy - Add credentials support
+  console.log('🌐 CORS handled by Nginx proxy - Adding credentials support');
+  app.use((req, res, next) => {
+    // Add credentials support for CORS requests
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+      'https://main.d1wapgj6lifsrx.amplifyapp.com',
+      'http://localhost:3000'
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    next();
+  });
 }
 
 // Middleware

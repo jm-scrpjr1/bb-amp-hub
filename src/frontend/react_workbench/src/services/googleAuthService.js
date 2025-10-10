@@ -264,7 +264,7 @@ class GoogleAuthService {
     return new Promise((resolve, reject) => {
       try {
         // Create a simple OAuth URL and open popup
-        const redirectUri = `${window.location.origin}/auth/callback`;
+        const redirectUri = `${window.location.origin}/auth/signin`;
         const scope = 'email profile openid';
         const responseType = 'code';
         const state = Math.random().toString(36).substring(7);

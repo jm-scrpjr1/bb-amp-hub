@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Minimize2, Maximize2 } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider';
+import environmentConfig from '../../config/environment';
 
 // Simple markdown parser for ARIA responses
 const parseMarkdown = (text) => {
@@ -220,7 +221,7 @@ const FloatingChatbot = ({ className = '' }) => {
     setMessages(prev => [...prev, typingMessage]);
 
     try {
-      const response = await fetch('http://localhost:3002/api/chat', {
+      const response = await fetch(`${environmentConfig.apiUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

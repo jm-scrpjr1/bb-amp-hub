@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { Search, Sparkles } from 'lucide-react';
+import environmentConfig from '../../config/environment';
 
 // Comprehensive search data
 const searchData = {
@@ -158,7 +159,7 @@ const AISearch = ({ className = "" }) => {
       // AI Mode: Call ARIA to scan the site and provide intelligent responses
       const callARIA = async () => {
         try {
-          const response = await fetch('http://localhost:3002/api/chat', {
+          const response = await fetch(`${environmentConfig.apiUrl}/chat`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

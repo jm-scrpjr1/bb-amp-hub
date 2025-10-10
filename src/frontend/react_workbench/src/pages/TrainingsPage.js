@@ -84,7 +84,7 @@ const trainings = [
     category: 'Sales',
     animation: 'bounce',
     liked: false,
-    size: 'w-36 h-36', // 1.5x size
+
     wittyMessages: [
       "Ready to boost your sales training! 🚀",
       "I'm here to help you learn sales skills! ✨",
@@ -102,7 +102,7 @@ const trainings = [
     category: 'Marketing',
     animation: 'shake',
     liked: false,
-    size: 'w-43 h-43', // 1.8x size
+
     wittyMessages: [
       "Marketing training magic awaits! ✨",
       "Let's learn to create campaigns that convert! 📈",
@@ -120,7 +120,7 @@ const trainings = [
     category: 'Finance',
     animation: 'float',
     liked: false,
-    size: 'w-48 h-48', // 2x size
+
     wittyMessages: [
       "Numbers training - let's make it fun! 📊",
       "I'll teach you financial clarity! 💎",
@@ -138,7 +138,7 @@ const trainings = [
     category: 'Human Resources',
     animation: 'float',
     liked: false,
-    size: 'w-36 h-36', // 1.5x size
+
     wittyMessages: [
       "People skills training is my specialty! 👥",
       "Let's learn HR processes together! 🎯",
@@ -156,7 +156,7 @@ const trainings = [
     category: 'IT',
     animation: 'bounce',
     liked: false,
-    size: 'w-36 h-36', // 1.5x size
+
     wittyMessages: [
       "Tech training? I've got the solutions! 🔧",
       "Let's learn IT infrastructure together! ⚙️",
@@ -174,7 +174,7 @@ const trainings = [
     category: 'Coding',
     animation: 'shake',
     liked: false,
-    size: 'w-36 h-36', // 1.5x size
+
     wittyMessages: [
       "Learn to code like a wizard! 🧙‍♂️",
       "Let's debug and learn together! 🐛",
@@ -322,7 +322,7 @@ const TrainingsPage = () => {
                     <AnimatedRobot
                       src={training.image}
                       alt={training.name}
-                      size={training.size || 'w-36 h-36'}
+                      size="w-36 h-36"
                       animationType={training.animation}
                       showMessage={hoveredTraining === training.id}
                       message={currentMessages[training.id]}

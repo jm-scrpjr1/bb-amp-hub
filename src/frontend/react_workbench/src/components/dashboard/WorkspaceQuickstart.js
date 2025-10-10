@@ -63,17 +63,19 @@ const quickstartTiles = [
 
 const WorkspaceQuickstart = () => {
   const [hoveredTile, setHoveredTile] = useState(null);
-  const [currentMessage, setCurrentMessage] = useState('');
+  const [currentMessages, setCurrentMessages] = useState({});
 
   const handleTileHover = (tile) => {
     setHoveredTile(tile.id);
     const randomMessage = tile.wittyMessages[Math.floor(Math.random() * tile.wittyMessages.length)];
-    setCurrentMessage(randomMessage);
+    setCurrentMessages(prev => ({
+      ...prev,
+      [tile.id]: randomMessage
+    }));
   };
 
   const handleTileLeave = () => {
     setHoveredTile(null);
-    setCurrentMessage('');
   };
 
   const getColorClasses = (color) => {
@@ -154,7 +156,8 @@ const WorkspaceQuickstart = () => {
                 alt={tile.title}
                 size="w-28 h-28"
                 animationType={tile.animation}
-                showMessage={false}
+                showMessage={hoveredTile === tile.id}
+                message={currentMessages[tile.id]}
                 showGlow={hoveredTile === tile.id}
                 className="mx-auto"
                 style={{

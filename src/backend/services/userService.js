@@ -38,19 +38,6 @@ class UserService {
       const user = await prisma.user.findUnique({
         where: { email: email.toLowerCase() },
         include: {
-          team: {
-            select: {
-              id: true,
-              name: true,
-              managerId: true,
-            }
-          },
-          managedTeams: {
-            select: {
-              id: true,
-              name: true,
-            }
-          },
           groupMemberships: {
             include: {
               group: {
@@ -132,19 +119,6 @@ class UserService {
             loginCount: 1,
           },
           include: {
-            team: {
-              select: {
-                id: true,
-                name: true,
-                managerId: true,
-              }
-            },
-            managedTeams: {
-              select: {
-                id: true,
-                name: true,
-              }
-            },
             groupMemberships: {
               include: {
                 group: {
@@ -188,8 +162,6 @@ class UserService {
           loginCount: 1,
           createdAt: new Date(),
           updatedAt: new Date(),
-          teamId: null,
-          team: null,
           permissions: [],
           groupMemberships: [],
           managedGroups: []
@@ -353,8 +325,6 @@ class UserService {
       lastLoginAt: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      teamId: null,
-      team: null,
       permissions: [],
       groupMemberships: [],
       managedGroups: []

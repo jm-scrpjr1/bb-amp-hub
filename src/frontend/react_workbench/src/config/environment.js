@@ -42,11 +42,12 @@ const getCurrentEnvironment = () => {
 const currentEnv = getCurrentEnvironment();
 const environmentConfig = config[currentEnv];
 
-// Only log in development to avoid console spam in production
-if (currentEnv === 'development') {
-  console.log('Environment detected:', currentEnv);
-  console.log('Environment config:', environmentConfig);
-}
+// Log environment info for debugging (will remove after testing)
+console.log('🔍 Environment detected:', currentEnv);
+console.log('🔍 Environment config:', environmentConfig);
+console.log('🔍 Window hostname:', window.location.hostname);
+console.log('🔍 Process env API URL:', process.env.REACT_APP_API_URL);
+console.log('🔍 Process env Backend Auth:', process.env.REACT_APP_ENABLE_BACKEND_AUTH);
 
 export default environmentConfig;
 export { getCurrentEnvironment };

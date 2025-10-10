@@ -63,84 +63,94 @@ const AnimatedRobot = ({
   };
 
   const getAnimationVariants = () => {
+    // Add random delays and variations to prevent synchronized movement
+    const randomDelay = Math.random() * 2; // 0-2 second random delay
+    const randomDuration = 2.5 + Math.random() * 2; // 2.5-4.5 second random duration
+    const randomIntensity = 0.7 + Math.random() * 0.6; // 0.7-1.3 intensity multiplier
+
     switch (animationType) {
       case 'bounce':
         return {
           animate: {
-            y: [0, -30, 0],
-            x: [0, 8, -8, 0],
-            rotate: [0, 8, -8, 0],
-            scale: [1, 1.1, 1]
+            y: [0, -20 * randomIntensity, 0],
+            x: [0, 6 * randomIntensity, -6 * randomIntensity, 0],
+            rotate: [0, 5 * randomIntensity, -5 * randomIntensity, 0],
+            scale: [1, 1.05 * randomIntensity, 1]
           },
           transition: {
-            duration: 3,
+            duration: randomDuration,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
+            delay: randomDelay
           }
         };
       case 'shake':
         return {
           animate: {
-            x: [0, -10, 10, -10, 10, 0],
-            y: [0, -5, 5, -5, 5, 0],
-            rotate: [0, -3, 3, -3, 3, 0]
+            x: [0, -8 * randomIntensity, 8 * randomIntensity, -8 * randomIntensity, 8 * randomIntensity, 0],
+            y: [0, -4 * randomIntensity, 4 * randomIntensity, -4 * randomIntensity, 4 * randomIntensity, 0],
+            rotate: [0, -2 * randomIntensity, 2 * randomIntensity, -2 * randomIntensity, 2 * randomIntensity, 0]
           },
           transition: {
-            duration: 1.2,
+            duration: 1 + Math.random() * 0.5,
             repeat: Infinity,
-            repeatDelay: 2
+            repeatDelay: 1.5 + Math.random() * 1.5,
+            delay: randomDelay
           }
         };
       case 'float':
         return {
           animate: {
-            y: [0, -25, 0],
-            x: [0, 12, -12, 0],
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.05, 1]
+            y: [0, -18 * randomIntensity, 0],
+            x: [0, 8 * randomIntensity, -8 * randomIntensity, 0],
+            rotate: [0, 4 * randomIntensity, -4 * randomIntensity, 0],
+            scale: [1, 1.03 * randomIntensity, 1]
           },
           transition: {
-            duration: 5,
+            duration: randomDuration,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
+            delay: randomDelay
           }
         };
       case 'wiggle':
         return {
           animate: {
-            rotate: [0, 15, -15, 15, -15, 0],
-            scale: [1, 1.15, 0.95, 1.15, 0.95, 1],
-            x: [0, 5, -5, 0],
-            y: [0, -8, 8, 0]
+            rotate: [0, 12 * randomIntensity, -12 * randomIntensity, 12 * randomIntensity, -12 * randomIntensity, 0],
+            scale: [1, 1.1 * randomIntensity, 0.98, 1.1 * randomIntensity, 0.98, 1],
+            x: [0, 4 * randomIntensity, -4 * randomIntensity, 0],
+            y: [0, -6 * randomIntensity, 6 * randomIntensity, 0]
           },
           transition: {
-            duration: 2,
+            duration: 1.5 + Math.random() * 1,
             repeat: Infinity,
-            repeatDelay: 1
+            repeatDelay: 0.8 + Math.random() * 1.2,
+            delay: randomDelay
           }
         };
       case 'gentle':
         return {
           animate: {
-            y: [0, -10, 0],
-            rotate: [0, 2, -2, 0],
-            scale: [1, 1.02, 1]
+            y: [0, -8 * randomIntensity, 0],
+            rotate: [0, 1.5 * randomIntensity, -1.5 * randomIntensity, 0],
+            scale: [1, 1.015 * randomIntensity, 1]
           },
           transition: {
-            duration: 4,
+            duration: randomDuration + 1,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
+            delay: randomDelay
           }
         };
       default:
         return {
           animate: {
-            y: [0, -20, 0],
-            x: [0, 10, -10, 0],
-            rotate: [0, 5, -5, 0]
+            y: [0, -15 * randomIntensity, 0],
+            x: [0, 7 * randomIntensity, -7 * randomIntensity, 0],
+            rotate: [0, 3 * randomIntensity, -3 * randomIntensity, 0]
           },
           transition: {
-            duration: 4,
+            duration: randomDuration,
             repeat: Infinity,
             ease: "easeInOut"
           }
@@ -185,7 +195,11 @@ const AnimatedRobot = ({
       <motion.div
         className={`${size} relative cursor-pointer`}
         {...getAnimationVariants()}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{
+          scale: 1.2,
+          rotate: [0, -5, 5, -5, 5, 0],
+          transition: { duration: 0.5, type: "spring", stiffness: 300 }
+        }}
         whileTap={{ scale: 0.95 }}
         onClick={handleRobotClick}
       >

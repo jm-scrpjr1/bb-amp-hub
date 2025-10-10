@@ -152,11 +152,15 @@ const WorkspaceQuickstart = () => {
               <AnimatedRobot
                 src={tile.image}
                 alt={tile.title}
-                size="w-30 h-30"
+                size="w-28 h-28"
                 animationType={tile.animation}
                 showMessage={false}
                 showGlow={hoveredTile === tile.id}
                 className="mx-auto"
+                style={{
+                  transform: hoveredTile === tile.id ? 'scale(1.2)' : 'scale(1)',
+                  transition: 'transform 0.3s ease'
+                }}
               />
             </div>
             <h3 className="font-semibold text-gray-900 text-lg">

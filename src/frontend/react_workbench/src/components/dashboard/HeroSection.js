@@ -72,7 +72,7 @@ const HeroSection = () => {
               <img
                 src="/images/ai-amplifiers.png"
                 alt="AI Amplifiers"
-                className="w-[752px] h-[602px] md:w-[904px] md:h-[752px] object-contain"
+                className="w-[640px] h-[512px] md:w-[768px] md:h-[640px] object-contain"
               />
             </motion.div>
           </div>

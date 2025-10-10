@@ -1,4 +1,9 @@
 // Environment configuration for different deployment environments
+//
+// Backend Authentication:
+// - Set REACT_APP_ENABLE_BACKEND_AUTH=true in AWS to enable backend auth
+// - Ensure REACT_APP_API_URL points to your backend server (not frontend URL)
+// - Without backend auth, the app uses frontend-only authentication
 
 const config = {
   development: {
@@ -12,7 +17,8 @@ const config = {
     apiUrl: process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com',
     googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
     enableMockAuth: process.env.REACT_APP_GOOGLE_CLIENT_ID === 'demo-client-id',
-    enableBackendAuth: true,
+    // Disable backend auth until backend server is deployed
+    enableBackendAuth: process.env.REACT_APP_ENABLE_BACKEND_AUTH === 'true',
     environment: 'production'
   }
 };

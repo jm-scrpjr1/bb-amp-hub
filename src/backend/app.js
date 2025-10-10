@@ -316,10 +316,10 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
       return acc;
     }, {});
 
-    // Get group statistics
-    const totalGroups = await prisma.group.count();
-    const publicGroups = await prisma.group.count({ where: { visibility: 'PUBLIC' } });
-    const privateGroups = await prisma.group.count({ where: { visibility: 'PRIVATE' } });
+    // Group statistics - not available yet (no group table)
+    const totalGroups = 0;
+    const publicGroups = 0;
+    const privateGroups = 0;
 
     // Get recent users (last 7 days)
     const sevenDaysAgo = new Date();

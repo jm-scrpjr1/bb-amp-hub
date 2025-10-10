@@ -130,8 +130,8 @@ const WorkspaceQuickstart = () => {
                 alt={tile.title}
                 size="w-28 h-28"
                 animationType={tile.animation}
-                showMessage={hoveredTile === tile.id}
-                message={currentMessages[tile.id]}
+                showMessage={false}
+                message=""
                 showGlow={hoveredTile === tile.id}
                 className="mx-auto"
                 style={{
@@ -150,6 +150,35 @@ const WorkspaceQuickstart = () => {
                 <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
               </svg>
             </div>
+
+            {/* Cloud Chat Bubble */}
+            <AnimatePresence>
+              {hoveredTile === tile.id && currentMessages[tile.id] && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-50"
+                >
+                  <div className="relative bg-white rounded-3xl shadow-xl border border-gray-100 px-4 py-3 max-w-[200px]">
+                    <div className="text-xs text-gray-700 font-medium text-center leading-relaxed">
+                      {currentMessages[tile.id]}
+                    </div>
+
+                    {/* Cloud-like tail with multiple bubbles */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-1">
+                      {/* Large bubble */}
+                      <div className="w-4 h-4 bg-white rounded-full border border-gray-100 shadow-md"></div>
+                      {/* Medium bubble */}
+                      <div className="absolute top-2 left-2 w-3 h-3 bg-white rounded-full border border-gray-100 shadow-md"></div>
+                      {/* Small bubble */}
+                      <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full border border-gray-100 shadow-sm"></div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         ))}
       </div>

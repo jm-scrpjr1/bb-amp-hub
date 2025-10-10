@@ -124,16 +124,16 @@ const WorkspaceQuickstart = () => {
           >
             {/* Cloud Chat Bubble Thought */}
             <AnimatePresence>
-              {hoveredTile === tile.id && currentMessage && (
+              {hoveredTile === tile.id && currentMessages[tile.id] && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-20"
+                  className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-50"
                 >
                   <div className="relative bg-white rounded-3xl px-6 py-4 shadow-xl border border-gray-100 max-w-xs">
                     <p className="text-sm text-gray-700 font-medium leading-relaxed text-center">
-                      {currentMessage}
+                      {currentMessages[tile.id]}
                     </p>
 
                     {/* Cloud-like tail with multiple bubbles */}

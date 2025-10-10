@@ -179,7 +179,7 @@ const AnimatedRobot = ({
               initial={{ opacity: 0, scale: 0, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0, y: -20 }}
-              className="absolute -top-24 left-1/2 transform -translate-x-1/2 z-10"
+              className="absolute -top-24 left-1/2 transform -translate-x-1/2 z-50"
             >
               <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-lg border border-cyan-200/50">
                 <p className="text-base font-medium text-gray-800 whitespace-nowrap">{message}</p>

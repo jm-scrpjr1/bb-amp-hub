@@ -352,7 +352,7 @@ const TrainingsPage = () => {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 10 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-20"
+                        className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-50"
                       >
                         <div className="relative bg-white rounded-3xl shadow-xl border border-gray-100 px-4 py-3 max-w-[200px]">
                           <div className="text-xs text-gray-700 font-medium text-center leading-relaxed">

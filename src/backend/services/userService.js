@@ -71,6 +71,9 @@ class UserService {
       // God mode: Owner email always gets OWNER role
       const role = isOwnerEmail(email) ? UserRole.OWNER : UserRole.MEMBER;
 
+      console.log(`🔄 Upserting user: ${email} with role: ${role}`);
+      console.log(`📸 User image data:`, authUser.image);
+
       // Try to upsert in database first
       try {
         const user = await prisma.user.upsert({
@@ -89,11 +92,35 @@ class UserService {
             image: authUser.image,
             role,
             status: UserStatus.ACTIVE,
+            country: 'US', // Default country for new users
             lastLoginAt: new Date(),
             loginCount: 1,
           },
 
         });
+
+        // Auto-assign new users to General group if they're not in any groups
+        const userGroups = await prisma.groupMember.findMany({
+          where: { userId: user.id }
+        });
+
+        if (userGroups.length === 0) {
+          // Find General group
+          const generalGroup = await prisma.group.findFirst({
+            where: { name: 'General' }
+          });
+
+          if (generalGroup) {
+            await prisma.groupMember.create({
+              data: {
+                userId: user.id,
+                groupId: generalGroup.id,
+                role: 'MEMBER',
+                status: 'ACTIVE'
+              }
+            });
+          }
+        }
 
         return user;
       } catch (dbError) {

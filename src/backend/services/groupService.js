@@ -210,9 +210,29 @@ class GroupService {
   // Get group members
   static async getGroupMembers(groupId) {
     try {
-      const memberships = Array.from(mockMemberships.values())
-        .filter(m => m.groupId === groupId && m.status === MembershipStatus.ACTIVE);
-      
+      const memberships = await prisma.groupMember.findMany({
+        where: {
+          groupId: groupId,
+          status: 'ACTIVE'
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              role: true,
+              country: true
+            }
+          }
+        },
+        orderBy: [
+          { role: 'asc' },
+          { user: { name: 'asc' } }
+        ]
+      });
+
       return memberships;
     } catch (error) {
       console.error('Error fetching group members:', error);

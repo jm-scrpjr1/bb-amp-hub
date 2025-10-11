@@ -7,8 +7,11 @@ const GroupsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [healthAnalysis, setHealthAnalysis] = useState(null);
-  const [loadingHealth, setLoadingHealth] = useState(false);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     loadGroups();
@@ -28,32 +31,43 @@ const GroupsPage = () => {
     }
   };
 
-  const analyzeGroupHealth = async (groupId) => {
+  const loadGroupMembers = async (groupId) => {
     try {
-      setLoadingHealth(true);
-      const response = await apiService.getGroupHealth(groupId);
-      setHealthAnalysis(response.analysis);
+      setLoadingMembers(true);
+      const response = await apiService.getGroupMembers(groupId);
+      setGroupMembers(response.members || []);
       setError(null);
     } catch (err) {
       setError(err.message);
-      console.error('Error analyzing group health:', err);
+      console.error('Error loading group members:', err);
     } finally {
-      setLoadingHealth(false);
+      setLoadingMembers(false);
     }
   };
 
-  const testChatAPI = async () => {
-    try {
-      const response = await apiService.sendChatMessage('Hello ARIA, can you help me with group management?');
-      alert(`ARIA Response: ${response.response}`);
-    } catch (err) {
-      alert(`Chat Error: ${err.message}`);
-    }
+  const toggleFavorite = (groupId) => {
+    setFavorites(prev =>
+      prev.includes(groupId)
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    );
   };
 
-  // Separate groups by type (no more country groups)
-  const departmentGroups = groups.filter(group => group.type === 'DEPARTMENT');
-  const otherGroups = groups.filter(group => group.type !== 'DEPARTMENT');
+  // Filter groups based on search and filter
+  const filteredGroups = groups.filter(group => {
+    const matchesSearch = group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         group.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (selectedFilter === 'favorites') {
+      return matchesSearch && favorites.includes(group.id);
+    }
+
+    return matchesSearch;
+  });
+
+  // Separate groups by type
+  const departmentGroups = filteredGroups.filter(group => group.type === 'DEPARTMENT');
+  const otherGroups = filteredGroups.filter(group => group.type !== 'DEPARTMENT');
 
   const getGroupIcon = (type, name) => {
     if (type === 'DEPARTMENT') {
@@ -86,13 +100,33 @@ const GroupsPage = () => {
           ? 'border-purple-500 bg-purple-50 shadow-md'
           : 'border-gray-200 hover:border-purple-300'
       }`}
-      onClick={() => onClick(group)}
+      onClick={() => {
+        onClick(group);
+        loadGroupMembers(group.id);
+      }}
     >
       <div className="flex items-start gap-3">
         <span className="text-2xl">{getGroupIcon(group.type, group.name)}</span>
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900">{group.name}</h3>
-          <p className="text-sm text-gray-600 mt-1">{group.description}</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900">{group.name}</h3>
+              <p className="text-sm text-gray-600 mt-1">{group.description}</p>
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(group.id);
+              }}
+              className={`p-1 rounded-full transition-colors ${
+                favorites.includes(group.id)
+                  ? 'text-yellow-500 hover:text-yellow-600'
+                  : 'text-gray-400 hover:text-yellow-500'
+              }`}
+            >
+              ⭐
+            </button>
+          </div>
           <div className="flex gap-2 mt-3">
             <span className={`inline-block text-xs px-2 py-1 rounded-full ${
               group.type === 'DEPARTMENT'
@@ -132,12 +166,48 @@ const GroupsPage = () => {
             >
               Refresh Groups
             </button>
-            <button
-              onClick={testChatAPI}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Test Chat API
-            </button>
+          </div>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search groups..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-400">🔍</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedFilter('all')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  selectedFilter === 'all'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                All Groups
+              </button>
+              <button
+                onClick={() => setSelectedFilter('favorites')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  selectedFilter === 'favorites'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                ⭐ Favorites
+              </button>
+            </div>
           </div>
         </div>
 
@@ -181,11 +251,11 @@ const GroupsPage = () => {
             )}
           </div>
 
-          {/* Group Details & Health Analysis */}
+          {/* Group Details & Members */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">📊</span>
-              <h2 className="text-xl font-semibold text-gray-900">Group Analysis</h2>
+              <span className="text-2xl">👥</span>
+              <h2 className="text-xl font-semibold text-gray-900">Group Members</h2>
             </div>
             {selectedGroup ? (
               <div>
@@ -230,101 +300,70 @@ const GroupsPage = () => {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => analyzeGroupHealth(selectedGroup.id)}
-                  disabled={loadingHealth}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-3 rounded-lg hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 mb-4 flex items-center justify-center gap-2"
-                >
-                  {loadingHealth ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Analyzing...</span>
-                    </>
+                {/* Group Members List */}
+                <div className="mt-4">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <span>👥</span>
+                    <span>Members ({groupMembers.length})</span>
+                  </h4>
+
+                  {loadingMembers ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                      <span className="ml-2 text-gray-600">Loading members...</span>
+                    </div>
+                  ) : groupMembers.length === 0 ? (
+                    <div className="text-center py-8 bg-gray-50 rounded-lg">
+                      <span className="text-4xl mb-2 block">👥</span>
+                      <p className="text-gray-600">No members found in this group</p>
+                    </div>
                   ) : (
-                    <>
-                      <span>🔍</span>
-                      <span>Analyze Group Health</span>
-                    </>
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {groupMembers.map((member) => (
+                        <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-semibold overflow-hidden">
+                            {member.user?.image ? (
+                              <img
+                                src={member.user.image}
+                                alt={member.user.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <span className={member.user?.image ? 'hidden' : 'block'}>
+                              {member.user?.name?.charAt(0)?.toUpperCase() || '?'}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{member.user?.name || 'Unknown User'}</div>
+                            <div className="text-sm text-gray-600">{member.user?.email}</div>
+                          </div>
+                          <div className="flex gap-2">
+                            <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                              member.role === 'ADMIN'
+                                ? 'bg-red-100 text-red-800'
+                                : member.role === 'MODERATOR'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {member.role}
+                            </span>
+                            <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                              member.status === 'ACTIVE'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {member.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </button>
-
-                {healthAnalysis && (
-                  <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      <span>📈</span>
-                      <span>Health Analysis</span>
-                    </h4>
-                    <div className="mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">Health Score</span>
-                        <span className={`font-bold text-lg ${
-                          healthAnalysis.healthScore >= 80 ? 'text-green-600' :
-                          healthAnalysis.healthScore >= 60 ? 'text-yellow-600' : 'text-red-600'
-                        }`}>
-                          {healthAnalysis.healthScore}/100
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full ${
-                            healthAnalysis.healthScore >= 80 ? 'bg-green-600' :
-                            healthAnalysis.healthScore >= 60 ? 'bg-yellow-600' : 'bg-red-600'
-                          }`}
-                          style={{ width: `${healthAnalysis.healthScore}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <h5 className="font-medium text-sm mb-2 flex items-center gap-1">
-                        <span>💡</span>
-                        <span>Insights</span>
-                      </h5>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        {healthAnalysis.insights.map((insight, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-blue-500 mt-1">•</span>
-                            <span>{insight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="mb-4">
-                      <h5 className="font-medium text-sm mb-2 flex items-center gap-1">
-                        <span>🎯</span>
-                        <span>Recommendations</span>
-                      </h5>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        {healthAnalysis.recommendations.map((rec, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-green-500 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="bg-white rounded-lg p-3">
-                        <span className="text-gray-600">Members</span>
-                        <div className="font-semibold text-lg text-gray-900">{healthAnalysis.metrics.memberCount}</div>
-                      </div>
-                      <div className="bg-white rounded-lg p-3">
-                        <span className="text-gray-600">Active</span>
-                        <div className="font-semibold text-lg text-gray-900">{healthAnalysis.metrics.activeMembers}</div>
-                      </div>
-                      <div className="bg-white rounded-lg p-3">
-                        <span className="text-gray-600">Engagement</span>
-                        <div className="font-semibold text-lg text-gray-900">{healthAnalysis.metrics.engagementScore}%</div>
-                      </div>
-                      <div className="bg-white rounded-lg p-3">
-                        <span className="text-gray-600">Diversity</span>
-                        <div className="font-semibold text-lg text-gray-900">{healthAnalysis.metrics.diversityScore}%</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             ) : (
               <div className="text-center py-12">

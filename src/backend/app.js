@@ -683,6 +683,27 @@ app.post('/api/groups', authenticateUser, async (req, res) => {
   }
 });
 
+// Group members endpoint
+app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Check if user can view this group's members
+    if (!PermissionService.hasGodMode(req.user) && !PermissionService.canViewGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const members = await GroupService.getGroupMembers(groupId);
+    res.json({
+      success: true,
+      members
+    });
+  } catch (error) {
+    console.error('Error fetching group members:', error);
+    res.status(500).json({ error: 'Failed to fetch group members' });
+  }
+});
+
 // Group health analysis endpoint
 app.get('/api/groups/:groupId/ai/health', authenticateUser, async (req, res) => {
   try {

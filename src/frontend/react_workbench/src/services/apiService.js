@@ -101,12 +101,12 @@ class ApiService {
     }
   }
 
-  async getGroupHealth(groupId) {
+  async getGroupMembers(groupId) {
     try {
-      const response = await this.api.get(`/groups/${groupId}/ai/health`);
+      const response = await this.api.get(`/groups/${groupId}/members`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to get group health analysis');
+      throw new Error(error.response?.data?.message || 'Failed to get group members');
     }
   }
 

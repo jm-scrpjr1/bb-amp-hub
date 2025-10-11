@@ -688,12 +688,26 @@ app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
   try {
     const { groupId } = req.params;
 
-    // Check if user can view this group's members
-    if (!PermissionService.hasGodMode(req.user) && !PermissionService.canViewGroup(req.user, groupId)) {
+    console.log('🔍 Group members request:', {
+      groupId,
+      userEmail: req.user?.email,
+      userRole: req.user?.role,
+      hasGodMode: PermissionService.hasGodMode(req.user)
+    });
+
+    // OWNER and SUPER_ADMIN have full access to all groups
+    const hasFullAccess = req.user?.role === 'OWNER' ||
+                         req.user?.role === 'SUPER_ADMIN' ||
+                         PermissionService.hasGodMode(req.user);
+
+    if (!hasFullAccess) {
+      console.log('❌ User lacks permission to view group members');
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
     const members = await GroupService.getGroupMembers(groupId);
+    console.log('✅ Found group members:', members.length);
+
     res.json({
       success: true,
       members

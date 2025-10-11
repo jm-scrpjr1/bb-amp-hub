@@ -210,7 +210,7 @@ class GroupService {
   // Get group members
   static async getGroupMembers(groupId) {
     try {
-      const memberships = await prisma.groupMember.findMany({
+      const memberships = await prisma.groupMembership.findMany({
         where: {
           groupId: groupId,
           status: 'ACTIVE'

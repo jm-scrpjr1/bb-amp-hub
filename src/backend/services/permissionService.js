@@ -200,8 +200,38 @@ class PermissionService {
            user?.role === 'SUPER_ADMIN';
   }
 
+  // Can add/remove users from groups - SUPER_ADMIN and OWNER only
+  static canManageGroupMembers(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
+  // Can edit user details (name, role, groups) - SUPER_ADMIN and OWNER only
+  static canEditUserDetails(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
+  // Can delete users - SUPER_ADMIN and OWNER only
+  static canDeleteUsers(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
   // Group management permissions
   static canCreateGroups(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
+  // Can delete groups - SUPER_ADMIN and OWNER only
+  static canDeleteGroups(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
+  // Can edit group details - SUPER_ADMIN and OWNER only
+  static canEditGroups(user) {
     return this.hasGodMode(user) ||
            user?.role === 'SUPER_ADMIN';
   }

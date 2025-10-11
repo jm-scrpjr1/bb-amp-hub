@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import AnimatedRobot from '../ui/AnimatedRobot';
 
 const quickstartTiles = [
@@ -62,6 +63,7 @@ const quickstartTiles = [
 ];
 
 const WorkspaceQuickstart = () => {
+  const navigate = useNavigate();
   const [hoveredTile, setHoveredTile] = useState(null);
   const [currentMessages, setCurrentMessages] = useState({});
 
@@ -76,6 +78,25 @@ const WorkspaceQuickstart = () => {
 
   const handleTileLeave = () => {
     setHoveredTile(null);
+  };
+
+  const handleTileClick = (tileId) => {
+    switch (tileId) {
+      case 'prompts':
+        navigate('/prompt-tutor');
+        break;
+      case 'automations':
+        navigate('/automations');
+        break;
+      case 'ai-agents':
+        navigate('/ai-agents');
+        break;
+      case 'training':
+        navigate('/trainings');
+        break;
+      default:
+        console.log(`Navigation not implemented for ${tileId}`);
+    }
   };
 
   const getColorClasses = (color) => {
@@ -115,12 +136,17 @@ const WorkspaceQuickstart = () => {
             className={`${getColorClasses(tile.color)} border-2 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-2xl text-center relative overflow-visible`}
             onMouseEnter={() => handleTileHover(tile)}
             onMouseLeave={handleTileLeave}
+            onClick={() => handleTileClick(tile.id)}
             whileHover={{
-              scale: 1.05,
-              y: -8,
-              transition: { duration: 0.2 }
+              scale: 1.08,
+              y: -12,
+              rotate: [0, -2, 2, 0],
+              transition: {
+                duration: 0.15,
+                rotate: { duration: 0.3, repeat: Infinity }
+              }
             }}
-            whileTap={{ scale: 0.98 }}
+            whileTap={{ scale: 0.95 }}
           >
 
 

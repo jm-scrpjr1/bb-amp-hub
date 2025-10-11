@@ -63,19 +63,19 @@ const AnimatedRobot = ({
   };
 
   const getAnimationVariants = () => {
-    // Add random delays and variations to prevent synchronized movement
-    const randomDelay = Math.random() * 2; // 0-2 second random delay
-    const randomDuration = 2.5 + Math.random() * 2; // 2.5-4.5 second random duration
-    const randomIntensity = 0.7 + Math.random() * 0.6; // 0.7-1.3 intensity multiplier
+    // Add random delays and variations to prevent synchronized movement - FASTER & MORE LIVELY
+    const randomDelay = Math.random() * 0.5; // 0-0.5 second random delay (faster)
+    const randomDuration = 0.8 + Math.random() * 0.7; // 0.8-1.5 second random duration (much faster)
+    const randomIntensity = 1.2 + Math.random() * 0.8; // 1.2-2.0 intensity multiplier (more intense)
 
     switch (animationType) {
       case 'bounce':
         return {
           animate: {
-            y: [0, -20 * randomIntensity, 0],
-            x: [0, 6 * randomIntensity, -6 * randomIntensity, 0],
-            rotate: [0, 5 * randomIntensity, -5 * randomIntensity, 0],
-            scale: [1, 1.05 * randomIntensity, 1]
+            y: [0, -25 * randomIntensity, 0],
+            x: [0, 10 * randomIntensity, -10 * randomIntensity, 0],
+            rotate: [0, 8 * randomIntensity, -8 * randomIntensity, 0],
+            scale: [1, 1.1 * randomIntensity, 1]
           },
           transition: {
             duration: randomDuration,
@@ -87,24 +87,24 @@ const AnimatedRobot = ({
       case 'shake':
         return {
           animate: {
-            x: [0, -8 * randomIntensity, 8 * randomIntensity, -8 * randomIntensity, 8 * randomIntensity, 0],
-            y: [0, -4 * randomIntensity, 4 * randomIntensity, -4 * randomIntensity, 4 * randomIntensity, 0],
-            rotate: [0, -2 * randomIntensity, 2 * randomIntensity, -2 * randomIntensity, 2 * randomIntensity, 0]
+            x: [0, -12 * randomIntensity, 12 * randomIntensity, -12 * randomIntensity, 12 * randomIntensity, 0],
+            y: [0, -6 * randomIntensity, 6 * randomIntensity, -6 * randomIntensity, 6 * randomIntensity, 0],
+            rotate: [0, -4 * randomIntensity, 4 * randomIntensity, -4 * randomIntensity, 4 * randomIntensity, 0]
           },
           transition: {
-            duration: 1 + Math.random() * 0.5,
+            duration: 0.4 + Math.random() * 0.3, // Much faster
             repeat: Infinity,
-            repeatDelay: 1.5 + Math.random() * 1.5,
+            repeatDelay: 0.2 + Math.random() * 0.3, // Much shorter delay
             delay: randomDelay
           }
         };
       case 'float':
         return {
           animate: {
-            y: [0, -18 * randomIntensity, 0],
-            x: [0, 8 * randomIntensity, -8 * randomIntensity, 0],
-            rotate: [0, 4 * randomIntensity, -4 * randomIntensity, 0],
-            scale: [1, 1.03 * randomIntensity, 1]
+            y: [0, -22 * randomIntensity, 0],
+            x: [0, 12 * randomIntensity, -12 * randomIntensity, 0],
+            rotate: [0, 6 * randomIntensity, -6 * randomIntensity, 0],
+            scale: [1, 1.08 * randomIntensity, 1]
           },
           transition: {
             duration: randomDuration,
@@ -116,27 +116,27 @@ const AnimatedRobot = ({
       case 'wiggle':
         return {
           animate: {
-            rotate: [0, 12 * randomIntensity, -12 * randomIntensity, 12 * randomIntensity, -12 * randomIntensity, 0],
-            scale: [1, 1.1 * randomIntensity, 0.98, 1.1 * randomIntensity, 0.98, 1],
-            x: [0, 4 * randomIntensity, -4 * randomIntensity, 0],
-            y: [0, -6 * randomIntensity, 6 * randomIntensity, 0]
+            rotate: [0, 15 * randomIntensity, -15 * randomIntensity, 15 * randomIntensity, -15 * randomIntensity, 0],
+            scale: [1, 1.15 * randomIntensity, 0.95, 1.15 * randomIntensity, 0.95, 1],
+            x: [0, 8 * randomIntensity, -8 * randomIntensity, 0],
+            y: [0, -10 * randomIntensity, 10 * randomIntensity, 0]
           },
           transition: {
-            duration: 1.5 + Math.random() * 1,
+            duration: 0.6 + Math.random() * 0.4, // Much faster
             repeat: Infinity,
-            repeatDelay: 0.8 + Math.random() * 1.2,
+            repeatDelay: 0.1 + Math.random() * 0.3, // Much shorter delay
             delay: randomDelay
           }
         };
       case 'gentle':
         return {
           animate: {
-            y: [0, -8 * randomIntensity, 0],
-            rotate: [0, 1.5 * randomIntensity, -1.5 * randomIntensity, 0],
-            scale: [1, 1.015 * randomIntensity, 1]
+            y: [0, -15 * randomIntensity, 0],
+            rotate: [0, 3 * randomIntensity, -3 * randomIntensity, 0],
+            scale: [1, 1.05 * randomIntensity, 1]
           },
           transition: {
-            duration: randomDuration + 1,
+            duration: randomDuration + 0.3, // Still faster than before
             repeat: Infinity,
             ease: "easeInOut",
             delay: randomDelay
@@ -145,9 +145,10 @@ const AnimatedRobot = ({
       default:
         return {
           animate: {
-            y: [0, -15 * randomIntensity, 0],
-            x: [0, 7 * randomIntensity, -7 * randomIntensity, 0],
-            rotate: [0, 3 * randomIntensity, -3 * randomIntensity, 0]
+            y: [0, -20 * randomIntensity, 0],
+            x: [0, 10 * randomIntensity, -10 * randomIntensity, 0],
+            rotate: [0, 5 * randomIntensity, -5 * randomIntensity, 0],
+            scale: [1, 1.06 * randomIntensity, 1]
           },
           transition: {
             duration: randomDuration,
@@ -196,11 +197,17 @@ const AnimatedRobot = ({
         className={`${size} relative cursor-pointer`}
         {...getAnimationVariants()}
         whileHover={{
-          scale: 1.2,
-          rotate: [0, -5, 5, -5, 5, 0],
-          transition: { duration: 0.5, type: "spring", stiffness: 300 }
+          scale: 1.25,
+          rotate: [0, -8, 8, -8, 8, 0],
+          y: [0, -5, 5, 0],
+          transition: {
+            duration: 0.3,
+            type: "spring",
+            stiffness: 400,
+            rotate: { duration: 0.2, repeat: Infinity }
+          }
         }}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.9 }}
         onClick={handleRobotClick}
       >
         <img
@@ -219,13 +226,15 @@ const AnimatedRobot = ({
             className="absolute inset-0 rounded-full"
             animate={{
               boxShadow: [
-                '0 0 20px rgba(6, 229, 236, 0.3)',
-                '0 0 40px rgba(6, 229, 236, 0.6)',
-                '0 0 20px rgba(6, 229, 236, 0.3)'
-              ]
+                '0 0 25px rgba(6, 229, 236, 0.4)',
+                '0 0 50px rgba(6, 229, 236, 0.8)',
+                '0 0 25px rgba(6, 229, 236, 0.4)'
+              ],
+              scale: [1, 1.05, 1],
+              rotate: [0, 180, 360]
             }}
             transition={{
-              duration: 2,
+              duration: 1.2,
               repeat: Infinity,
               ease: "easeInOut"
             }}

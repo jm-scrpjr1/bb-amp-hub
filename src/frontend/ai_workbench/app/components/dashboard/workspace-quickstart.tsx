@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollEffects } from '@/components/effects';
 import { MoreHorizontal } from '@/components/icons';
+import { useRouter } from 'next/navigation';
 
 interface QuickstartTile {
   id: string;
@@ -78,10 +79,11 @@ const getAnimationVariants = (animation: string) => {
     case 'bounce':
       return {
         animate: {
-          y: [0, -15, 0],
-          scale: [1, 1.05, 1],
+          y: [0, -20, 0],
+          scale: [1, 1.08, 1],
+          rotate: [0, 3, -3, 0],
           transition: {
-            duration: 2.5,
+            duration: 1.2,
             repeat: Infinity,
             ease: "easeInOut",
             times: [0, 0.5, 1]
@@ -91,13 +93,14 @@ const getAnimationVariants = (animation: string) => {
     case 'shake':
       return {
         animate: {
-          x: [0, -3, 3, -3, 3, 0],
-          rotate: [0, -2, 2, -2, 2, 0],
+          x: [0, -5, 5, -5, 5, 0],
+          rotate: [0, -3, 3, -3, 3, 0],
+          scale: [1, 1.02, 1],
           transition: {
-            duration: 2,
+            duration: 0.8,
             repeat: Infinity,
             ease: "easeInOut",
-            repeatDelay: 1
+            repeatDelay: 0.5
           }
         }
       };
@@ -105,15 +108,21 @@ const getAnimationVariants = (animation: string) => {
       return {
         animate: {
           rotate: [0, 360],
-          scale: [1, 1.1, 1],
+          scale: [1, 1.12, 1],
+          y: [0, -8, 0],
           transition: {
             rotate: {
-              duration: 6,
+              duration: 3,
               repeat: Infinity,
               ease: "linear"
             },
             scale: {
-              duration: 3,
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            },
+            y: {
+              duration: 2,
               repeat: Infinity,
               ease: "easeInOut"
             }
@@ -123,11 +132,12 @@ const getAnimationVariants = (animation: string) => {
     case 'float':
       return {
         animate: {
-          y: [0, -12, 0],
-          x: [0, 3, -3, 0],
-          rotate: [0, 5, -5, 0],
+          y: [0, -18, 0],
+          x: [0, 5, -5, 0],
+          rotate: [0, 8, -8, 0],
+          scale: [1, 1.05, 1],
           transition: {
-            duration: 4,
+            duration: 2,
             repeat: Infinity,
             ease: "easeInOut"
           }
@@ -139,6 +149,7 @@ const getAnimationVariants = (animation: string) => {
 };
 
 function WorkspaceQuickstart() {
+  const router = useRouter();
   const [hoveredTile, setHoveredTile] = useState<string | null>(null);
   const [currentMessages, setCurrentMessages] = useState<{[key: string]: string}>({});
 
@@ -158,6 +169,25 @@ function WorkspaceQuickstart() {
     setHoveredTile(null);
   };
 
+  const handleTileClick = (tileId: string) => {
+    switch (tileId) {
+      case 'prompts':
+        router.push('/prompt-tutor');
+        break;
+      case 'automations':
+        router.push('/automations');
+        break;
+      case 'ai-agents':
+        router.push('/ai-agents');
+        break;
+      case 'training':
+        router.push('/trainings');
+        break;
+      default:
+        console.log(`Navigation not implemented for ${tileId}`);
+    }
+  };
+
   return (
     <div className="mb-8">
       <ScrollEffects effect="fadeUp" delay={0.2}>
@@ -173,6 +203,7 @@ function WorkspaceQuickstart() {
               whileTap={{ scale: 0.98 }}
               onMouseEnter={() => handleTileHover(tile.id, tile.wittyMessages)}
               onMouseLeave={handleTileLeave}
+              onClick={() => handleTileClick(tile.id)}
             >
               {/* Header with title and menu */}
               <div className="flex items-center justify-between mb-6">
@@ -188,18 +219,21 @@ function WorkspaceQuickstart() {
                   className="w-48 h-48 flex items-center justify-center relative z-10"
                   {...getAnimationVariants(tile.animation)}
                   whileHover={{
-                    scale: 1.15,
-                    rotate: [0, -5, 5, -5, 0],
+                    scale: 1.2,
+                    rotate: [0, -8, 8, -8, 0],
+                    y: [0, -12, 0],
                     transition: {
-                      scale: { duration: 0.3 },
-                      rotate: { duration: 0.6, repeat: Infinity }
+                      scale: { duration: 0.2 },
+                      rotate: { duration: 0.4, repeat: Infinity },
+                      y: { duration: 0.3, repeat: Infinity }
                     }
                   }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.9 }}
                   animate={{
-                    y: [0, -8, 0],
+                    y: [0, -12, 0],
+                    x: [0, 2, -2, 0],
                     transition: {
-                      duration: 2,
+                      duration: 1.5,
                       repeat: Infinity,
                       ease: "easeInOut"
                     }
@@ -252,11 +286,12 @@ function WorkspaceQuickstart() {
                                'linear-gradient(45deg, #7c3aed, #a78bfa)'
                   }}
                   animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.2, 0.4, 0.2]
+                    scale: [1, 1.3, 1],
+                    opacity: [0.2, 0.6, 0.2],
+                    rotate: [0, 180, 360]
                   }}
                   transition={{
-                    duration: 3,
+                    duration: 2,
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}

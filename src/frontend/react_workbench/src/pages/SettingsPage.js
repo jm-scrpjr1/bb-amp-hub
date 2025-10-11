@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const SettingsPage = () => {
   const { user, isAuthenticated, loading } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, boldBusinessTheme, toggleBoldBusinessTheme } = useTheme();
   const navigate = useNavigate();
 
   // Settings state
@@ -116,11 +116,11 @@ const SettingsPage = () => {
             Appearance
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-gray-900">Theme</p>
-                <p className="text-sm text-gray-600">Choose your preferred theme</p>
+                <p className="font-medium text-gray-900">Dark Mode</p>
+                <p className="text-sm text-gray-600">Toggle between light and dark theme</p>
               </div>
               <button
                 onClick={toggleTheme}
@@ -131,6 +131,25 @@ const SettingsPage = () => {
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                     theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900">Bold Business Theme</p>
+                <p className="text-sm text-gray-600">Use the dev.boldbusiness.com color palette and design</p>
+              </div>
+              <button
+                onClick={toggleBoldBusinessTheme}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  boldBusinessTheme ? 'bg-cyan-500' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    boldBusinessTheme ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
               </button>

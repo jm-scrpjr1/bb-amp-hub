@@ -23,6 +23,7 @@ import {
   Circle,
   Shield
 } from 'lucide-react';
+import { useTheme } from '../../providers/ThemeProvider';
 
 // Navigation items matching the Next.js workbench structure
 const navigationItems = [
@@ -71,6 +72,7 @@ const iconMap = {
 const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { boldBusinessTheme } = useTheme();
   const [activeItem, setActiveItem] = useState('home');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
@@ -163,15 +165,19 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
           </button>
         </div>
 
-        {/* Logo Section */}
+        {/* Logo Section - Always visible, styled based on theme */}
         <div className="p-6 border-b border-gray-200">
           <Link to="/" className="block hover:opacity-80 transition-opacity duration-200">
             <div className="flex flex-col items-center">
-              <div className="text-sm text-gray-500 font-medium mb-2">Bold Business</div>
+              <div className={`text-sm font-medium mb-2 ${boldBusinessTheme ? 'text-cyan-400' : 'text-gray-500'}`}>
+                Bold Business
+              </div>
               <img
                 src="/images/AI Workbench Logo.png"
                 alt="AI Workbench Logo"
-                className="h-15 object-contain"
+                className={`h-15 object-contain transition-all duration-300 ${
+                  boldBusinessTheme ? 'filter brightness-110 drop-shadow-lg' : ''
+                }`}
               />
             </div>
           </Link>

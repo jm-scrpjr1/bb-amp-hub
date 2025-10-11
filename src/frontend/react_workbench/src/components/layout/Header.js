@@ -114,9 +114,11 @@ const Header = ({ onMenuClick }) => {
             </button>
           </div>
 
-          {/* Center - Extended AI Search */}
-          <div className="flex-1 flex justify-center px-4 max-w-4xl">
-            <AISearch className="w-full" />
+          {/* Center - AI Search - Always centered */}
+          <div className="flex-1 flex justify-center px-4">
+            <div className="w-full max-w-2xl">
+              <AISearch className="w-full" />
+            </div>
           </div>
 
           {/* Right side */}

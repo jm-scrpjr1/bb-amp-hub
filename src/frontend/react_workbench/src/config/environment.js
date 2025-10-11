@@ -29,12 +29,17 @@ const getCurrentEnvironment = () => {
   if (window.location.hostname.includes('amplifyapp.com')) {
     return 'production';
   }
-  
+
+  // Check if we're on production domains
+  if (window.location.hostname.includes('boldbusiness.com')) {
+    return 'production';
+  }
+
   // Check if we're on localhost
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'development';
   }
-  
+
   // Default to production for other domains
   return 'production';
 };

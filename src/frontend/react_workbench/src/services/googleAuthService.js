@@ -157,7 +157,9 @@ class GoogleAuthService {
             }
           },
           auto_select: false,
-          cancel_on_tap_outside: false
+          cancel_on_tap_outside: false,
+          // Add COOP-friendly configuration
+          use_fedcm_for_prompt: true
         });
 
         // Create a temporary button and trigger click
@@ -182,7 +184,16 @@ class GoogleAuthService {
             button.click();
           } else {
             console.log('Button not found, trying prompt...');
-            window.google.accounts.id.prompt();
+            try {
+              window.google.accounts.id.prompt();
+            } catch (promptError) {
+              console.error('Prompt failed, likely due to COOP policy:', promptError);
+              console.log('Trying OAuth popup fallback...');
+              this.showOAuthPopup().then(resolve).catch(() => {
+                console.log('OAuth popup also failed, using mock authentication');
+                resolve(this.getMockUser());
+              });
+            }
           }
 
           // Clean up
@@ -195,8 +206,16 @@ class GoogleAuthService {
 
       } catch (error) {
         console.error('Google sign-in error:', error);
-        console.log('Falling back to mock authentication');
-        resolve(this.getMockUser());
+        if (error.message && error.message.includes('Cross-Origin-Opener-Policy')) {
+          console.log('COOP error detected, trying OAuth popup fallback...');
+          this.showOAuthPopup().then(resolve).catch(() => {
+            console.log('OAuth popup also failed, using mock authentication');
+            resolve(this.getMockUser());
+          });
+        } else {
+          console.log('Falling back to mock authentication');
+          resolve(this.getMockUser());
+        }
       }
     });
   }

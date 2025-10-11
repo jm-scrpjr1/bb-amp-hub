@@ -8,10 +8,10 @@ datasource db {
 }
 
 enum UserRole {
-    OWNER
-    ADMIN
-    TEAM_MANAGER
-    MEMBER
+    OWNER           // God mode access to ALL
+    SUPER_ADMIN     // Can manage groups and users (add, update, delete)
+    MANAGER         // Can view users in the groups they belong to
+    MEMBER          // Basic access own groups
 }
 
 enum GroupType {
@@ -36,34 +36,55 @@ enum MembershipStatus {
 }
 
 enum Permission {
-    // Group Management
+    // God Mode (OWNER only)
+    GOD_MODE                    // Full access to everything
+
+    // Group Management (SUPER_ADMIN, OWNER)
     CREATE_GROUP
     DELETE_GROUP
     EDIT_GROUP
     MANAGE_GROUP_MEMBERS
     VIEW_ALL_GROUPS
 
-    // User Management
+    // User Management (SUPER_ADMIN, OWNER)
     MANAGE_USERS
-    VIEW_USER_PROFILES
+    VIEW_ALL_USER_PROFILES
     ASSIGN_ROLES
+    DELETE_USERS
 
-    // Content Access
+    // Manager Permissions (MANAGER, SUPER_ADMIN, OWNER)
+    VIEW_GROUP_MEMBERS
+    MANAGE_OWN_GROUP_MEMBERS
+
+    // Content Access (Country-based)
+    VIEW_PH_RESOURCES           // Philippines resources
+    VIEW_COL_RESOURCES          // Colombia resources
+    VIEW_MX_RESOURCES           // Mexico resources
+    VIEW_US_RESOURCES           // United States resources
+    VIEW_IN_RESOURCES           // India resources
+
+    // Department Access
     VIEW_HR_CONTENT
     VIEW_IT_CONTENT
     VIEW_FINANCE_CONTENT
     VIEW_MARKETING_CONTENT
-    VIEW_ADMIN_CONTENT
+    VIEW_SALES_CONTENT
+    VIEW_DEVELOPER_CONTENT
 
-    // System Administration
+    // System Administration (SUPER_ADMIN, OWNER)
     ADMIN_PANEL_ACCESS
     SYSTEM_SETTINGS
     ANALYTICS_ACCESS
 
-    // AI Features
+    // AI Features (All roles)
     AI_TRAINING_ACCESS
     AI_ASSESSMENT_ACCESS
     PROMPT_TUTOR_ACCESS
+
+    // Basic Access (All roles)
+    VIEW_OWN_PROFILE
+    EDIT_OWN_PROFILE
+    VIEW_OWN_GROUPS
 }
 
 enum UserStatus {
@@ -79,11 +100,7 @@ model User {
     image         String?
     role          UserRole    @default(MEMBER)
     status        UserStatus  @default(ACTIVE)
-
-    // Legacy team support (keeping for backward compatibility)
-    teamId        String?
-    team          Team?       @relation(fields: [teamId], references: [id])
-    managedTeams  Team[]      @relation("TeamManager")
+    country       String?     // Country code (PH, COL, MX, US, IN, etc.)
 
     // New group system
     groupMemberships    GroupMembership[]
@@ -104,19 +121,7 @@ model User {
     @@map("users")
 }
 
-model Team {
-    id          String   @id @default(cuid())
-    name        String
-    description String?
-    managerId   String?
-    manager     User?    @relation("TeamManager", fields: [managerId], references: [id])
-    members     User[]
 
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
-
-    @@map("teams")
-}
 
 model Group {
     id              String          @id @default(cuid())

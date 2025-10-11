@@ -405,6 +405,12 @@ app.get("/api/user/profile", authenticateUser, async (req, res) => {
   try {
     const user = req.user;
 
+    // Get user's group memberships
+    const userGroups = await GroupService.getUserGroups(user.id);
+
+    // Get managed groups
+    const managedGroups = userGroups.filter(group => group.membershipRole === 'MANAGER');
+
     res.json({
       success: true,
       user: {
@@ -414,9 +420,10 @@ app.get("/api/user/profile", authenticateUser, async (req, res) => {
         image: user.image,
         role: user.role,
         status: user.status,
+        country: user.country,
         permissions: user.permissions || [],
-        groupMemberships: user.groupMemberships || [],
-        managedGroups: user.managedGroups || []
+        groupMemberships: userGroups || [],
+        managedGroups: managedGroups || []
       }
     });
   } catch (error) {
@@ -894,34 +901,7 @@ app.put('/api/permissions/user/:userId', authenticateUser, async (req, res) => {
   }
 });
 
-// User profile endpoints
-app.get('/api/user/profile', authenticateUser, async (req, res) => {
-  try {
-    // Get user with full permissions and group memberships
-    const user = req.user;
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Get user's group memberships
-    const userGroups = await GroupService.getUserGroups(user.id);
-
-    // Get managed groups (mock for now)
-    const managedGroups = userGroups.filter(group => group.membershipRole === 'MANAGER');
-
-    const userWithGroups = {
-      ...user,
-      groupMemberships: userGroups,
-      managedGroups
-    };
-
-    res.json(userWithGroups);
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
 
 app.patch('/api/user/profile', authenticateUser, async (req, res) => {
   try {

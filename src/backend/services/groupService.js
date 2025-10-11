@@ -1,94 +1,89 @@
 // Group service for managing groups, memberships, and permissions
-// JavaScript version converted from TypeScript
+// Updated to use Prisma database
 
+const { PrismaClient } = require('@prisma/client');
 const { GroupType, GroupVisibility, MembershipStatus } = require('./permissionService');
 
-// Mock database for development
-const mockGroups = new Map();
-const mockMemberships = new Map();
-
-// Initialize with some sample data
-const sampleGroups = [
-  {
-    id: 'group-1',
-    name: 'Engineering Team',
-    description: 'Software development and engineering',
-    type: GroupType.DEPARTMENT,
-    visibility: GroupVisibility.PUBLIC,
-    maxMembers: 50,
-    autoApprove: false,
-    tags: ['engineering', 'development'],
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdById: 'user-1'
-  },
-  {
-    id: 'group-2',
-    name: 'Marketing Team',
-    description: 'Marketing and communications',
-    type: GroupType.DEPARTMENT,
-    visibility: GroupVisibility.PUBLIC,
-    maxMembers: 20,
-    autoApprove: true,
-    tags: ['marketing', 'communications'],
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdById: 'user-1'
-  }
-];
-
-// Initialize sample groups
-sampleGroups.forEach(group => {
-  mockGroups.set(group.id, group);
-});
+const prisma = new PrismaClient();
 
 class GroupService {
   // Get all groups with filtering and pagination
   static async getGroups(options = {}) {
     try {
-      const { 
-        page = 1, 
-        limit = 20, 
-        search, 
-        type, 
-        visibility, 
-        tags 
+      const {
+        page = 1,
+        limit = 20,
+        search,
+        type,
+        visibility
       } = options;
-      
-      let groups = Array.from(mockGroups.values()).filter(g => g.isActive);
-      
+
+      // Build where clause for filtering
+      const where = {
+        isActive: true
+      };
+
       // Apply filters
       if (search) {
-        const searchLower = search.toLowerCase();
-        groups = groups.filter(group => 
-          group.name.toLowerCase().includes(searchLower) ||
-          group.description?.toLowerCase().includes(searchLower)
-        );
-      }
-      
-      if (type) {
-        groups = groups.filter(group => group.type === type);
-      }
-      
-      if (visibility) {
-        groups = groups.filter(group => group.visibility === visibility);
-      }
-      
-      if (tags && tags.length > 0) {
-        groups = groups.filter(group => 
-          group.tags?.some(tag => tags.includes(tag))
-        );
+        where.OR = [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ];
       }
 
-      // Pagination
-      const total = groups.length;
+      if (type) {
+        where.type = type;
+      }
+
+      if (visibility) {
+        where.visibility = visibility;
+      }
+
+      // Get total count for pagination
+      const total = await prisma.group.count({ where });
+
+      // Get groups with pagination
       const skip = (page - 1) * limit;
-      const paginatedGroups = groups.slice(skip, skip + limit);
+      const groups = await prisma.group.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: [
+          { type: 'asc' },
+          { name: 'asc' }
+        ],
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          _count: {
+            select: {
+              memberships: {
+                where: {
+                  status: 'ACTIVE'
+                }
+              }
+            }
+          }
+        }
+      });
 
       return {
-        groups: paginatedGroups,
+        groups: groups.map(group => ({
+          ...group,
+          memberCount: group._count.memberships
+        })),
         total,
         page,
         limit,
@@ -109,7 +104,41 @@ class GroupService {
   // Get group by ID
   static async getGroupById(groupId) {
     try {
-      return mockGroups.get(groupId) || null;
+      const group = await prisma.group.findUnique({
+        where: { id: groupId },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          memberships: {
+            where: {
+              status: 'ACTIVE'
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      return group;
     } catch (error) {
       console.error('Error fetching group by ID:', error);
       return null;

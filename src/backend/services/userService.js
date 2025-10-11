@@ -7,12 +7,12 @@ const { GoogleWorkspaceService } = require('./googleWorkspaceService');
 // Mock database for development - fallback when database is not available
 const mockUsers = new Map();
 
-// User roles and statuses
+// User roles and statuses - Updated for new RBAC system
 const UserRole = {
-  OWNER: 'OWNER',
-  ADMIN: 'ADMIN',
-  TEAM_MANAGER: 'TEAM_MANAGER',
-  MEMBER: 'MEMBER'
+  OWNER: 'OWNER',           // God mode access to ALL
+  SUPER_ADMIN: 'SUPER_ADMIN', // Can manage groups and users (add, update, delete)
+  MANAGER: 'MANAGER',       // Can view users in the groups they belong to
+  MEMBER: 'MEMBER'          // Basic access own groups
 };
 
 const UserStatus = {

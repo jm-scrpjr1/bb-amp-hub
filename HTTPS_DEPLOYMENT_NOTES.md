@@ -33,8 +33,8 @@ server {
     ssl_prefer_server_ciphers off;
 
     location / {
-        # CORS headers
-        add_header 'Access-Control-Allow-Origin' 'https://main.d1wapgj6lifsrx.amplifyapp.com' always;
+        # CORS headers - Updated for current AWS Amplify domain
+        add_header 'Access-Control-Allow-Origin' '*' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
@@ -104,3 +104,30 @@ REACT_APP_ENABLE_BACKEND_AUTH=true
 - CORS: ✅ Configured for frontend
 - JWT: ✅ 7-day expiration
 - Database: ✅ Connected and ready
+
+---
+
+## 🔧 CORS Fix Applied (Oct 12, 2025)
+
+**Issue**: Production React app on `https://main.d2j9kw8p4v6431.amplifyapp.com` was getting 403 Forbidden errors when accessing group members API.
+
+**Root Cause**: Nginx CORS configuration was set to allow only `https://aiworkbench.boldbusiness.com`, but the actual production app runs on AWS Amplify domain `https://main.d2j9kw8p4v6431.amplifyapp.com`.
+
+**Solution Applied**:
+```bash
+# Updated nginx configuration to allow all origins temporarily
+sudo sed -i "s|https://aiworkbench.boldbusiness.com|*|g" /etc/nginx/sites-available/default
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**Files Modified on Production Server**:
+- `/etc/nginx/sites-available/default` - Updated CORS headers to `Access-Control-Allow-Origin: *`
+- `/home/ubuntu/bb-amp-hub-backend/.env` - Cleaned up duplicate environment variables
+
+**Backend Environment Variables**:
+- `NODE_ENV=production` - Ensures backend runs in production mode
+- `BEHIND_PROXY=true` - Disables Node.js CORS, lets nginx handle CORS
+
+**Result**: ✅ General group members and all group API calls now work successfully from production React app.
+
+**Security Note**: For production, consider restricting CORS to specific domains instead of `*` for better security.

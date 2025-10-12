@@ -162,11 +162,13 @@ export class GroupService {
     offset?: number;
   } = {}): Promise<GroupInfo[]> {
     try {
-      const where: any = {};
+      const where: any = {
+        // Default to active groups only, unless explicitly set to false
+        isActive: options.isActive !== false
+      };
 
       if (options.type) where.type = options.type;
       if (options.visibility) where.visibility = options.visibility;
-      if (options.isActive !== undefined) where.isActive = options.isActive;
       if (options.search) {
         where.OR = [
           { name: { contains: options.search, mode: 'insensitive' } },

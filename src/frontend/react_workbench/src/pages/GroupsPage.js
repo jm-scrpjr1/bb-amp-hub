@@ -82,6 +82,7 @@ const GroupsPage = () => {
       }
     } else if (type === 'FUNCTIONAL') {
       switch (name.toLowerCase()) {
+        case 'general': return '👥';
         case 'philippines': return '🇵🇭';
         case 'colombia': return '🇨🇴';
         case 'mexico': return '🇲🇽';
@@ -220,7 +221,7 @@ const GroupsPage = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Department Groups */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-2 mb-4">
@@ -240,6 +241,36 @@ const GroupsPage = () => {
             ) : (
               <div className="space-y-3">
                 {departmentGroups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    isSelected={selectedGroup?.id === group.id}
+                    onClick={setSelectedGroup}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Country Teams & Other Groups */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-2xl">🌍</span>
+              <h2 className="text-xl font-semibold text-gray-900">Country Teams & Other</h2>
+              <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                {otherGroups.length}
+              </span>
+            </div>
+            {loading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <span className="ml-2 text-gray-600">Loading teams...</span>
+              </div>
+            ) : otherGroups.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">No country teams found.</p>
+            ) : (
+              <div className="space-y-3">
+                {otherGroups.map((group) => (
                   <GroupCard
                     key={group.id}
                     group={group}

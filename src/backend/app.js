@@ -273,16 +273,30 @@ const authenticateUser = async (req, res, next) => {
     try {
       const decoded = Buffer.from(token, 'base64').toString('utf-8');
       const email = decoded.split(':')[0];
+      console.log('🔍 Token authentication:', { token: token.substring(0, 20) + '...', decoded, email });
+
       const user = await UserService.getUserByEmail(email);
       if (!user) {
+        console.log('❌ User not found for email:', email);
         return res.status(401).json({ error: 'User not found' });
       }
+
       // Load user with group memberships for permission checks
-      req.user = await UserService.getUserWithGroups(user.id) || user;
+      const userWithGroups = await UserService.getUserWithGroups(user.id);
+      req.user = userWithGroups || user;
+
+      console.log('✅ User authenticated:', {
+        email: req.user.email,
+        role: req.user.role,
+        groupMemberships: req.user.groupMemberships?.length || 0,
+        managedGroups: req.user.managedGroups?.length || 0
+      });
     } catch (decodeError) {
+      console.error('❌ Token decode error:', decodeError);
       // Fallback to mock user for development
       const fallbackUser = await UserService.getUserByEmail('jlope@boldbusiness.com');
       req.user = fallbackUser ? await UserService.getUserWithGroups(fallbackUser.id) || fallbackUser : null;
+      console.log('🔄 Using fallback user:', req.user?.email);
     }
 
     next();

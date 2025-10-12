@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
-import { Search, Heart, MoreVertical } from 'lucide-react';
+import { Search, Heart, MoreVertical, Brain, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedRobot from '../components/ui/AnimatedRobot';
+import AIAssessmentSimple from '../components/assessment/AIAssessmentSimple';
+import StartAssessmentButton from '../components/assessment/StartAssessmentButton';
 
 const categories = [
   { id: 'all', name: 'All', active: true },
   { id: 'favorites', name: 'Favorites', active: false },
+  { id: 'ai assessment', name: 'AI Assessment', active: false },
   { id: 'sales', name: 'Sales', active: false },
   { id: 'finance', name: 'Finance', active: false },
   { id: 'human resources', name: 'Human Resources', active: false },
@@ -75,6 +78,24 @@ const getAnimationVariants = (animation) => {
 };
 
 const trainings = [
+  {
+    id: 0,
+    name: 'AI Readiness Assessment',
+    description: 'Discover your AI potential and get personalized recommendations',
+    image: '/images/AI AGENT 4.png',
+    bgColor: 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500',
+    category: 'AI Assessment',
+    animation: 'float',
+    liked: false,
+    isAssessment: true,
+    wittyMessages: [
+      "Ready to discover your AI potential! 🧠",
+      "Let's assess your AI readiness together! ✨",
+      "Time to unlock your AI capabilities! 🚀",
+      "Your AI journey starts with assessment! 🎯",
+      "Let's measure your AI superpowers! ⚡"
+    ]
+  },
   {
     id: 1,
     name: 'Sales',
@@ -191,6 +212,8 @@ const TrainingsPage = () => {
   const [likedTrainings, setLikedTrainings] = useState(new Set());
   const [hoveredTraining, setHoveredTraining] = useState(null);
   const [currentMessages, setCurrentMessages] = useState({});
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [completedAssessment, setCompletedAssessment] = useState(false);
 
   const getRandomMessage = (messages) => {
     return messages[Math.floor(Math.random() * messages.length)];
@@ -220,6 +243,29 @@ const TrainingsPage = () => {
     });
   };
 
+  const handleStartAssessment = () => {
+    setShowAssessment(true);
+  };
+
+  const handleAssessmentComplete = (result) => {
+    setCompletedAssessment(true);
+    setShowAssessment(false);
+    console.log('Assessment completed:', result);
+  };
+
+  const handleAssessmentCancel = () => {
+    setShowAssessment(false);
+  };
+
+  const handleTrainingClick = (training) => {
+    if (training.isAssessment) {
+      handleStartAssessment();
+    } else {
+      // Handle regular training click
+      console.log('Training clicked:', training.name);
+    }
+  };
+
   const filteredTrainings = trainings.filter(training => {
     const matchesSearch = searchTerm === '' ||
       new RegExp(`\\b${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(training.name) ||
@@ -232,6 +278,22 @@ const TrainingsPage = () => {
     return matchesSearch && matchesCategory;
   });
 
+  // Show assessment modal if active
+  if (showAssessment) {
+    return (
+      <MainLayout>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-8">
+          <div className="container mx-auto px-4">
+            <AIAssessmentSimple
+              onComplete={handleAssessmentComplete}
+              onCancel={handleAssessmentCancel}
+            />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto space-y-8">
@@ -239,10 +301,10 @@ const TrainingsPage = () => {
         <ScrollEffects effect="fadeUp" delay={0.1}>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              AI Training Programs
+              AI Training & Assessment
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Enhance your skills with AI-powered training modules. Each program is designed to help you master different aspects of business and technology.
+              Discover your AI potential and enhance your skills with our comprehensive training programs. Start with an AI readiness assessment or dive into specialized training modules.
             </p>
           </div>
         </ScrollEffects>
@@ -293,12 +355,21 @@ const TrainingsPage = () => {
                 transition={{ delay: 0.4 + index * 0.1 }}
                 onMouseEnter={() => handleTrainingHover(training.id, training.wittyMessages)}
                 onMouseLeave={handleTrainingLeave}
+                onClick={() => handleTrainingClick(training)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+                <div className={`${training.isAssessment ? 'bg-gradient-to-br from-blue-50 via-purple-50 to-cyan-50 border-2 border-blue-200' : 'bg-white border border-gray-100'} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden`}>
                   {/* Background Glow Effect */}
-                  <div className={`absolute inset-0 ${training.bgColor} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
+                  <div className={`absolute inset-0 ${training.isAssessment ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500' : training.bgColor} opacity-0 group-hover:opacity-${training.isAssessment ? '10' : '5'} transition-opacity duration-300 rounded-2xl`}></div>
+
+                  {/* Special AI Assessment Badge */}
+                  {training.isAssessment && (
+                    <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
+                      <Brain className="w-3 h-3 inline mr-1" />
+                      AI Assessment
+                    </div>
+                  )}
 
                   {/* Like Button */}
                   <button
@@ -333,16 +404,24 @@ const TrainingsPage = () => {
 
                   {/* Training Info */}
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <h3 className={`text-xl font-bold mb-2 ${training.isAssessment ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500 bg-clip-text text-transparent' : 'text-gray-900'}`}>
                       {training.name}
                     </h3>
                     <p className="text-gray-600 text-sm mb-4">
                       {training.description}
                     </p>
+                    {training.isAssessment && (
+                      <div className="mt-4">
+                        <StartAssessmentButton onClick={() => handleStartAssessment()} variant="primary">
+                          <Target className="w-5 h-5 mr-2" />
+                          <span className="text-sm">Start Assessment</span>
+                        </StartAssessmentButton>
+                      </div>
+                    )}
                   </div>
 
                   {/* Color Bar at Bottom */}
-                  <div className={`absolute bottom-0 left-0 right-0 h-1 ${training.bgColor} rounded-b-2xl`}></div>
+                  <div className={`absolute bottom-0 left-0 right-0 h-1 ${training.isAssessment ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500' : training.bgColor} rounded-b-2xl`}></div>
 
                   {/* Cloud Chat Bubble */}
                   <AnimatePresence>

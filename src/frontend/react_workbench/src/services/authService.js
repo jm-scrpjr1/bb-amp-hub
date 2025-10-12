@@ -104,7 +104,7 @@ class AuthService {
       // Continue with local signout even if server request fails
       console.error('Server signout failed:', error);
     } finally {
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('auth_token');
     }
   }
 

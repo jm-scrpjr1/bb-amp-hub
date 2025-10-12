@@ -15,7 +15,8 @@ class ApiService {
     // Add request interceptor to include auth token
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('authToken');
+        // Try both token keys for compatibility
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -31,7 +32,9 @@ class ApiService {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
+          // Clear both token keys
           localStorage.removeItem('authToken');
+          localStorage.removeItem('auth_token');
           window.location.href = '/auth/signin';
         }
         return Promise.reject(error);

@@ -24,10 +24,10 @@ export default function AuthBridge() {
         const data = await response.json()
         
         if (data.token) {
-          // Store token for React app to use
-          localStorage.setItem('nextjs_auth_token', data.token)
+          // Store token for React app to use (in the format React app expects)
+          localStorage.setItem('authToken', data.token)
           localStorage.setItem('nextjs_auth_user', JSON.stringify(data.user))
-          
+
           // Redirect to React app
           window.location.href = 'http://localhost:3003/'
         } else {

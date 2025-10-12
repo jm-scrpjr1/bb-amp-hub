@@ -56,6 +56,27 @@ const AuthProvider = ({ children }) => {
         }
       }
 
+      // Check for NextJS auth token and transfer it to React app format
+      const nextjsToken = localStorage.getItem('nextjs_auth_token');
+      const nextjsUser = localStorage.getItem('nextjs_auth_user');
+
+      if (nextjsToken && nextjsUser) {
+        // Transfer NextJS auth to React app format
+        localStorage.setItem('authToken', nextjsToken);
+        localStorage.removeItem('nextjs_auth_token');
+
+        try {
+          const userData = JSON.parse(nextjsUser);
+          localStorage.removeItem('nextjs_auth_user');
+          setUser(userData);
+          setIsAuthenticated(true);
+          return; // Skip fallback validation
+        } catch (error) {
+          console.error('Error parsing NextJS user data:', error);
+          localStorage.removeItem('nextjs_auth_user');
+        }
+      }
+
       // Fallback to frontend token validation
       const token = localStorage.getItem('authToken');
       if (token) {

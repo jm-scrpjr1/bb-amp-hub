@@ -1,0 +1,66 @@
+Category,Role,Prompt Type / Use,Description - Enter the Prompt
+Operations,Interior Designer,Interior Design Mockup,"I’d like some help with interior design. Here’s what you should know:
+
+Room Type: [e.g., Living room, Bedroom, Home Office]
+Current Style: [e.g., Minimalist, Boho, Mid-century Modern, Open to Any Style]
+Desired Style or Vibe: [e.g., Cozy and bright, Minimalist and modern, Earthy and relaxed]
+Color Preferences: [e.g., White, beige, sage green, avoid cool tones]
+Budget Range: [e.g., Under $500, Moderate, No Limit]
+Room Dimensions (Optional): [e.g., 12′ x 15′]
+Furniture to Keep: [e.g., Gray sectional sofa, oak dining table]
+Constraints: [e.g., Rental apartment, keep wall damage minimal; Hide outlets]
+Extras: [e.g., Also looking to expand this decor across space; provide mockup; Need storage ideas or other recommendations]"
+Operations,Interior Designer,Design Idea Generator,"Uploads a picture or blueprint of space to AI and enters prompt: This is my office space, provide design suggestions"
+HR,Engagement,Survey question assistance,"Write 6–8 employee survey questions designed to measure [e.g. belonging, manager trust, workload balance]. Ensure the questions are neutral and easy to understand. Format them as one question per line with rating scale suggestions."
+HR,Engagement,Engagement ideas,"Generate five practical ideas for improving employee engagement across [company/team/region]. Consider our hybrid work model, current engagement scores, and time/resource constraints. Present each idea with a short description, expected impact, and implementation effort level."
+HR,Management,Quarterly goals,"Draft clear and measurable quarterly goals for my team. Here is the business context, company objectives, and recent performance: [insert context]. Return 3 Objectives with 3-4 Key Results each, in a simple bullet format."
+Finance,Management,Cost Reduction,"Identify cost reduction opportunities from our recent budget report. Use the breakdown from August 2025 cost center or department to evaluate. Provide a table with opportunities, projected savings, and any potential risks."
+Finance,Management,Financial Forecast,Forecast Q4 2025 revenue based on the past 9 months of data. Use the trends from our financials to explain your reasoning. Present the forecast in a table and write a short executive summary.
+IT,Management,Executive SLA Reporting,"Generate a monthly SLA/KPI performance report for IT services. Include: ticket resolution times, compliance % vs SLA targets, uptime metrics, escalations, and improvement recommendations in executive-summary format."
+IT,Management,IT Budgeting & Forecasting,"Prepare an IT budget forecast for the next fiscal year. Break down operating costs, cloud expenses, cybersecurity tools, SaaS licenses, vendor contracts, and expected cost optimizations."
+IT,Management,Vendor/Tool Evaluation,"Create a vendor evaluation framework for [software/service]. Include cost, SLA terms, compliance alignment, scalability, integration potential, and security posture. Output as a decision matrix with recommendations."
+IT,Management,Compliance & Governance,"Draft a board-level compliance summary for [SOC2 / ISO 27001 / HIPAA]. Highlight achievements, audit gaps, remediation plans, and risk level by category (High/Medium/Low)."
+IT,Management,Strategic Planning,"You are an IT executive preparing a quarterly technology strategy brief for the executive team. Summarize key initiatives, risks, cybersecurity priorities, and upcoming IT investments. Present it in an executive-friendly format with bullet points and a short narrative."
+Marketing,All Roles,Campaign Calendar Builder ,"Generate a 30-day social media calendar with post topics, platform recommendations, and hashtags for [product/service name]. Include optimal posting times per platform."
+Marketing,All Roles,Trend-to-Content Converter,Analyze the top trending topics in [industry] this week and propose 3 campaign ideas that align with Bold’s tone of voice
+Marketing,All Roles,Hashtag Strategy Generator,"Create a set of branded and trending hashtags for a [campaign type] campaign focused on [theme]. Include hashtag tiers: branded, niche, trending."
+Marketing,All Roles,Content Pillar Balancer,"Audit the last 15 social posts and categorize them by content type (educational, promotional, cultural, testimonial). Suggest how to rebalance for better engagement."
+Marketing,All Roles,Multi-format Copy Generator,"Turn this long-form campaign message into social copy variants for LinkedIn, X, and Instagram — keeping tone professional but dynamic."
+Marketing,All Roles,Caption Mood Variations,"Create 3 tone variants (informative, bold, conversational) for this caption: [insert caption]."
+Marketing,All Roles,Ad Headline Refiner,Optimize this campaign headline for click-through on LinkedIn and Meta ads. Provide 5 alternatives ranked by engagement likelihood.
+Marketing,All Roles,Image Brief Composer,"Draft a creative brief for a designer based on this campaign theme: [insert theme]. Include moodboard directions, colors, and key phrases."
+Marketing,All Roles,Weekly Performance Summary,"Summarize this week’s social analytics from [data source]. Highlight top 3 performing posts, engagement rate changes, and audience growth."
+Marketing,All Roles,KPI Health Check,Compare last month’s campaign metrics to the previous one. Identify anomalies or opportunities.
+Marketing,All Roles,Engagement Insights Translator,Interpret this analytics table and generate 3 action recommendations for improving reach.
+Marketing,All Roles,Visual Report Composer,Create a 1-page visual report summarizing campaign results with charts and takeaways for leadership.
+Marketing,All Roles,Sentiment Analyzer,Scan recent comments and mentions around [campaign hashtag]. Summarize audience sentiment and key emotion drivers.
+Marketing,All Roles,Persona Evolution Tracker,Update audience personas based on recent follower demographics and behavior data.
+Marketing,All Roles,Competitor Pulse Report,Identify top 3 competitor campaigns in [industry] this week and outline their engagement tactics.
+Marketing,All Roles,Conversation Trend Map,Map top keywords and hashtags emerging in conversations related to [topic] in the past 7 days.
+Marketing,All Roles,A/B Test Planner,Design 3 A/B test ideas for ad creatives targeting [audience segment]. Include hypotheses and expected outcomes.”
+Marketing,All Roles,CTA Effectiveness Review,Compare engagement between posts using [CTA A] and [CTA B]. Recommend which to scale.
+Marketing,All Roles,Conversion Narrative Enhancer,Rewrite ad copy for improved conversion using principles of behavioral psychology and urgency.
+Marketing,All Roles,Campaign Brief Builder,"Auto-generate a complete campaign brief from this goal statement: [insert goal]. Include timeline, channels, target audience, and deliverables."
+Marketing,All Roles,Blog Ideation & SEO Optimization,"For the campaign [Campaign Name], generate 5 blog post ideas optimized for discoverability.  Each title must include a high-traffic keyword relevant to [Industry/Theme]. Provide: A suggested meta description (max 155 chars). Primary keyword + 2 supporting long-tail keywords.Headline options in Bold tone (clear, intelligent, aspirational)."
+Marketing,All Roles,Draft-to-Polish Workflow,"When a new draft or transcript is uploaded, refine it into a full blog article with:  Bold Business tone (strategic, professional, forward-thinking). Compelling intro hook and actionable close. Section headings in H2/H3 format.  Grammarly-checked clarity and flow.
+ Add internal cross-links to 2 related Bold case studies or pages if relevant.  "
+Marketing,All Roles,Asset Checklist & Production Tracker,"For campaign [Campaign Name], create a creative asset checklist with status tags.   Include:  Visuals (hero image, thumbnail, ad set). Copy (social post, email snippet, blog entry, tagline).  Format specs (size, file type, destination platform). Tag each item as Pending / In Progress / Done.  Output as a trackable table for Notion or Sheets.  "
+Marketing,All Roles,Concept-to-Visual Prompt Builder,"Transform this campaign concept into 3 image-generation prompts.  Each should describe composition, tone, lighting, and brand elements consistent with Bold’s palette (light blue, turquoise, yellow, white).   Include:  Visual theme (e.g., futuristic workspace, collaboration, innovation). Camera angle and mood. Color balance and typography if text is included.
+ Output ready-to-use prompts for AI render tools."
+General Use,All Roles,Google Sheets - Generate Text," To generate text tailored to your data, Google Workspace with Gemini uses relevant information from your sheet. Enter this into cell Or, at the top of the spreadsheet, click Insert and then Function and then AI. Examples: 
+=AI(“Generate slogan for event in 10 words or less”, A2)
+=AI(""Create an email to the reviewer addressing specific items in their reviews."", A2:G2)
+=AI(""develop a list of keywords for the job title based on the summary of duties."", A2:C2)"
+General Use,All Roles,Google Sheets - Summarize Information," To help you understand your data, Google Workspace with Gemini analyzes the content of your spreadsheet and extracts important key takeaways.  Enter this into cell Or, at the top of the spreadsheet, click Insert and then Function and then AI. Examples:  
+=AI(""For the customer, write a one sentence summary of their feedback."", A2:D2)
+=AI(""you are a customer service representative. Write a 2 sentence summary for the customer about their product or service inquiry."", F2)
+=AI(""List in bullet points the main themes of the customer concern."", D2)"
+General Use,All Roles,Google Sheets - Categorize Information,"To help you detect patterns, Google Workspace with Gemini categorizes your data into groups. This includes sentiment analysis. Enter this into cell Or, at the top of the spreadsheet, click Insert and then Function and then AI. Examples: 
+=AI(""Classify the preview as either a spam email or not a spam email."", D2)
+=AI(""Categorize the customer inquiry as a compliment, exchange request, or return request."",C2)
+=AI(""Classify the order by which product description is in the order. Use the product description to help."", A2:C2)"
+General Use,All Roles,Google Sheets - Analyze Sentiment," Used to analyze sentiment themes or categorize sentiment type (Positive, negative, or neutral) helpful for using in response sheets from google forms for open text / comment fields. Enter this into cell Or, at the top of the spreadsheet, click Insert and then Function and then AI. Examples: =AI(""Classify the sentiment of the customer response.”, D2)
+=AI(""Perform sentiment analysis on the emails sent by the customers."", C2)
+=AI(""Classify the body of the email, as either positive, negative, or neutral."", D2)"")"
+General Use,All Roles,M365 Copilot – Refine Messages or Emails,"Uses M365 Copilot to make messages or emails clearer and more straightforward.  
+Example prompt: ""Refine + my messages/emails"""

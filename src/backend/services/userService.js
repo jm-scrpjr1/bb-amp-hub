@@ -100,7 +100,7 @@ class UserService {
         });
 
         // Auto-assign new users to General group if they're not in any groups
-        const userGroups = await prisma.groupMember.findMany({
+        const userGroups = await prisma.groupMembership.findMany({
           where: { userId: user.id }
         });
 
@@ -111,18 +111,21 @@ class UserService {
           });
 
           if (generalGroup) {
-            await prisma.groupMember.create({
+            await prisma.groupMembership.create({
               data: {
                 userId: user.id,
                 groupId: generalGroup.id,
                 role: 'MEMBER',
-                status: 'ACTIVE'
+                status: 'ACTIVE',
+                joinedAt: new Date()
               }
             });
           }
         }
 
-        return user;
+        // Load user with group memberships and managed groups
+        const userWithGroups = await this.getUserWithGroups(user.id);
+        return userWithGroups || user;
       } catch (dbError) {
         console.error('Database upsert failed, using fallback:', dbError);
 
@@ -145,6 +148,43 @@ class UserService {
       }
     } catch (error) {
       console.error('Error upserting user from auth:', error);
+      return null;
+    }
+  }
+
+  // Get user with group memberships and managed groups
+  static async getUserWithGroups(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          groupMemberships: {
+            where: { status: 'ACTIVE' },
+            include: {
+              group: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true,
+                  visibility: true
+                }
+              }
+            }
+          },
+          managedGroups: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              visibility: true
+            }
+          }
+        }
+      });
+
+      return user;
+    } catch (error) {
+      console.error('Error fetching user with groups:', error);
       return null;
     }
   }

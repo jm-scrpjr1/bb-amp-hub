@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { UserService } from '@/lib/user-service';
 import { GroupService } from '@/lib/group-service';
-import { canManageGroup, canInviteToGroup } from '@/lib/permissions';
+import { canManageGroup, canInviteToGroup, canViewGroup } from '@/lib/permissions';
 import { RBACLogger } from '@/lib/rbac';
 
 // GET /api/groups/[groupId]/members - Get group members
@@ -25,8 +25,28 @@ export async function GET(
 
     const { groupId } = await params;
 
-    // Check if user can view group members
-    if (!canManageGroup(user, groupId)) {
+    // Get the group first to check permissions properly
+    const group = await GroupService.getGroupById(groupId);
+
+    if (!group) {
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 });
+    }
+
+    // Check if user can view this group (more permissive than manage)
+    const canView = canViewGroup(user, group);
+    console.log('Group members access check:', {
+      userId: user.id,
+      userEmail: user.email,
+      userRole: user.role,
+      groupId: group.id,
+      groupName: group.name,
+      groupVisibility: group.visibility,
+      canView,
+      hasGroupMemberships: !!user.groupMemberships?.length,
+      hasManagedGroups: !!user.managedGroups?.length
+    });
+
+    if (!canView) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 

@@ -273,13 +273,16 @@ const authenticateUser = async (req, res, next) => {
     try {
       const decoded = Buffer.from(token, 'base64').toString('utf-8');
       const email = decoded.split(':')[0];
-      req.user = await UserService.getUserByEmail(email);
-      if (!req.user) {
+      const user = await UserService.getUserByEmail(email);
+      if (!user) {
         return res.status(401).json({ error: 'User not found' });
       }
+      // Load user with group memberships for permission checks
+      req.user = await UserService.getUserWithGroups(user.id) || user;
     } catch (decodeError) {
       // Fallback to mock user for development
-      req.user = await UserService.getUserByEmail('jlope@boldbusiness.com');
+      const fallbackUser = await UserService.getUserByEmail('jlope@boldbusiness.com');
+      req.user = fallbackUser ? await UserService.getUserWithGroups(fallbackUser.id) || fallbackUser : null;
     }
 
     next();
@@ -695,12 +698,18 @@ app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
       hasGodMode: PermissionService.hasGodMode(req.user)
     });
 
-    // OWNER and SUPER_ADMIN have full access to all groups
-    const hasFullAccess = req.user?.role === 'OWNER' ||
-                         req.user?.role === 'SUPER_ADMIN' ||
-                         PermissionService.hasGodMode(req.user);
+    // Check if user can view this group (more permissive - allows group members to view)
+    const canView = PermissionService.canViewGroup(req.user, groupId);
+    const canManage = PermissionService.canManageGroup(req.user, groupId);
 
-    if (!hasFullAccess) {
+    console.log('🔐 Permission check:', {
+      canView,
+      canManage,
+      userGroupMemberships: req.user?.groupMemberships?.length || 0,
+      userManagedGroups: req.user?.managedGroups?.length || 0
+    });
+
+    if (!canView) {
       console.log('❌ User lacks permission to view group members');
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -710,7 +719,14 @@ app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
 
     res.json({
       success: true,
-      members
+      members,
+      permissions: {
+        canView: true, // Already checked above
+        canManage: canManage, // Can edit group, add/remove members, etc.
+        canInvite: PermissionService.canInviteToGroup(req.user, groupId),
+        canEdit: canManage,
+        canDelete: canManage
+      }
     });
   } catch (error) {
     console.error('Error fetching group members:', error);

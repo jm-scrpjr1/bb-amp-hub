@@ -29,6 +29,35 @@ export class UserService {
               name: true,
             }
           },
+          managedGroups: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              visibility: true,
+            }
+          },
+          groupMemberships: {
+            where: {
+              status: 'ACTIVE'
+            },
+            select: {
+              groupId: true,
+              role: true,
+              status: true,
+              canInvite: true,
+              canRemove: true,
+              canEdit: true,
+              group: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true,
+                  visibility: true,
+                }
+              }
+            }
+          },
           permissions: {
             select: {
               permission: true,
@@ -94,6 +123,35 @@ export class UserService {
             select: {
               id: true,
               name: true,
+            }
+          },
+          managedGroups: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              visibility: true,
+            }
+          },
+          groupMemberships: {
+            where: {
+              status: 'ACTIVE'
+            },
+            select: {
+              groupId: true,
+              role: true,
+              status: true,
+              canInvite: true,
+              canRemove: true,
+              canEdit: true,
+              group: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true,
+                  visibility: true,
+                }
+              }
             }
           },
           permissions: {

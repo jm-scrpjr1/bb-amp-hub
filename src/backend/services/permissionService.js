@@ -206,6 +206,12 @@ class PermissionService {
            user?.role === 'SUPER_ADMIN';
   }
 
+  // Can create new groups - SUPER_ADMIN and OWNER only
+  static canCreateGroups(user) {
+    return this.hasGodMode(user) ||
+           user?.role === 'SUPER_ADMIN';
+  }
+
   // Can edit user details (name, role, groups) - SUPER_ADMIN and OWNER only
   static canEditUserDetails(user) {
     return this.hasGodMode(user) ||

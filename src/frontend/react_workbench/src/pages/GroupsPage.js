@@ -12,6 +12,10 @@ const GroupsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [favorites, setFavorites] = useState([]);
+  const [userPermissions, setUserPermissions] = useState({
+    canViewAllGroups: false,
+    canCreateGroups: false
+  });
 
   useEffect(() => {
     loadGroups();
@@ -22,6 +26,10 @@ const GroupsPage = () => {
       setLoading(true);
       const response = await apiService.getGroups();
       setGroups(response.groups || []);
+      setUserPermissions(response.userPermissions || {
+        canViewAllGroups: false,
+        canCreateGroups: false
+      });
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -136,7 +144,7 @@ const GroupsPage = () => {
                 ? 'bg-green-100 text-green-800'
                 : 'bg-gray-100 text-gray-800'
             }`}>
-              {group.type === 'DEPARTMENT' ? 'Department' : group.type === 'FUNCTIONAL' ? 'Country' : group.type}
+              {group.type === 'DEPARTMENT' ? 'Department' : group.type === 'FUNCTIONAL' ? 'Functional' : group.type}
             </span>
             <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
               {group.visibility}
@@ -158,7 +166,18 @@ const GroupsPage = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Groups & Teams</h1>
-            <p className="text-gray-600 mt-2">Manage your organization's departments and country teams</p>
+            <p className="text-gray-600 mt-2">
+              {userPermissions.canViewAllGroups
+                ? "Manage your organization's departments and functional groups"
+                : "View and manage your group memberships"}
+            </p>
+            {!userPermissions.canViewAllGroups && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  👥 Showing only your groups
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex gap-3">
             <button
@@ -252,11 +271,11 @@ const GroupsPage = () => {
             )}
           </div>
 
-          {/* Country Teams & Other Groups */}
+          {/* My Groups */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🌍</span>
-              <h2 className="text-xl font-semibold text-gray-900">Country Teams & Other</h2>
+              <span className="text-2xl">👥</span>
+              <h2 className="text-xl font-semibold text-gray-900">My Groups</h2>
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                 {otherGroups.length}
               </span>
@@ -267,7 +286,7 @@ const GroupsPage = () => {
                 <span className="ml-2 text-gray-600">Loading teams...</span>
               </div>
             ) : otherGroups.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">No country teams found.</p>
+              <p className="text-gray-600 text-center py-8">No groups found.</p>
             ) : (
               <div className="space-y-3">
                 {otherGroups.map((group) => (
@@ -296,7 +315,7 @@ const GroupsPage = () => {
                     <h3 className="font-semibold text-gray-900 text-lg">{selectedGroup.name}</h3>
                     <p className="text-sm text-gray-600">
                       {selectedGroup.type === 'DEPARTMENT' ? 'Department' :
-                       selectedGroup.type === 'FUNCTIONAL' ? 'Country Team' : selectedGroup.type}
+                       selectedGroup.type === 'FUNCTIONAL' ? 'Functional Group' : selectedGroup.type}
                     </p>
                   </div>
                 </div>
@@ -310,7 +329,7 @@ const GroupsPage = () => {
                     <div className="text-sm text-blue-600 font-medium">Type</div>
                     <div className="text-blue-900 font-semibold">
                       {selectedGroup.type === 'DEPARTMENT' ? 'Department' :
-                       selectedGroup.type === 'FUNCTIONAL' ? 'Country Team' : selectedGroup.type}
+                       selectedGroup.type === 'FUNCTIONAL' ? 'Functional Group' : selectedGroup.type}
                     </div>
                   </div>
                   <div className="bg-green-50 rounded-lg p-3">
@@ -400,7 +419,7 @@ const GroupsPage = () => {
               <div className="text-center py-12">
                 <span className="text-6xl mb-4 block">👥</span>
                 <p className="text-gray-600 text-lg">Select a group to view details and analyze its health</p>
-                <p className="text-gray-500 text-sm mt-2">Choose from departments or country teams above</p>
+                <p className="text-gray-500 text-sm mt-2">Choose from departments or functional groups above</p>
               </div>
             )}
           </div>

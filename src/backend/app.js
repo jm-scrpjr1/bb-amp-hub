@@ -669,13 +669,45 @@ app.get('/api/chat/health', async (req, res) => {
 // Groups API
 app.get('/api/groups', authenticateUser, async (req, res) => {
   try {
-    const groups = await GroupService.getGroups(req.query);
+    const user = req.user;
+
+    // Check if user can see all groups (OWNER or ADMIN roles)
+    const canViewAllGroups = PermissionService.hasGodMode(user) ||
+                             user.role === 'SUPER_ADMIN' ||
+                             user.role === 'ADMIN';
+
+    console.log('🔍 Groups request:', {
+      userEmail: user?.email,
+      userRole: user?.role,
+      canViewAllGroups,
+      userGroupMemberships: user?.groupMemberships?.length || 0
+    });
+
+    let groups;
+    if (canViewAllGroups) {
+      // Admin/Owner can see all groups
+      groups = await GroupService.getGroups(req.query);
+    } else {
+      // Regular users can only see groups they belong to
+      const userGroupIds = user.groupMemberships?.map(m => m.groupId) || [];
+      groups = await GroupService.getUserGroups(user.id, req.query);
+    }
+
+    console.log('✅ Groups filtered:', {
+      totalGroups: groups.groups?.length || 0,
+      canViewAll: canViewAllGroups
+    });
+
     res.json({
       success: true,
       groups: groups.groups,
       total: groups.total,
       page: groups.page,
-      totalPages: groups.totalPages
+      totalPages: groups.totalPages,
+      userPermissions: {
+        canViewAllGroups,
+        canCreateGroups: PermissionService.canCreateGroups(user)
+      }
     });
   } catch (error) {
     console.error('Error fetching groups:', error);

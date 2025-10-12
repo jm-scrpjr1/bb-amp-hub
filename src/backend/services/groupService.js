@@ -284,25 +284,112 @@ class GroupService {
     }
   }
 
-  // Get groups for user
-  static async getUserGroups(userId) {
+  // Get groups for user with pagination and filtering
+  static async getUserGroups(userId, options = {}) {
     try {
-      const userMemberships = Array.from(mockMemberships.values())
-        .filter(m => m.userId === userId && m.status === MembershipStatus.ACTIVE);
+      const {
+        page = 1,
+        limit = 20,
+        search,
+        type,
+        visibility
+      } = options;
 
-      const groups = userMemberships.map(membership => {
-        const group = mockGroups.get(membership.groupId);
-        return {
-          ...group,
+      // Get user's group memberships
+      const userMemberships = await prisma.groupMembership.findMany({
+        where: {
+          userId: userId,
+          status: 'ACTIVE'
+        },
+        include: {
+          group: {
+            include: {
+              createdBy: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true
+                }
+              },
+              manager: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true
+                }
+              },
+              _count: {
+                select: {
+                  memberships: {
+                    where: {
+                      status: 'ACTIVE'
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Extract groups and apply filters
+      let groups = userMemberships
+        .map(membership => ({
+          ...membership.group,
+          memberCount: membership.group._count.memberships,
           membershipRole: membership.role,
           joinedAt: membership.joinedAt
-        };
-      }).filter(Boolean);
+        }))
+        .filter(group => group.isActive); // Only active groups
 
-      return groups;
+      // Apply search filter
+      if (search) {
+        const searchLower = search.toLowerCase();
+        groups = groups.filter(group =>
+          group.name.toLowerCase().includes(searchLower) ||
+          group.description.toLowerCase().includes(searchLower)
+        );
+      }
+
+      // Apply type filter
+      if (type) {
+        groups = groups.filter(group => group.type === type);
+      }
+
+      // Apply visibility filter
+      if (visibility) {
+        groups = groups.filter(group => group.visibility === visibility);
+      }
+
+      // Sort groups
+      groups.sort((a, b) => {
+        if (a.type !== b.type) {
+          return a.type.localeCompare(b.type);
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      // Apply pagination
+      const total = groups.length;
+      const skip = (page - 1) * limit;
+      const paginatedGroups = groups.slice(skip, skip + limit);
+
+      return {
+        groups: paginatedGroups,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      };
     } catch (error) {
       console.error('Error fetching user groups:', error);
-      return [];
+      return {
+        groups: [],
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0
+      };
     }
   }
 

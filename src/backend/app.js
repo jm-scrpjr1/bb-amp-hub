@@ -203,52 +203,14 @@ app.get("/api/hello", (req, res) => {
   });
 });
 
-// Emergency deployment endpoint (when SSH is blocked)
-app.post("/api/emergency-deploy", async (req, res) => {
-  try {
-    const { secret } = req.body;
-
-    // Simple secret check
-    if (secret !== "bb-emergency-deploy-2024") {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    console.log("🚨 Emergency deployment triggered");
-
-    const { exec } = require('child_process');
-    const util = require('util');
-    const execPromise = util.promisify(exec);
-
-    try {
-      // Execute deployment commands
-      const { stdout, stderr } = await execPromise('cd /home/ubuntu/bb-amp-hub-backend && git pull origin main && pm2 restart bb-amp-hub-backend');
-
-      console.log('✅ Emergency deployment completed');
-      console.log('stdout:', stdout);
-      console.log('stderr:', stderr);
-
-      res.json({
-        success: true,
-        message: "Emergency deployment completed successfully",
-        stdout: stdout,
-        stderr: stderr,
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (execError) {
-      console.error('❌ Emergency deployment failed:', execError);
-      res.status(500).json({
-        error: "Emergency deployment failed",
-        details: execError.message,
-        stdout: execError.stdout,
-        stderr: execError.stderr
-      });
-    }
-
-  } catch (error) {
-    console.error('Emergency deployment endpoint error:', error);
-    res.status(500).json({ error: "Emergency deployment endpoint failed" });
-  }
+// Simple deployment status endpoint
+app.get("/api/deploy-status", (req, res) => {
+  res.json({
+    message: "Deployment endpoint ready",
+    version: "1.0.2-DEPLOY-READY",
+    timestamp: new Date().toISOString(),
+    instructions: "Use AWS Console to stop/start instance for deployment"
+  });
 });
 
 // Deployment webhook endpoint (for emergency deployments when SSH is blocked)

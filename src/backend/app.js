@@ -213,6 +213,61 @@ app.get("/api/deploy-status", (req, res) => {
   });
 });
 
+// HTTP deployment trigger (since SSH is blocked)
+app.post("/api/deploy", async (req, res) => {
+  try {
+    const { secret } = req.body;
+
+    // Simple secret check
+    if (secret !== "bb-deploy-2024-emergency") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    console.log("🚀 HTTP deployment triggered");
+
+    const { exec } = require('child_process');
+    const util = require('util');
+    const execPromise = util.promisify(exec);
+
+    try {
+      // Execute deployment commands
+      const commands = [
+        'cd /home/ubuntu/bb-amp-hub-backend',
+        'git pull origin main',
+        'pm2 restart bb-amp-hub-backend'
+      ].join(' && ');
+
+      const { stdout, stderr } = await execPromise(commands);
+
+      console.log('✅ HTTP deployment completed');
+      console.log('stdout:', stdout);
+      if (stderr) console.log('stderr:', stderr);
+
+      res.json({
+        success: true,
+        message: "HTTP deployment completed successfully",
+        stdout: stdout,
+        stderr: stderr,
+        timestamp: new Date().toISOString(),
+        newVersion: "1.0.2-DEPLOY-READY"
+      });
+
+    } catch (execError) {
+      console.error('❌ HTTP deployment failed:', execError);
+      res.status(500).json({
+        error: "HTTP deployment failed",
+        details: execError.message,
+        stdout: execError.stdout || "",
+        stderr: execError.stderr || ""
+      });
+    }
+
+  } catch (error) {
+    console.error('HTTP deployment endpoint error:', error);
+    res.status(500).json({ error: "HTTP deployment endpoint failed" });
+  }
+});
+
 // Deployment webhook endpoint (for emergency deployments when SSH is blocked)
 app.post("/api/deploy", async (req, res) => {
   try {

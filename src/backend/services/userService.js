@@ -332,7 +332,7 @@ class UserService {
     return {
       id: 'fallback-' + email.replace('@', '-').replace('.', '-'),
       email: email.toLowerCase(),
-      name: isOwner ? 'John Lopez (God Mode)' : 'User',
+      name: isOwner ? 'John Madrino' : 'User',
       image: null,
       role: isOwner ? UserRole.OWNER : UserRole.MEMBER,
       status: UserStatus.ACTIVE,

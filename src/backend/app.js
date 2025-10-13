@@ -295,7 +295,7 @@ const authenticateUser = async (req, res, next) => {
     } catch (decodeError) {
       console.error('❌ Token decode error:', decodeError);
       // Fallback to mock user for development
-      const fallbackUser = await UserService.getUserByEmail('jlope@boldbusiness.com');
+      const fallbackUser = await UserService.getUserByEmail('jmadrino@boldbusiness.com');
       req.user = fallbackUser ? await UserService.getUserWithGroups(fallbackUser.id) || fallbackUser : null;
       console.log('🔄 Using fallback user:', req.user?.email);
     }

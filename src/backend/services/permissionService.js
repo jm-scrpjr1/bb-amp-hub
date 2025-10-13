@@ -96,6 +96,7 @@ class PermissionService {
       case 'OWNER':
         return true; // God mode access to ALL
 
+      case 'ADMIN':
       case 'SUPER_ADMIN':
         return this.getSuperAdminPermissions().includes(permission);
 
@@ -188,57 +189,66 @@ class PermissionService {
     return user.country === country;
   }
 
-  // Admin panel access - SUPER_ADMIN and OWNER only
+  // Admin panel access - ADMIN, SUPER_ADMIN and OWNER only
   static canAccessAdminPanel(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // User management permissions - SUPER_ADMIN and OWNER only
+  // User management permissions - ADMIN, SUPER_ADMIN and OWNER only
   static canManageUsers(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can add/remove users from groups - SUPER_ADMIN and OWNER only
+  // Can add/remove users from groups - ADMIN, SUPER_ADMIN and OWNER only
   static canManageGroupMembers(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can create new groups - SUPER_ADMIN and OWNER only
+  // Can create new groups - ADMIN, SUPER_ADMIN and OWNER only
   static canCreateGroups(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can edit user details (name, role, groups) - SUPER_ADMIN and OWNER only
+  // Can edit user details (name, role, groups) - ADMIN, SUPER_ADMIN and OWNER only
   static canEditUserDetails(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can delete users - SUPER_ADMIN and OWNER only
+  // Can delete users - ADMIN, SUPER_ADMIN and OWNER only
   static canDeleteUsers(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Group management permissions
+  // Group management permissions (duplicate method - keeping for compatibility)
   static canCreateGroups(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can delete groups - SUPER_ADMIN and OWNER only
+  // Can delete groups - ADMIN, SUPER_ADMIN and OWNER only
   static canDeleteGroups(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
-  // Can edit group details - SUPER_ADMIN and OWNER only
+  // Can edit group details - ADMIN, SUPER_ADMIN and OWNER only
   static canEditGroups(user) {
     return this.hasGodMode(user) ||
+           user?.role === 'ADMIN' ||
            user?.role === 'SUPER_ADMIN';
   }
 
@@ -248,8 +258,8 @@ class PermissionService {
     // God mode always has access
     if (this.hasGodMode(user)) return true;
 
-    // SUPER_ADMIN can manage all groups
-    if (user.role === 'SUPER_ADMIN') return true;
+    // SUPER_ADMIN and ADMIN can manage all groups
+    if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') return true;
 
     // MANAGER can manage groups they belong to
     if (user.role === 'MANAGER') {
@@ -278,7 +288,7 @@ class PermissionService {
     if (user.managedGroups?.some(g => g.id === groupId)) return true;
     
     // Admin and Owner roles can view all groups
-    return user.role === UserRole.SUPER_ADMIN || user.role === UserRole.OWNER;
+    return user.role === 'ADMIN' || user.role === UserRole.SUPER_ADMIN || user.role === UserRole.OWNER;
   }
 
   static canInviteToGroup(user, groupId) {

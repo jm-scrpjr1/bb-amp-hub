@@ -1062,7 +1062,7 @@ async function initializeApp() {
 // ===== AI ASSESSMENT API ENDPOINTS =====
 
 // Get random questions for assessment
-app.get('/api/assessment/questions', authenticateToken, async (req, res) => {
+app.get('/api/assessment/questions', authenticateUser, async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 15;
     const questions = await AIAssessmentService.getRandomQuestions(limit);
@@ -1092,7 +1092,7 @@ app.get('/api/assessment/questions', authenticateToken, async (req, res) => {
 });
 
 // Start new assessment session
-app.post('/api/assessment/start', authenticateToken, async (req, res) => {
+app.post('/api/assessment/start', authenticateUser, async (req, res) => {
   try {
     const userId = req.user.email;
     const session = await AIAssessmentService.startAssessmentSession(userId);
@@ -1111,7 +1111,7 @@ app.post('/api/assessment/start', authenticateToken, async (req, res) => {
 });
 
 // Save question response
-app.post('/api/assessment/answer', authenticateToken, async (req, res) => {
+app.post('/api/assessment/answer', authenticateUser, async (req, res) => {
   try {
     const { sessionId, questionId, userAnswer, timeSpentSeconds } = req.body;
 
@@ -1143,7 +1143,7 @@ app.post('/api/assessment/answer', authenticateToken, async (req, res) => {
 });
 
 // Complete assessment and get results
-app.post('/api/assessment/complete', authenticateToken, async (req, res) => {
+app.post('/api/assessment/complete', authenticateUser, async (req, res) => {
   try {
     const { sessionId } = req.body;
 
@@ -1170,7 +1170,7 @@ app.post('/api/assessment/complete', authenticateToken, async (req, res) => {
 });
 
 // Get user's assessment history
-app.get('/api/assessment/history', authenticateToken, async (req, res) => {
+app.get('/api/assessment/history', authenticateUser, async (req, res) => {
   try {
     const userId = req.user.email;
     const limit = parseInt(req.query.limit) || 10;
@@ -1191,7 +1191,7 @@ app.get('/api/assessment/history', authenticateToken, async (req, res) => {
 });
 
 // Get assessment session details
-app.get('/api/assessment/session/:sessionId', authenticateToken, async (req, res) => {
+app.get('/api/assessment/session/:sessionId', authenticateUser, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const session = await AIAssessmentService.getAssessmentSession(sessionId);

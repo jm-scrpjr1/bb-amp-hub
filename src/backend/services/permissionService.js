@@ -278,7 +278,7 @@ class PermissionService {
     if (user.managedGroups?.some(g => g.id === groupId)) return true;
     
     // Admin and Owner roles can view all groups
-    return user.role === UserRole.ADMIN || user.role === UserRole.OWNER;
+    return user.role === UserRole.SUPER_ADMIN || user.role === UserRole.OWNER;
   }
 
   static canInviteToGroup(user, groupId) {

@@ -100,26 +100,29 @@ class UserService {
         });
 
         // Auto-assign new users to General group if they're not in any groups
-        const userGroups = await prisma.groupMembership.findMany({
-          where: { userId: user.id }
-        });
+        const userGroups = await prisma.$queryRaw`
+          SELECT * FROM group_memberships WHERE "userId" = ${user.id}
+        `;
 
         if (userGroups.length === 0) {
           // Find General group
-          const generalGroup = await prisma.group.findFirst({
-            where: { name: 'General' }
-          });
+          const generalGroups = await prisma.$queryRaw`
+            SELECT * FROM groups WHERE name = 'General' LIMIT 1
+          `;
 
-          if (generalGroup) {
-            await prisma.groupMembership.create({
-              data: {
-                userId: user.id,
-                groupId: generalGroup.id,
-                role: 'MEMBER',
-                status: 'ACTIVE',
-                joinedAt: new Date()
-              }
-            });
+          if (generalGroups.length > 0) {
+            const generalGroup = generalGroups[0];
+            const membershipId = 'cm' + Math.random().toString(36).substr(2, 20);
+
+            await prisma.$queryRaw`
+              INSERT INTO group_memberships (
+                id, "userId", "groupId", role, status, "joinedAt", "createdAt", "updatedAt"
+              ) VALUES (
+                ${membershipId}, ${user.id}, ${generalGroup.id}, 'MEMBER', 'ACTIVE', NOW(), NOW(), NOW()
+              )
+            `;
+
+            console.log(`✅ Auto-assigned user ${user.email} to General group`);
           }
         }
 

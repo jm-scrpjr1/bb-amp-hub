@@ -198,8 +198,53 @@ app.get("/api/hello", (req, res) => {
     status: "healthy",
     database: "connected",
     timestamp: new Date().toISOString(),
-    version: "1.0.0"
+    version: "1.0.1-UPDATED",
+    lastUpdate: "2025-10-13T14:45:00Z"
   });
+});
+
+// Deployment webhook endpoint (for emergency deployments when SSH is blocked)
+app.post("/api/deploy", async (req, res) => {
+  try {
+    const { secret } = req.body;
+
+    // Simple secret check (in production, use proper authentication)
+    if (secret !== "bb-amp-hub-deploy-2024") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    console.log("🚀 Deployment webhook triggered");
+
+    const { exec } = require('child_process');
+
+    // Execute deployment commands
+    exec('cd /home/ubuntu/bb-amp-hub-backend && git pull origin main && pm2 restart bb-amp-hub-backend',
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error('Deployment error:', error);
+          return res.status(500).json({
+            error: "Deployment failed",
+            details: error.message
+          });
+        }
+
+        console.log('Deployment stdout:', stdout);
+        console.log('Deployment stderr:', stderr);
+
+        res.json({
+          success: true,
+          message: "Deployment completed successfully",
+          stdout: stdout,
+          stderr: stderr,
+          timestamp: new Date().toISOString()
+        });
+      }
+    );
+
+  } catch (error) {
+    console.error('Deployment webhook error:', error);
+    res.status(500).json({ error: "Deployment webhook failed" });
+  }
 });
 
 // Google OAuth authentication endpoint

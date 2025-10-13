@@ -55,6 +55,7 @@ const { UserService } = require('./services/userService');
 const { AIGroupService } = require('./services/aiGroupService');
 const { GroupService } = require('./services/groupService');
 const { PermissionService } = require('./services/permissionService');
+const AIAssessmentService = require('./services/aiAssessmentService');
 
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
@@ -1057,6 +1058,156 @@ async function initializeApp() {
     console.log('⚠️ Database not available, using fallback mode');
   }
 }
+
+// ===== AI ASSESSMENT API ENDPOINTS =====
+
+// Get random questions for assessment
+app.get('/api/assessment/questions', authenticateToken, async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 15;
+    const questions = await AIAssessmentService.getRandomQuestions(limit);
+
+    res.json({
+      success: true,
+      questions: questions.map(q => ({
+        id: q.id,
+        categoryId: q.categoryId,
+        categoryName: q.categoryName,
+        questionText: q.questionText,
+        questionType: q.questionType,
+        options: q.options,
+        scaleMin: q.scaleMin,
+        scaleMax: q.scaleMax,
+        scaleLabels: q.scaleLabels,
+        difficultyLevel: q.difficultyLevel
+      }))
+    });
+  } catch (error) {
+    console.error('Error getting assessment questions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get assessment questions'
+    });
+  }
+});
+
+// Start new assessment session
+app.post('/api/assessment/start', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.email;
+    const session = await AIAssessmentService.startAssessmentSession(userId);
+
+    res.json({
+      success: true,
+      session
+    });
+  } catch (error) {
+    console.error('Error starting assessment session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to start assessment session'
+    });
+  }
+});
+
+// Save question response
+app.post('/api/assessment/answer', authenticateToken, async (req, res) => {
+  try {
+    const { sessionId, questionId, userAnswer, timeSpentSeconds } = req.body;
+
+    if (!sessionId || !questionId || userAnswer === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields: sessionId, questionId, userAnswer'
+      });
+    }
+
+    const result = await AIAssessmentService.saveQuestionResponse(
+      sessionId,
+      questionId,
+      userAnswer,
+      timeSpentSeconds || 0
+    );
+
+    res.json({
+      success: true,
+      result
+    });
+  } catch (error) {
+    console.error('Error saving question response:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save question response'
+    });
+  }
+});
+
+// Complete assessment and get results
+app.post('/api/assessment/complete', authenticateToken, async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Session ID is required'
+      });
+    }
+
+    const results = await AIAssessmentService.completeAssessment(sessionId);
+
+    res.json({
+      success: true,
+      results
+    });
+  } catch (error) {
+    console.error('Error completing assessment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to complete assessment'
+    });
+  }
+});
+
+// Get user's assessment history
+app.get('/api/assessment/history', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.email;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const history = await AIAssessmentService.getUserAssessmentHistory(userId, limit);
+
+    res.json({
+      success: true,
+      history
+    });
+  } catch (error) {
+    console.error('Error getting assessment history:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get assessment history'
+    });
+  }
+});
+
+// Get assessment session details
+app.get('/api/assessment/session/:sessionId', authenticateToken, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const session = await AIAssessmentService.getAssessmentSession(sessionId);
+
+    res.json({
+      success: true,
+      session
+    });
+  } catch (error) {
+    console.error('Error getting assessment session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get assessment session'
+    });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {

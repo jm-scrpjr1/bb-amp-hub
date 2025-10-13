@@ -4,7 +4,7 @@ import { ScrollEffects } from '../components/effects';
 import { Search, Heart, MoreVertical, Brain, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedRobot from '../components/ui/AnimatedRobot';
-import AIAssessmentSimple from '../components/assessment/AIAssessmentSimple';
+import AIAssessmentDatabase from '../components/assessment/AIAssessmentDatabase';
 import StartAssessmentButton from '../components/assessment/StartAssessmentButton';
 
 const categories = [
@@ -284,7 +284,7 @@ const TrainingsPage = () => {
       <MainLayout>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 py-8">
           <div className="container mx-auto px-4">
-            <AIAssessmentSimple
+            <AIAssessmentDatabase
               onComplete={handleAssessmentComplete}
               onCancel={handleAssessmentCancel}
             />
@@ -359,15 +359,27 @@ const TrainingsPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className={`${training.isAssessment ? 'bg-gradient-to-br from-blue-50 via-purple-50 to-cyan-50 border-2 border-blue-200' : 'bg-white border border-gray-100'} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden`}>
+                <div className={`${training.isAssessment ? 'bg-gradient-to-br from-blue-50 via-purple-50 to-cyan-50 border-2 border-blue-200' : 'bg-gradient-to-br from-gray-50 via-white to-blue-50 border-2 border-gray-200'} rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden`}>
                   {/* Background Glow Effect */}
-                  <div className={`absolute inset-0 ${training.isAssessment ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500' : training.bgColor} opacity-0 group-hover:opacity-${training.isAssessment ? '10' : '5'} transition-opacity duration-300 rounded-2xl`}></div>
+                  <div className={`absolute inset-0 ${training.isAssessment ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-500' : 'bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500'} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl`}></div>
 
-                  {/* Special AI Assessment Badge */}
+                  {/* Special Category Badges */}
                   {training.isAssessment && (
                     <div className="absolute top-2 left-2 z-10 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
                       <Brain className="w-3 h-3 inline mr-1" />
                       AI Assessment
+                    </div>
+                  )}
+                  {!training.isAssessment && training.category && (
+                    <div className={`absolute top-2 left-2 z-10 text-white text-xs px-2 py-1 rounded-full font-medium ${
+                      training.category.toLowerCase() === 'sales' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                      training.category.toLowerCase() === 'finance' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
+                      training.category.toLowerCase() === 'human resources' ? 'bg-gradient-to-r from-pink-500 to-rose-600' :
+                      training.category.toLowerCase() === 'marketing' ? 'bg-gradient-to-r from-purple-500 to-violet-600' :
+                      training.category.toLowerCase() === 'coding' ? 'bg-gradient-to-r from-indigo-500 to-blue-600' :
+                      'bg-gradient-to-r from-gray-500 to-slate-600'
+                    }`}>
+                      {training.category}
                     </div>
                   )}
 

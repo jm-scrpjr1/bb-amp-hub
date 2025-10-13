@@ -28,12 +28,12 @@
 
 **Update AWS Amplify Environment Variables**:
 ```
-REACT_APP_API_URL=http://54.160.207.35:3001/api
+REACT_APP_API_URL=http://54.226.14.229:3001/api
 REACT_APP_ENABLE_BACKEND_AUTH=true
 REACT_APP_GOOGLE_CLIENT_ID=1095873294496-47956hstcv5fgol4tf7mplog3o417hkj.apps.googleusercontent.com
 ```
 
-**Backend Status**: ✅ Running at `http://54.160.207.35:3001/api/health`
+**Backend Status**: ✅ Running at `http://54.226.14.229:3001/api/health`
 
 3. **Update Google OAuth Redirect URIs**:
    - Go to Google Cloud Console
@@ -66,7 +66,7 @@ REACT_APP_GOOGLE_CLIENT_ID=1095873294496-47956hstcv5fgol4tf7mplog3o417hkj.apps.g
 REACT_APP_GOOGLE_CLIENT_ID=1095873294496-47956hstcv5fgol4tf7mplog3o417hkj.apps.googleusercontent.com
 
 # If using backend (Option A) - BACKEND IS DEPLOYED!
-REACT_APP_API_URL=http://54.160.207.35:3001/api
+REACT_APP_API_URL=http://54.226.14.229:3001/api
 REACT_APP_ENABLE_BACKEND_AUTH=true
 
 # If not using backend (Option B)

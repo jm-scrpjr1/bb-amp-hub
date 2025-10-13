@@ -6,7 +6,7 @@
 echo "🔧 Updating CORS configuration on production server..."
 
 # SSH connection details (update these with your actual details)
-EC2_HOST="54.160.207.35"
+EC2_HOST="54.226.14.229"
 EC2_USER="ubuntu"  # or "ec2-user" depending on your AMI
 KEY_PATH="~/.ssh/your-key.pem"  # Update with your actual key path
 

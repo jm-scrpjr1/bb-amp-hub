@@ -6,7 +6,7 @@
 echo "🧪 Testing AI Assessment API Endpoints..."
 
 # Configuration
-BASE_URL="https://54.160.207.35/api"
+BASE_URL="https://54.226.14.229/api"
 # For testing, we'll use a simple token (in production, this would be a real auth token)
 AUTH_TOKEN="dGVzdEBib2xkYnVzaW5lc3MuY29tOjE2OTc1NjgwMDA="  # base64 encoded test@boldbusiness.com:timestamp
 

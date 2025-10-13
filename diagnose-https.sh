@@ -118,8 +118,8 @@ echo "🔗 Testing https://localhost..."
 curl -k -s https://localhost/health | head -5 2>/dev/null || echo "HTTPS test failed"
 
 echo ""
-echo "🔗 Testing https://54.160.207.35..."
-curl -k -s https://54.160.207.35/health | head -5 2>/dev/null || echo "External HTTPS test failed"
+echo "🔗 Testing https://54.226.14.229..."
+curl -k -s https://54.226.14.229/health | head -5 2>/dev/null || echo "External HTTPS test failed"
 
 echo ""
 echo "🎯 Diagnostic Complete!"

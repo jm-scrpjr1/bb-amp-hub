@@ -8,7 +8,7 @@ set -e
 echo "🔧 Fixing CORS configuration on backend server..."
 
 # Configuration
-EC2_IP="54.160.207.35"
+EC2_IP="54.226.14.229"
 EC2_USER="ubuntu"
 BACKEND_DIR="/home/ubuntu/bb-amp-hub-backend"
 

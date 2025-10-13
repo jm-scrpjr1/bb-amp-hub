@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🚀 Update Backend with AI Assessment APIs
-# Run this script ON your EC2 server (54.160.207.35)
+# Run this script ON your EC2 server (54.226.14.229)
 
 set -e
 
@@ -99,8 +99,8 @@ echo "  - GET  /api/assessment/history"
 echo "  - GET  /api/assessment/session/:id"
 echo ""
 echo "🔗 Backend is available at:"
-echo "  - HTTP: http://54.160.207.35:3001/api"
-echo "  - HTTPS (via nginx): https://54.160.207.35/api"
+echo "  - HTTP: http://54.226.14.229:3001/api"
+echo "  - HTTPS (via nginx): https://54.226.14.229/api"
 echo ""
 echo "🔍 To check logs: pm2 logs bb-amp-hub-backend"
 echo "🔄 To restart: pm2 restart bb-amp-hub-backend"

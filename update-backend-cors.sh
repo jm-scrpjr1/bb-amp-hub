@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 🔧 Update Backend CORS Configuration
-# Run this script ON your EC2 server (54.160.207.35)
+# Run this script ON your EC2 server (54.226.14.229)
 
 set -e
 

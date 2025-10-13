@@ -6,7 +6,7 @@
 echo "🚀 Deploying Backend to AWS EC2..."
 
 # Configuration
-EC2_HOST="54.160.207.35"
+EC2_HOST="54.226.14.229"
 EC2_USER="ubuntu"  # or ec2-user depending on AMI
 BACKEND_DIR="/home/ubuntu/bb-amp-hub/src/backend"
 REPO_URL="https://github.com/jm-scrpjr1/bb-amp-hub.git"
@@ -74,10 +74,10 @@ rm -rf $TEMP_DIR
 echo "🎉 Deployment script completed!"
 echo ""
 echo "📋 Next steps:"
-echo "1. Test the backend: curl -k https://54.160.207.35/api/hello"
-echo "2. Test AI Assessment: curl -k https://54.160.207.35/api/assessment/questions"
+echo "1. Test the backend: curl -k https://54.226.14.229/api/hello"
+echo "2. Test AI Assessment: curl -k https://54.226.14.229/api/assessment/questions"
 echo "3. Check backend logs if needed: ssh $EC2_USER@$EC2_HOST 'cd /home/ubuntu/bb-amp-hub/src/backend && tail -50 backend.log'"
 echo ""
 echo "🔗 Backend should now be available at:"
-echo "   - HTTP: http://54.160.207.35:3001/api"
-echo "   - HTTPS (via nginx): https://54.160.207.35/api"
+echo "   - HTTP: http://54.226.14.229:3001/api"
+echo "   - HTTPS (via nginx): https://54.226.14.229/api"

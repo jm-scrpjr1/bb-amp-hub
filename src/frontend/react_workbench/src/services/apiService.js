@@ -133,6 +133,24 @@ class ApiService {
     }
   }
 
+  async addGroupMember(groupId, memberData) {
+    try {
+      const response = await this.api.post(`/groups/${groupId}/members`, memberData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to add group member');
+    }
+  }
+
+  async removeGroupMember(groupId, userId) {
+    try {
+      const response = await this.api.delete(`/groups/${groupId}/members/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to remove group member');
+    }
+  }
+
   // User API
   async getUsers() {
     try {

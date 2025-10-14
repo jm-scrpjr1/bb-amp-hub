@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Edit, Users, Trash2 } from 'lucide-react';
 import MainLayout from '../components/layout/MainLayout';
+import { EditGroupModal, ManageMembersModal } from '../components/ui';
+import { useGroupPermissions } from '../providers/RBACProvider';
 import { apiService } from '../services/apiService';
 
 const GroupsPage = () => {
+  const groupPermissions = useGroupPermissions();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,6 +20,12 @@ const GroupsPage = () => {
     canViewAllGroups: false,
     canCreateGroups: false
   });
+
+  // Modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [selectedGroupForAction, setSelectedGroupForAction] = useState(null);
 
   useEffect(() => {
     loadGroups();
@@ -102,6 +112,43 @@ const GroupsPage = () => {
     return '👥';
   };
 
+  // Modal handlers
+  const handleEditGroup = (group) => {
+    setSelectedGroupForAction(group);
+    setShowEditModal(true);
+  };
+
+  const handleManageMembers = (group) => {
+    setSelectedGroupForAction(group);
+    setShowMembersModal(true);
+  };
+
+  const handleDeleteGroup = async (group) => {
+    if (window.confirm(`Are you sure you want to delete the group "${group.name}"? This action cannot be undone.`)) {
+      try {
+        await apiService.deleteGroup(group.id);
+        await loadGroups(); // Reload groups
+      } catch (err) {
+        setError(err.message);
+      }
+    }
+  };
+
+  const handleGroupUpdated = (updatedGroup) => {
+    setGroups(prevGroups =>
+      prevGroups.map(group =>
+        group.id === updatedGroup.id ? updatedGroup : group
+      )
+    );
+  };
+
+  const handleMembersUpdated = () => {
+    // Reload group members if a group is selected
+    if (selectedGroup) {
+      loadGroupMembers(selectedGroup.id);
+    }
+  };
+
   const GroupCard = ({ group, isSelected, onClick }) => (
     <div
       className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -155,6 +202,42 @@ const GroupsPage = () => {
               </span>
             )}
           </div>
+
+          {/* Management buttons */}
+          {groupPermissions.canManageGroup(group.id) && (
+            <div className="flex items-center gap-1 mt-3 pt-3 border-t border-gray-200">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEditGroup(group);
+                }}
+                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                title="Edit group"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleManageMembers(group);
+                }}
+                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Manage members"
+              >
+                <Users className="h-4 w-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteGroup(group);
+                }}
+                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete group"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -446,6 +529,27 @@ const GroupsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <EditGroupModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedGroupForAction(null);
+        }}
+        group={selectedGroupForAction}
+        onGroupUpdated={handleGroupUpdated}
+      />
+
+      <ManageMembersModal
+        isOpen={showMembersModal}
+        onClose={() => {
+          setShowMembersModal(false);
+          setSelectedGroupForAction(null);
+        }}
+        group={selectedGroupForAction}
+        onMembersUpdated={handleMembersUpdated}
+      />
     </MainLayout>
   );
 };

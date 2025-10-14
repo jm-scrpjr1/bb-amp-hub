@@ -5,6 +5,9 @@ import {
   canAccessAdminPanel,
   canManageUsers,
   canCreateGroups,
+  canManageGroup,
+  canViewGroup,
+  canInviteToGroup,
   isOwner,
   isAdmin,
   isTeamManager,
@@ -80,16 +83,16 @@ export const RBACProvider = ({ children }) => {
     return canCreateGroups(user);
   };
 
-  const canManageGroup = (groupId) => {
-    return hasPermission(user, Permission.MANAGE_GROUP_MEMBERS, groupId) || isOwner(user);
+  const canManageGroupCheck = (groupId) => {
+    return canManageGroup(user, groupId);
   };
 
-  const canViewGroup = (groupId) => {
-    return hasPermission(user, Permission.VIEW_ALL_GROUPS) || isMember();
+  const canViewGroupCheck = (group) => {
+    return canViewGroup(user, group);
   };
 
-  const canInviteToGroup = (groupId) => {
-    return hasPermission(user, Permission.MANAGE_GROUP_MEMBERS, groupId) || isTeamManager(user);
+  const canInviteToGroupCheck = (groupId) => {
+    return canInviteToGroup(user, groupId);
   };
 
   const canAccessAdminPanelCheck = () => {
@@ -111,9 +114,9 @@ export const RBACProvider = ({ children }) => {
     isTeamManager: isTeamManagerCheck,
     isMember,
     canCreateGroups: canCreateGroupsCheck,
-    canManageGroup,
-    canViewGroup,
-    canInviteToGroup,
+    canManageGroup: canManageGroupCheck,
+    canViewGroup: canViewGroupCheck,
+    canInviteToGroup: canInviteToGroupCheck,
     canAccessAdminPanel: canAccessAdminPanelCheck,
     canManageUsers: () => canManageUsers(user),
     hasGodMode: () => hasGodMode(user),
@@ -248,7 +251,7 @@ export const useGroupPermissions = () => {
   return {
     canCreateGroups: rbac.canCreateGroups(),
     canManageGroup: (groupId) => rbac.canManageGroup(groupId),
-    canViewGroup: (groupId) => rbac.canViewGroup(groupId),
+    canViewGroup: (group) => rbac.canViewGroup(group),
     canInviteToGroup: (groupId) => rbac.canInviteToGroup(groupId),
   };
 };

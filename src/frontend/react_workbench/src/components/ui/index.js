@@ -6,3 +6,5 @@ export { default as BoldIdeaModal } from './BoldIdeaModal';
 export { default as TicketConfirmationModal } from './TicketConfirmationModal';
 export { default as DirectMessageModal } from './DirectMessageModal';
 export { default as GroupChatModal } from './GroupChatModal';
+export { default as EditGroupModal } from './EditGroupModal';
+export { default as ManageMembersModal } from './ManageMembersModal';

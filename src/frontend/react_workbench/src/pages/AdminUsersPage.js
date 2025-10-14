@@ -57,6 +57,11 @@ const AdminUsersPage = () => {
     loadAllUsers();
   }, [canManageUsers]);
 
+  // Reset to page 1 when search term or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, roleFilter, statusFilter]);
+
   useEffect(() => {
     filterUsers();
   }, [allUsers, searchTerm, roleFilter, statusFilter, currentPage]);

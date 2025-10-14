@@ -1,0 +1,293 @@
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import { X, Users, Plus, Trash2, Search, AlertCircle, UserPlus } from 'lucide-react';
+import { apiService } from '../../services/apiService';
+
+const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, group, onMembersUpdated }) {
+  const [members, setMembers] = useState([]);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
+  const [selectedRole, setSelectedRole] = useState('MEMBER');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (group && isOpen) {
+      loadGroupMembers();
+      loadAvailableUsers();
+    }
+  }, [group, isOpen]);
+
+  const loadGroupMembers = useCallback(async () => {
+    if (!group) return;
+    
+    try {
+      setIsLoading(true);
+      const response = await apiService.getGroupMembers(group.id);
+      setMembers(response.members || []);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load group members');
+      console.error('Error loading group members:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [group]);
+
+  const loadAvailableUsers = useCallback(async () => {
+    try {
+      // Get all users to show in the add member dropdown
+      const response = await apiService.getUsers({ limit: 1000 });
+      setAvailableUsers(response.users || []);
+    } catch (err) {
+      console.error('Error loading available users:', err);
+    }
+  }, []);
+
+  const handleAddMember = useCallback(async (e) => {
+    e.preventDefault();
+    if (!selectedUser || !group) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await apiService.addGroupMember(group.id, {
+        userId: selectedUser,
+        role: selectedRole
+      });
+      
+      // Reload members
+      await loadGroupMembers();
+      
+      // Reset form
+      setSelectedUser('');
+      setSelectedRole('MEMBER');
+      
+      if (onMembersUpdated) {
+        onMembersUpdated();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to add member');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [selectedUser, selectedRole, group, loadGroupMembers, onMembersUpdated]);
+
+  const handleRemoveMember = useCallback(async (userId) => {
+    if (!group || !window.confirm('Are you sure you want to remove this member?')) return;
+
+    try {
+      await apiService.removeGroupMember(group.id, userId);
+      
+      // Reload members
+      await loadGroupMembers();
+      
+      if (onMembersUpdated) {
+        onMembersUpdated();
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to remove member');
+    }
+  }, [group, loadGroupMembers, onMembersUpdated]);
+
+  const handleClose = useCallback(() => {
+    if (!isSubmitting) {
+      setError(null);
+      setSearchTerm('');
+      setSelectedUser('');
+      setSelectedRole('MEMBER');
+      onClose();
+    }
+  }, [isSubmitting, onClose]);
+
+  const filteredMembers = members.filter(member =>
+    member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const availableUsersForAdd = availableUsers.filter(user =>
+    !members.some(member => member.id === user.id)
+  );
+
+  if (!mounted || !isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Users className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Manage Members</h2>
+              <p className="text-sm text-gray-600">{group?.name}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <X className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          {error && (
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-500" />
+              <span className="text-sm text-red-700">{error}</span>
+            </div>
+          )}
+
+          {/* Add Member Form */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Add New Member
+            </h3>
+            <form onSubmit={handleAddMember} className="flex gap-3">
+              <div className="flex-1">
+                <select
+                  value={selectedUser}
+                  onChange={(e) => setSelectedUser(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                >
+                  <option value="">Select a user...</option>
+                  {availableUsersForAdd.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.name} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  disabled={isSubmitting}
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                >
+                  <option value="MEMBER">Member</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                disabled={!selectedUser || isSubmitting}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+                {isSubmitting ? 'Adding...' : 'Add'}
+              </button>
+            </form>
+          </div>
+
+          {/* Search Members */}
+          <div className="relative">
+            <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search members..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Members List */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Current Members ({filteredMembers.length})
+            </h3>
+            
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-600 mt-2">Loading members...</p>
+              </div>
+            ) : filteredMembers.length === 0 ? (
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">
+                  {searchTerm ? 'No members found matching your search' : 'No members in this group yet'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredMembers.map(member => (
+                  <div key={member.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        {member.name?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{member.name}</h4>
+                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <div className="flex gap-2 mt-1">
+                          <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                            member.role === 'ADMIN'
+                              ? 'bg-red-100 text-red-800'
+                              : member.role === 'MANAGER'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {member.role}
+                          </span>
+                          <span className={`inline-block text-xs px-2 py-1 rounded-full ${
+                            member.status === 'ACTIVE'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {member.status}
+                          </span>
+                          {member.joinedAt && (
+                            <span className="inline-block text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                              Joined {new Date(member.joinedAt).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveMember(member.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remove member"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end pt-4 border-t border-gray-200">
+            <button
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+export default ManageMembersModal;

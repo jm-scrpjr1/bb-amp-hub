@@ -2,8 +2,9 @@
 
 export const UserRole = {
   OWNER: 'OWNER',
+  SUPER_ADMIN: 'SUPER_ADMIN',
   ADMIN: 'ADMIN',
-  TEAM_MANAGER: 'TEAM_MANAGER',
+  MANAGER: 'MANAGER',
   MEMBER: 'MEMBER'
 };
 
@@ -108,8 +109,9 @@ export function canCreateGroups(user) {
   if (hasGodMode(user)) return true;
 
   return user.role === UserRole.OWNER ||
+         user.role === UserRole.SUPER_ADMIN ||
          user.role === UserRole.ADMIN ||
-         user.role === UserRole.TEAM_MANAGER ||
+         user.role === UserRole.MANAGER ||
          hasPermission(user, Permission.CREATE_GROUP);
 }
 
@@ -118,15 +120,23 @@ export function isOwner(user) {
 }
 
 export function isAdmin(user) {
-  return (user?.role === UserRole.ADMIN || user?.role === UserRole.OWNER) && 
+  return (user?.role === UserRole.ADMIN ||
+          user?.role === UserRole.SUPER_ADMIN ||
+          user?.role === UserRole.OWNER) &&
          user?.status === UserStatus.ACTIVE;
 }
 
-export function isTeamManager(user) {
-  return (user?.role === UserRole.TEAM_MANAGER || 
-          user?.role === UserRole.ADMIN || 
-          user?.role === UserRole.OWNER) && 
+export function isManager(user) {
+  return (user?.role === UserRole.MANAGER ||
+          user?.role === UserRole.ADMIN ||
+          user?.role === UserRole.SUPER_ADMIN ||
+          user?.role === UserRole.OWNER) &&
          user?.status === UserStatus.ACTIVE;
+}
+
+// Backward compatibility alias
+export function isTeamManager(user) {
+  return isManager(user);
 }
 
 // Enhanced user creation function that assigns proper roles based on email
@@ -208,6 +218,28 @@ export const ROLE_PERMISSIONS = {
     Permission.PROMPT_TUTOR_ACCESS
   ],
   
+  [UserRole.SUPER_ADMIN]: [
+    // Super Admins have all permissions like Owners except system settings
+    Permission.ADMIN_PANEL_ACCESS,
+    Permission.MANAGE_USERS,
+    Permission.ANALYTICS_ACCESS,
+    Permission.CREATE_GROUP,
+    Permission.DELETE_GROUP,
+    Permission.EDIT_GROUP,
+    Permission.MANAGE_GROUP_MEMBERS,
+    Permission.VIEW_ALL_GROUPS,
+    Permission.VIEW_USER_PROFILES,
+    Permission.ASSIGN_ROLES,
+    Permission.VIEW_HR_CONTENT,
+    Permission.VIEW_IT_CONTENT,
+    Permission.VIEW_FINANCE_CONTENT,
+    Permission.VIEW_MARKETING_CONTENT,
+    Permission.VIEW_ADMIN_CONTENT,
+    Permission.AI_TRAINING_ACCESS,
+    Permission.AI_ASSESSMENT_ACCESS,
+    Permission.PROMPT_TUTOR_ACCESS
+  ],
+
   [UserRole.ADMIN]: [
     // Admins have most permissions except system-level changes
     Permission.ADMIN_PANEL_ACCESS,
@@ -227,9 +259,9 @@ export const ROLE_PERMISSIONS = {
     Permission.AI_ASSESSMENT_ACCESS,
     Permission.PROMPT_TUTOR_ACCESS
   ],
-  
-  [UserRole.TEAM_MANAGER]: [
-    // Team managers can manage their team and view team analytics
+
+  [UserRole.MANAGER]: [
+    // Managers can manage their team and view team analytics
     Permission.CREATE_GROUP,
     Permission.EDIT_GROUP,
     Permission.MANAGE_GROUP_MEMBERS,
@@ -247,9 +279,75 @@ export const ROLE_PERMISSIONS = {
 
 export function getUserPermissions(user) {
   if (!user) return [];
-  
+
   // God mode for owner email
   if (hasGodMode(user)) return ROLE_PERMISSIONS[UserRole.OWNER];
-  
+
   return ROLE_PERMISSIONS[user.role] || ROLE_PERMISSIONS[UserRole.MEMBER];
+}
+
+// Group Management Permission Functions
+export function canManageGroup(user, groupId) {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner, Super Admin, and Admin can manage all groups
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
+
+  // Manager can manage groups they belong to
+  if (user.role === UserRole.MANAGER) {
+    return user.managedGroups?.some(g => g.id === groupId) ||
+           user.groupMemberships?.some(m => m.groupId === groupId && m.status === 'ACTIVE');
+  }
+
+  // Check if user has group management permission
+  return hasPermission(user, Permission.MANAGE_GROUP_MEMBERS, groupId);
+}
+
+export function canViewGroup(user, group) {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner, Super Admin, and Admin can view all groups
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
+
+  // Public groups are visible to all
+  if (group.visibility === 'PUBLIC') return true;
+
+  // Check if user is a member
+  const membership = user.groupMemberships?.find(m => m.groupId === group.id);
+  if (membership && membership.status === 'ACTIVE') return true;
+
+  // Check if user is the manager
+  if (group.managerId === user.id) return true;
+
+  return false;
+}
+
+export function canInviteToGroup(user, groupId) {
+  if (!user) return false;
+
+  // God mode - owner email always has access
+  if (hasGodMode(user)) return true;
+
+  // Owner, Super Admin, and Admin can invite to any group
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
+
+  // Check if user is the group manager
+  const managedGroup = user.managedGroups?.find(g => g.id === groupId);
+  if (managedGroup) return true;
+
+  // Check if user has invite permission in the group
+  const membership = user.groupMemberships?.find(m => m.groupId === groupId);
+  return membership?.canInvite || false;
 }

@@ -5,6 +5,8 @@ import PageTemplate from '@/components/common/page-template';
 import { useRBAC, useGroupPermissions } from '@/providers/rbac-provider';
 import { GroupType, GroupVisibility, GroupInfo } from '@/lib/permissions';
 import CreateGroupModal from '@/components/groups/create-group-modal-simple';
+import EditGroupModal from '@/components/groups/edit-group-modal';
+import ManageMembersModal from '@/components/groups/manage-members-modal';
 import { Users } from '@/components/icons';
 import {
   Plus,
@@ -20,7 +22,9 @@ import {
   Zap,
   Trash2,
   MoreVertical,
-  AlertTriangle
+  AlertTriangle,
+  Edit,
+  Users as UsersIcon
 } from 'lucide-react';
 
 export default function GroupsPage() {
@@ -177,6 +181,8 @@ export default function GroupsPage() {
 function GroupCard({ group, onUpdate }: { group: GroupInfo; onUpdate: () => void }) {
   const groupPermissions = useGroupPermissions();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const TypeIcon = getGroupTypeIcon(group.type);
@@ -229,11 +235,25 @@ function GroupCard({ group, onUpdate }: { group: GroupInfo; onUpdate: () => void
           {groupPermissions.canManageGroup(group.id) && (
             <div className="flex items-center gap-1">
               <button
+                onClick={() => setShowEditModal(true)}
+                className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                title="Edit group"
+              >
+                <Edit className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setShowMembersModal(true)}
+                className="p-1 text-gray-400 hover:text-green-600 transition-colors"
+                title="Manage members"
+              >
+                <UsersIcon className="h-4 w-4" />
+              </button>
+              <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="p-1 text-gray-400 hover:text-red-600 transition-colors"
                 title="Delete group"
               >
-                <Settings className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -256,6 +276,28 @@ function GroupCard({ group, onUpdate }: { group: GroupInfo; onUpdate: () => void
           </div>
         </div>
       </div>
+
+      {/* Edit Group Modal */}
+      <EditGroupModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSuccess={() => {
+          onUpdate();
+          setShowEditModal(false);
+        }}
+        group={group}
+      />
+
+      {/* Manage Members Modal */}
+      <ManageMembersModal
+        isOpen={showMembersModal}
+        onClose={() => setShowMembersModal(false)}
+        onSuccess={() => {
+          onUpdate();
+          setShowMembersModal(false);
+        }}
+        group={group}
+      />
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (

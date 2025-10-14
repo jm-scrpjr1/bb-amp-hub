@@ -31,7 +31,8 @@ const AdminUsersPage = () => {
   const { user } = useAuth();
   const { canManageUsers } = useRBAC();
   const [loading, setLoading] = useState(true);
-  const [users, setUsers] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [allUsers, setAllUsers] = useState([]); // Cache all users
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
@@ -42,6 +43,7 @@ const AdminUsersPage = () => {
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(null);
 
   const usersPerPage = 10;
 
@@ -52,37 +54,47 @@ const AdminUsersPage = () => {
       return;
     }
 
-    loadUsers();
-  }, [canManageUsers, currentPage]);
+    loadAllUsers();
+  }, [canManageUsers]);
 
   useEffect(() => {
     filterUsers();
-  }, [users, searchTerm, roleFilter, statusFilter]);
+  }, [allUsers, searchTerm, roleFilter, statusFilter, currentPage]);
 
-  const loadUsers = async () => {
+  const loadAllUsers = async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       setError(null);
 
+      // Load all users at once by setting a high limit
       const response = await adminService.getUsers({
-        page: currentPage,
-        limit: usersPerPage
+        page: 1,
+        limit: 1000 // Load up to 1000 users at once
       });
 
-      setUsers(response.users || []);
+      setAllUsers(response.users || []);
       setTotalUsers(response.total || 0);
-      setTotalPages(response.totalPages || 1);
+      setLastRefresh(new Date());
 
     } catch (err) {
       console.error('Error loading users:', err);
       setError('Failed to load users. Please try again.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
+  const refreshUsers = () => {
+    loadAllUsers(true);
+  };
+
   const filterUsers = () => {
-    let filtered = [...users];
+    let filtered = [...allUsers];
 
     // Search filter
     if (searchTerm) {
@@ -103,7 +115,15 @@ const AdminUsersPage = () => {
       filtered = filtered.filter(user => user.status === statusFilter);
     }
 
-    setFilteredUsers(filtered);
+    // Calculate pagination for filtered results
+    const totalFiltered = filtered.length;
+    const totalPagesFiltered = Math.ceil(totalFiltered / usersPerPage);
+    const startIndex = (currentPage - 1) * usersPerPage;
+    const endIndex = startIndex + usersPerPage;
+    const paginatedUsers = filtered.slice(startIndex, endIndex);
+
+    setFilteredUsers(paginatedUsers);
+    setTotalPages(totalPagesFiltered);
   };
 
   const getRoleIcon = (role) => {
@@ -208,16 +228,22 @@ const AdminUsersPage = () => {
               <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
               <p className="text-gray-600 mt-1">
                 Manage user accounts, roles, and permissions ({totalUsers} users total)
+                {lastRefresh && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    • Last updated: {lastRefresh.toLocaleTimeString()}
+                  </span>
+                )}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
             <button
-              onClick={loadUsers}
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={refreshUsers}
+              disabled={refreshing}
+              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh'}
             </button>
             <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               <Plus className="h-4 w-4 mr-2" />
@@ -228,6 +254,15 @@ const AdminUsersPage = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Filter Users</h3>
+            {allUsers.length > 0 && (
+              <div className="flex items-center text-sm text-gray-500">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Cached data ({allUsers.length} users loaded)
+              </div>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -247,8 +282,9 @@ const AdminUsersPage = () => {
             >
               <option value="ALL">All Roles</option>
               <option value="OWNER">Owner</option>
+              <option value="SUPER_ADMIN">Super Admin</option>
               <option value="ADMIN">Admin</option>
-              <option value="TEAM_MANAGER">Team Manager</option>
+              <option value="MANAGER">Manager</option>
               <option value="MEMBER">Member</option>
             </select>
 

@@ -843,6 +843,58 @@ app.post('/api/groups', authenticateUser, async (req, res) => {
   }
 });
 
+// Update group endpoint
+app.put('/api/groups/:groupId', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Check if user can manage this group
+    if (!PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions to manage this group' });
+    }
+
+    const updatedGroup = await GroupService.updateGroup(groupId, req.body);
+
+    if (!updatedGroup) {
+      return res.status(404).json({ error: 'Group not found' });
+    }
+
+    res.json({
+      success: true,
+      group: updatedGroup
+    });
+  } catch (error) {
+    console.error('Error updating group:', error);
+    res.status(500).json({ error: 'Failed to update group' });
+  }
+});
+
+// Delete group endpoint
+app.delete('/api/groups/:groupId', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Check if user can manage this group
+    if (!PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions to manage this group' });
+    }
+
+    const success = await GroupService.deleteGroup(groupId);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Group not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Group deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting group:', error);
+    res.status(500).json({ error: 'Failed to delete group' });
+  }
+});
+
 // Group members endpoint
 app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
   try {
@@ -888,6 +940,64 @@ app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
   } catch (error) {
     console.error('Error fetching group members:', error);
     res.status(500).json({ error: 'Failed to fetch group members' });
+  }
+});
+
+// Add member to group endpoint
+app.post('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { userId, role = 'MEMBER' } = req.body;
+
+    // Check if user can manage this group
+    if (!PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions to manage this group' });
+    }
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const membership = await GroupService.addGroupMember(groupId, userId, role);
+
+    if (!membership) {
+      return res.status(400).json({ error: 'Failed to add member to group' });
+    }
+
+    res.json({
+      success: true,
+      membership,
+      message: 'Member added to group successfully'
+    });
+  } catch (error) {
+    console.error('Error adding group member:', error);
+    res.status(500).json({ error: 'Failed to add member to group' });
+  }
+});
+
+// Remove member from group endpoint
+app.delete('/api/groups/:groupId/members/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { groupId, userId } = req.params;
+
+    // Check if user can manage this group
+    if (!PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions to manage this group' });
+    }
+
+    const success = await GroupService.removeGroupMember(groupId, userId);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Member not found in group' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Member removed from group successfully'
+    });
+  } catch (error) {
+    console.error('Error removing group member:', error);
+    res.status(500).json({ error: 'Failed to remove member from group' });
   }
 });
 

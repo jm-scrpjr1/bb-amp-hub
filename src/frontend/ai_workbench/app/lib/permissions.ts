@@ -203,8 +203,9 @@ export function canCreateGroups(user: UserWithPermissions | null): boolean {
   if (hasGodMode(user)) return true;
 
   return user.role === UserRole.OWNER ||
+         user.role === UserRole.SUPER_ADMIN ||
          user.role === UserRole.ADMIN ||
-         user.role === UserRole.TEAM_MANAGER ||
+         user.role === UserRole.MANAGER ||
          hasPermission(user, Permission.CREATE_GROUP);
 }
 
@@ -214,8 +215,10 @@ export function canManageGroup(user: UserWithPermissions | null, groupId: string
   // God mode - owner email always has access
   if (hasGodMode(user)) return true;
 
-  // Owner and Admin can manage all groups
-  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+  // Owner, Super Admin, and Admin can manage all groups
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
 
   // Check if user is the group manager
   const managedGroup = user.managedGroups?.find(g => g.id === groupId);
@@ -231,8 +234,10 @@ export function canViewGroup(user: UserWithPermissions | null, group: GroupInfo)
   // God mode - owner email always has access
   if (hasGodMode(user)) return true;
 
-  // Owner and Admin can view all groups
-  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+  // Owner, Super Admin, and Admin can view all groups
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
 
   // Public groups are visible to all
   if (group.visibility === GroupVisibility.PUBLIC) return true;
@@ -253,8 +258,10 @@ export function canInviteToGroup(user: UserWithPermissions | null, groupId: stri
   // God mode - owner email always has access
   if (hasGodMode(user)) return true;
 
-  // Owner and Admin can invite to any group
-  if (user.role === UserRole.OWNER || user.role === UserRole.ADMIN) return true;
+  // Owner, Super Admin, and Admin can invite to any group
+  if (user.role === UserRole.OWNER ||
+      user.role === UserRole.SUPER_ADMIN ||
+      user.role === UserRole.ADMIN) return true;
 
   // Check if user is the group manager
   const managedGroup = user.managedGroups?.find(g => g.id === groupId);

@@ -162,7 +162,7 @@ const AdminUsersPage = () => {
   const handleUpdateUser = async (userId, userData) => {
     try {
       await adminService.updateUser(userId, userData);
-      await loadUsers(); // Reload users
+      await loadAllUsers(); // Reload users
       setShowEditModal(false);
       setSelectedUser(null);
     } catch (err) {
@@ -178,7 +178,7 @@ const AdminUsersPage = () => {
 
     try {
       await adminService.deleteUser(userId);
-      await loadUsers(); // Reload users
+      await loadAllUsers(); // Reload users
     } catch (err) {
       console.error('Error deleting user:', err);
       setError('Failed to delete user. Please try again.');

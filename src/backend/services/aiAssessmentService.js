@@ -153,9 +153,9 @@ class AIAssessmentService {
     try {
       // Calculate total score
       const scoreData = await prisma.$queryRaw`
-        SELECT 
+        SELECT
           SUM(r.points_earned) as total_score,
-          SUM(q.points * c.weight) as max_possible_score,
+          SUM(q.points) as max_possible_score,
           COUNT(*) as questions_answered
         FROM user_question_responses r
         JOIN assessment_questions q ON r.question_id = q.id
@@ -165,7 +165,7 @@ class AIAssessmentService {
 
       const totalScore = parseInt(scoreData[0].total_score) || 0;
       const maxPossibleScore = parseInt(scoreData[0].max_possible_score) || 1;
-      const percentageScore = Math.round((totalScore / maxPossibleScore) * 100);
+      const percentageScore = Math.min(100, Math.round((totalScore / maxPossibleScore) * 100));
 
       // Determine AI readiness level
       let aiReadinessLevel;
@@ -226,12 +226,12 @@ class AIAssessmentService {
   static async calculateCategoryScores(sessionId) {
     try {
       const categoryScores = await prisma.$queryRaw`
-        SELECT 
+        SELECT
           c.id,
           c.name,
           c.weight,
           SUM(r.points_earned) as category_score,
-          SUM(q.points * c.weight) as category_max_score,
+          SUM(q.points) as category_max_score,
           COUNT(*) as questions_count
         FROM user_question_responses r
         JOIN assessment_questions q ON r.question_id = q.id
@@ -241,15 +241,23 @@ class AIAssessmentService {
         ORDER BY c.id
       `;
 
-      return categoryScores.map(cat => ({
-        categoryId: cat.id,
-        categoryName: cat.name,
-        weight: parseFloat(cat.weight),
-        score: parseInt(cat.category_score) || 0,
-        maxScore: parseInt(cat.category_max_score) || 1,
-        percentage: Math.round(((parseInt(cat.category_score) || 0) / (parseInt(cat.category_max_score) || 1)) * 100),
-        questionsCount: parseInt(cat.questions_count)
-      }));
+      return categoryScores.map(cat => {
+        const rawScore = parseInt(cat.category_score) || 0;
+        const maxScore = parseInt(cat.category_max_score) || 1;
+
+        // Calculate percentage first (0-100%)
+        const percentage = Math.min(100, Math.round((rawScore / maxScore) * 100));
+
+        return {
+          categoryId: cat.id,
+          categoryName: cat.name,
+          weight: parseFloat(cat.weight),
+          score: rawScore,
+          maxScore: maxScore,
+          percentage: percentage,
+          questionsCount: parseInt(cat.questions_count)
+        };
+      });
     } catch (error) {
       console.error('Error calculating category scores:', error);
       return [];

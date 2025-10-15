@@ -177,13 +177,44 @@ class GroupService {
   // Update group
   static async updateGroup(groupId, updateData) {
     try {
-      const group = mockGroups.get(groupId);
-      if (!group) return null;
+      // First check if group exists
+      const existingGroup = await prisma.group.findUnique({
+        where: { id: groupId }
+      });
 
-      Object.assign(group, updateData, { updatedAt: new Date() });
-      mockGroups.set(groupId, group);
+      if (!existingGroup) return null;
 
-      return group;
+      // Update the group
+      const updatedGroup = await prisma.group.update({
+        where: { id: groupId },
+        data: {
+          ...updateData,
+          updatedAt: new Date()
+        },
+        include: {
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          manager: {
+            select: {
+              id: true,
+              name: true,
+              email: true
+            }
+          },
+          _count: {
+            select: {
+              memberships: true
+            }
+          }
+        }
+      });
+
+      return updatedGroup;
     } catch (error) {
       console.error('Error updating group:', error);
       return null;

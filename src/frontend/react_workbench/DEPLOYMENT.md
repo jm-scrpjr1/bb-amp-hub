@@ -26,7 +26,7 @@
 ### 1. Environment Variables to Set in AWS Amplify Console:
 
 ```
-REACT_APP_API_URL=https://your-backend-api-url.com/api
+REACT_APP_API_URL=https://api.boldbusiness.com/api
 REACT_APP_GOOGLE_CLIENT_ID=1095873294496-47956hstcv5fgol4tf7mplog3o417hkj.apps.googleusercontent.com
 REACT_APP_ENVIRONMENT=production
 REACT_APP_OPENAI_ASSISTANT_ID=asst_R5RXI0LcyRxsgR80xb05oNQb

@@ -184,11 +184,14 @@ class GroupService {
 
       if (!existingGroup) return null;
 
+      // Filter out unsupported fields (like tags) that don't exist in the database schema
+      const { tags, ...validUpdateData } = updateData;
+
       // Update the group
       const updatedGroup = await prisma.group.update({
         where: { id: groupId },
         data: {
-          ...updateData,
+          ...validUpdateData,
           updatedAt: new Date()
         },
         include: {

@@ -24,6 +24,8 @@ import {
   Shield
 } from 'lucide-react';
 import { useTheme } from '../../providers/ThemeProvider';
+import { useAuth } from '../../providers/AuthProvider';
+import BoldIdeaModal from '../ui/BoldIdeaModal';
 
 // Navigation items matching the Next.js workbench structure
 const navigationItems = [
@@ -73,19 +75,16 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { boldBusinessTheme } = useTheme();
+  const { user, signOut } = useAuth();
   const [activeItem, setActiveItem] = useState('home');
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
-
-  // Mock session for now - will be replaced with actual auth
-  const session = { user: { email: 'jlope@boldbusiness.com' } };
 
   // Filter navigation items based on user permissions
   const getFilteredNavigationItems = () => {
     return navigationItems.filter(item => {
       // Show admin panel only to authorized users
       if (item.adminOnly) {
-        const user = session?.user;
         // Temporary: Show admin panel for owner email during development
         if (user?.email === 'jlope@boldbusiness.com') {
           return true;
@@ -100,8 +99,14 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   const handleNavigation = useCallback(async (itemId, path) => {
     setActiveItem(itemId);
     if (itemId === 'logout') {
-      // Handle logout - for now just redirect to signin
-      navigate('/signin');
+      // Handle logout using the same functionality as the profile dropdown
+      try {
+        await signOut();
+        navigate('/auth/signin');
+      } catch (error) {
+        console.error('Error signing out:', error);
+        navigate('/auth/signin');
+      }
       return;
     }
 
@@ -114,7 +119,7 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
     // Navigate to the route
     navigate(path);
     onClose?.();
-  }, [navigate, onClose]);
+  }, [navigate, onClose, signOut]);
 
   const isActive = (path) => {
     if (path === '/') {
@@ -383,9 +388,11 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
           </nav>
         </div>
 
-        {/* TODO: Add modals when we port them */}
-        {/* Ticket Confirmation Modal */}
         {/* Bold Idea Modal */}
+        <BoldIdeaModal
+          isOpen={isBoldIdeaModalOpen}
+          onClose={() => setIsBoldIdeaModalOpen(false)}
+        />
       </div>
     </>
   );

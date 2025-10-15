@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, CheckCircle, BarChart3, TrendingUp, Target, Lightbulb, Loader2, Award, Star } from 'lucide-react';
+import environmentConfig from '../../config/environment';
 
-// API service for assessment
+// API service for assessment using proper environment configuration
 const assessmentAPI = {
   async getQuestions(limit = 15) {
     const token = localStorage.getItem('auth_token');
-    const response = await fetch('/api/assessment/questions?limit=' + limit, {
+    const response = await fetch(`${environmentConfig.apiUrl}/assessment/questions?limit=${limit}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -19,7 +20,7 @@ const assessmentAPI = {
 
   async startSession() {
     const token = localStorage.getItem('auth_token');
-    const response = await fetch('/api/assessment/start', {
+    const response = await fetch(`${environmentConfig.apiUrl}/assessment/start`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -33,7 +34,7 @@ const assessmentAPI = {
 
   async saveAnswer(sessionId, questionId, userAnswer, timeSpentSeconds) {
     const token = localStorage.getItem('auth_token');
-    const response = await fetch('/api/assessment/answer', {
+    const response = await fetch(`${environmentConfig.apiUrl}/assessment/answer`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -53,7 +54,7 @@ const assessmentAPI = {
 
   async completeAssessment(sessionId) {
     const token = localStorage.getItem('auth_token');
-    const response = await fetch('/api/assessment/complete', {
+    const response = await fetch(`${environmentConfig.apiUrl}/assessment/complete`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

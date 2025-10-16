@@ -3,6 +3,7 @@ import MainLayout from '../components/layout/MainLayout';
 import { WelcomeSection, QuickActions } from '../components/dashboard';
 import BoldUpdates from '../components/dashboard/BoldUpdates';
 import ActivitySection from '../components/dashboard/ActivitySection';
+import AIReadinessCard from '../components/dashboard/AIReadinessCard';
 import DirectMessageModal from '../components/ui/DirectMessageModal';
 import GroupChatModal from '../components/ui/GroupChatModal';
 import TutorialButton from '../components/dashboard/TutorialButton';
@@ -91,6 +92,11 @@ const MySpacePage = () => {
 
         {/* Right Panel */}
         <div className="w-80 space-y-6 relative z-10">
+          {/* AI Readiness Card */}
+          <ScrollEffects effect="fadeUp" delay={0.1}>
+            <AIReadinessCard />
+          </ScrollEffects>
+
           {/* Resources Section */}
           <ScrollEffects effect="fadeUp" delay={0.2}>
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">

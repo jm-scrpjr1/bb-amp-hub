@@ -372,10 +372,10 @@ const TrainingsPage = () => {
                   )}
                   {!training.isAssessment && training.category && (
                     <div className={`absolute top-2 left-2 z-10 text-white text-xs px-2 py-1 rounded-full font-medium ${
-                      training.category.toLowerCase() === 'sales' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                      training.category.toLowerCase() === 'sales' ? 'bg-gradient-to-r from-red-500 to-red-600' :
                       training.category.toLowerCase() === 'finance' ? 'bg-gradient-to-r from-yellow-500 to-orange-600' :
-                      training.category.toLowerCase() === 'human resources' ? 'bg-gradient-to-r from-pink-500 to-rose-600' :
-                      training.category.toLowerCase() === 'marketing' ? 'bg-gradient-to-r from-purple-500 to-violet-600' :
+                      training.category.toLowerCase() === 'human resources' ? 'bg-gradient-to-r from-sky-400 to-sky-500' :
+                      training.category.toLowerCase() === 'marketing' ? 'bg-gradient-to-r from-green-500 to-green-600' :
                       training.category.toLowerCase() === 'coding' ? 'bg-gradient-to-r from-indigo-500 to-blue-600' :
                       'bg-gradient-to-r from-gray-500 to-slate-600'
                     }`}>
@@ -422,14 +422,27 @@ const TrainingsPage = () => {
                     <p className="text-gray-600 text-sm mb-4">
                       {training.description}
                     </p>
-                    {training.isAssessment && (
-                      <div className="mt-4">
+                    <div className="mt-4">
+                      {training.isAssessment ? (
                         <StartAssessmentButton onClick={() => handleStartAssessment()} variant="primary">
                           <Target className="w-5 h-5 mr-2" />
                           <span className="text-sm">Start Assessment</span>
                         </StartAssessmentButton>
-                      </div>
-                    )}
+                      ) : (
+                        <StartAssessmentButton onClick={() => handleTrainingClick(training)} variant="primary">
+                          <Target className="w-5 h-5 mr-2" />
+                          <span className="text-sm">
+                            {training.category === 'Sales' ? 'Start Sales Training' :
+                             training.category === 'Marketing' ? 'Start Marketing Training' :
+                             training.category === 'Finance' ? 'Start Finance Training' :
+                             training.category === 'Human Resources' ? 'Start HR Training' :
+                             training.category === 'Coding' ? 'Start Coding Training' :
+                             training.category === 'IT' ? 'Start IT Training' :
+                             `Start ${training.name} Training`}
+                          </span>
+                        </StartAssessmentButton>
+                      )}
+                    </div>
                   </div>
 
                   {/* Color Bar at Bottom */}

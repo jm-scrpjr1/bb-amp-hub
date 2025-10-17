@@ -229,7 +229,8 @@ const FloatingChatbot = ({ className = '' }) => {
         body: JSON.stringify({
           message: currentMessage,
           threadId: threadId, // Include thread ID for conversation continuity
-          conversationHistory: messages.slice(-10) // Send last 10 messages for context
+          conversationHistory: messages.slice(-10), // Send last 10 messages for context
+          userId: user?.email || null // Send user ID for persistence
         }),
       });
 

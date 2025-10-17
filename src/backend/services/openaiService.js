@@ -29,12 +29,18 @@ class OpenAIService {
 
   async sendMessage(message, threadId = null, userId = null) {
     try {
-      // Get or create thread for this user
-      if (!threadId && userId) {
-        const conversation = await AriaConversationService.getOrCreateConversation(userId);
+      // If userId provided, check database for existing conversation
+      if (userId) {
+        const conversation = await AriaConversationService.getOrCreateConversation(userId, threadId);
+
         if (conversation) {
+          // Use the thread from database
           threadId = conversation.thread_id;
           console.log(`📚 Resuming thread ${threadId} for user ${userId}`);
+        } else if (threadId) {
+          // ThreadId provided but not in DB - save it
+          await AriaConversationService.saveConversation(userId, threadId);
+          console.log(`💾 Saved existing thread ${threadId} for user ${userId}`);
         }
       }
 
@@ -45,7 +51,7 @@ class OpenAIService {
         // Save new conversation if userId provided
         if (userId) {
           await AriaConversationService.saveConversation(userId, threadId);
-          console.log(`💾 Saved new conversation for user ${userId}`);
+          console.log(`💾 Created and saved new thread ${threadId} for user ${userId}`);
         }
       }
 

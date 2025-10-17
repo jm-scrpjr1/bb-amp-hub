@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const AriaConversationService = require('./ariaConversationService');
 
 class OpenAIService {
   constructor() {
@@ -7,10 +8,10 @@ class OpenAIService {
       apiKey: process.env.OPENAI_API_KEY,
       organization: process.env.OPENAI_ORG_ID
     });
-    
+
     // Assistant ID from your memory
     this.assistantId = 'asst_R5RXI0LcyRxsgR80xb05oNQb';
-    
+
     // Store active threads
     this.activeThreads = new Map();
   }
@@ -26,11 +27,26 @@ class OpenAIService {
     }
   }
 
-  async sendMessage(message, threadId = null) {
+  async sendMessage(message, threadId = null, userId = null) {
     try {
+      // Get or create thread for this user
+      if (!threadId && userId) {
+        const conversation = await AriaConversationService.getOrCreateConversation(userId);
+        if (conversation) {
+          threadId = conversation.thread_id;
+          console.log(`📚 Resuming thread ${threadId} for user ${userId}`);
+        }
+      }
+
       // Create new thread if none provided
       if (!threadId) {
         threadId = await this.createThread();
+
+        // Save new conversation if userId provided
+        if (userId) {
+          await AriaConversationService.saveConversation(userId, threadId);
+          console.log(`💾 Saved new conversation for user ${userId}`);
+        }
       }
 
       console.log('🤖 ARIA processing message:', message);
@@ -78,7 +94,12 @@ class OpenAIService {
         if (assistantMessage && assistantMessage.content[0]) {
           const response = assistantMessage.content[0].text.value;
           console.log('✅ ARIA responded:', response.substring(0, 100) + '...');
-          
+
+          // Update conversation metadata
+          if (userId) {
+            await AriaConversationService.updateConversationMetadata(userId, threadId, message);
+          }
+
           return {
             response,
             threadId,

@@ -689,7 +689,7 @@ app.post("/api/admin/sync-groups", authenticateUser, async (req, res) => {
 // Chat API with OpenAI Assistant integration
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, threadId, conversationHistory } = req.body;
+    const { message, threadId, conversationHistory, userId } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
@@ -697,9 +697,10 @@ app.post('/api/chat', async (req, res) => {
 
     console.log('🤖 ARIA received message:', message);
     console.log('🧵 Thread ID:', threadId || 'new');
+    console.log('👤 User ID:', userId || 'anonymous');
 
-    // Use OpenAI Assistant API
-    const result = await openaiService.sendMessage(message, threadId);
+    // Use OpenAI Assistant API with user context
+    const result = await openaiService.sendMessage(message, threadId, userId);
 
     // If OpenAI fails, fall back to intent-based system
     if (!result.success) {

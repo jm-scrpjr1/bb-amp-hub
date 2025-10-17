@@ -244,7 +244,8 @@ export default function FloatingChatbot({ className = '' }: FloatingChatbotProps
         body: JSON.stringify({
           message: currentMessage,
           threadId: threadId, // Include thread ID for conversation continuity
-          conversationHistory: messages.slice(-10) // Send last 10 messages for context
+          conversationHistory: messages.slice(-10), // Send last 10 messages for context
+          userId: session?.user?.email || null // Send user ID for persistence
         }),
       });
 

@@ -1,193 +1,348 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-    OWNER           // God mode access to ALL
-    SUPER_ADMIN     // Can manage groups and users (add, update, delete)
-    MANAGER         // Can view users in the groups they belong to
-    MEMBER          // Basic access own groups
+model assessment_categories {
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @unique @db.VarChar(100)
+  description          String?
+  weight               Decimal?               @default(1.0) @db.Decimal(3, 2)
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamp(6)
+  assessment_questions assessment_questions[]
+  assessment_results   assessment_results[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model assessment_questions {
+  id                      Int                       @id @default(autoincrement())
+  category_id             Int?
+  question_text           String
+  question_type           String                    @db.VarChar(50)
+  options                 Json?
+  scale_min               Int?
+  scale_max               Int?
+  scale_labels            Json?
+  correct_answer          String?
+  points                  Int?                      @default(1)
+  difficulty_level        String?                   @default("medium") @db.VarChar(20)
+  is_active               Boolean?                  @default(true)
+  created_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  updated_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  assessment_categories   assessment_categories?    @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_question_responses user_question_responses[]
+}
+
+model assessment_results {
+  id                       Int                       @id @default(autoincrement())
+  session_id               Int?
+  user_id                  String                    @db.VarChar(255)
+  category_id              Int?
+  category_score           Int?                      @default(0)
+  category_max_score       Int?                      @default(0)
+  category_percentage      Decimal?                  @default(0.0) @db.Decimal(5, 2)
+  strengths                Json?
+  improvement_areas        Json?
+  recommendations          Json?
+  created_at               DateTime?                 @default(now()) @db.Timestamp(6)
+  assessment_categories    assessment_categories?    @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_assessment_sessions user_assessment_sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([session_id], map: "idx_assessment_results_session_id")
+  @@index([user_id], map: "idx_assessment_results_user_id")
+}
+
+model group_audit_logs {
+  id        String   @id
+  groupId   String
+  userId    String
+  action    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model group_invitations {
+  id           String    @id
+  groupId      String
+  invitedEmail String
+  invitedBy    String
+  token        String    @unique
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  createdAt    DateTime  @default(now())
+}
+
+model group_memberships {
+  id        String           @id
+  userId    String
+  groupId   String
+  status    MembershipStatus @default(PENDING)
+  role      String?
+  joinedAt  DateTime?
+  invitedBy String?
+  canInvite Boolean          @default(false)
+  canRemove Boolean          @default(false)
+  canEdit   Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime
+  groups    groups           @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  users     users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+}
+
+model group_permissions {
+  id         String     @id
+  groupId    String
+  permission Permission
+  resource   String?
+  createdAt  DateTime   @default(now())
+  groups     groups     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, permission, resource])
+}
+
+model groups {
+  id                              String              @id
+  name                            String
+  description                     String?
+  type                            GroupType           @default(FUNCTIONAL)
+  visibility                      GroupVisibility     @default(PUBLIC)
+  managerId                       String?
+  createdById                     String
+  isActive                        Boolean             @default(true)
+  maxMembers                      Int?
+  autoApprove                     Boolean             @default(false)
+  tags                            String[]
+  metadata                        Json?
+  createdAt                       DateTime            @default(now())
+  updatedAt                       DateTime
+  group_memberships               group_memberships[]
+  group_permissions               group_permissions[]
+  users_groups_createdByIdTousers users               @relation("groups_createdByIdTousers", fields: [createdById], references: [id])
+  users_groups_managerIdTousers   users?              @relation("groups_managerIdTousers", fields: [managerId], references: [id])
+}
+
+model system_analytics {
+  id               String   @id
+  date             DateTime @unique @default(now())
+  totalUsers       Int      @default(0)
+  activeUsers      Int      @default(0)
+  newUsers         Int      @default(0)
+  totalLogins      Int      @default(0)
+  promptTutorUsage Int      @default(0)
+  aiAgentsUsage    Int      @default(0)
+  automationsUsage Int      @default(0)
+  assessmentsUsage Int      @default(0)
+  resourcesUsage   Int      @default(0)
+  createdAt        DateTime @default(now())
+}
+
+model teams {
+  id                           String   @id
+  name                         String
+  description                  String?
+  managerId                    String?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime
+  users_teams_managerIdTousers users?   @relation("teams_managerIdTousers", fields: [managerId], references: [id])
+  users_users_teamIdToteams    users[]  @relation("users_teamIdToteams")
+}
+
+model user_assessment_history {
+  id                        Int                       @id @default(autoincrement())
+  user_id                   String                    @db.VarChar(255)
+  session_id                Int?
+  assessment_date           DateTime                  @db.Date
+  overall_score             Int
+  overall_percentage        Decimal                   @db.Decimal(5, 2)
+  ai_readiness_level        String                    @db.VarChar(50)
+  improvement_from_previous Decimal?                  @default(0.0) @db.Decimal(5, 2)
+  created_at                DateTime?                 @default(now()) @db.Timestamp(6)
+  user_assessment_sessions  user_assessment_sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([assessment_date], map: "idx_user_assessment_history_date")
+  @@index([user_id], map: "idx_user_assessment_history_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_assessment_sessions {
+  id                      Int                       @id @default(autoincrement())
+  user_id                 String                    @db.VarChar(255)
+  session_token           String                    @unique @db.VarChar(255)
+  started_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  completed_at            DateTime?                 @db.Timestamp(6)
+  total_score             Int?                      @default(0)
+  max_possible_score      Int?                      @default(0)
+  percentage_score        Decimal?                  @default(0.0) @db.Decimal(5, 2)
+  ai_readiness_level      String?                   @db.VarChar(50)
+  status                  String?                   @default("in_progress") @db.VarChar(20)
+  created_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  updated_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  assessment_results      assessment_results[]
+  user_assessment_history user_assessment_history[]
+  user_question_responses user_question_responses[]
+
+  @@index([status], map: "idx_user_assessment_sessions_status")
+  @@index([user_id], map: "idx_user_assessment_sessions_user_id")
+}
+
+model user_permissions {
+  id         String     @id
+  userId     String
+  permission Permission
+  resource   String?
+  createdAt  DateTime   @default(now())
+  users      users      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permission, resource])
+}
+
+model user_question_responses {
+  id                       Int                       @id @default(autoincrement())
+  session_id               Int?
+  question_id              Int?
+  user_answer              String
+  points_earned            Int?                      @default(0)
+  time_spent_seconds       Int?                      @default(0)
+  answered_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  created_at               DateTime?                 @default(now()) @db.Timestamp(6)
+  assessment_questions     assessment_questions?     @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user_assessment_sessions user_assessment_sessions? @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([session_id, question_id])
+  @@index([question_id], map: "idx_user_question_responses_question_id")
+  @@index([session_id], map: "idx_user_question_responses_session_id")
+}
+
+model users {
+  id                               String              @id
+  email                            String              @unique
+  name                             String?
+  image                            String?
+  role                             UserRole            @default(MEMBER)
+  status                           UserStatus          @default(ACTIVE)
+  teamId                           String?
+  lastLoginAt                      DateTime?
+  createdAt                        DateTime            @default(now())
+  updatedAt                        DateTime
+  loginCount                       Int                 @default(0)
+  country                          String?             @default("US") @db.VarChar(2)
+  group_memberships                group_memberships[]
+  groups_groups_createdByIdTousers groups[]            @relation("groups_createdByIdTousers")
+  groups_groups_managerIdTousers   groups[]            @relation("groups_managerIdTousers")
+  teams_teams_managerIdTousers     teams[]             @relation("teams_managerIdTousers")
+  user_permissions                 user_permissions[]
+  teams_users_teamIdToteams        teams?              @relation("users_teamIdToteams", fields: [teamId], references: [id])
 }
 
 enum GroupType {
-    DEPARTMENT      // HR, IT, Marketing, etc.
-    PROJECT         // Specific project teams
-    FUNCTIONAL      // Cross-functional teams
-    TEMPORARY       // Time-limited groups
-    CUSTOM          // Custom group types
+  DEPARTMENT
+  PROJECT
+  FUNCTIONAL
+  TEMPORARY
+  CUSTOM
 }
 
 enum GroupVisibility {
-    PUBLIC          // Visible to all users
-    PRIVATE         // Only visible to members
-    RESTRICTED      // Visible to specific roles
+  PUBLIC
+  PRIVATE
+  RESTRICTED
 }
 
 enum MembershipStatus {
-    ACTIVE
-    PENDING
-    INACTIVE
-    REMOVED
+  ACTIVE
+  PENDING
+  INACTIVE
+  REMOVED
 }
 
 enum Permission {
-    // God Mode (OWNER only)
-    GOD_MODE                    // Full access to everything
+  CREATE_GROUP
+  DELETE_GROUP
+  EDIT_GROUP
+  MANAGE_GROUP_MEMBERS
+  VIEW_ALL_GROUPS
+  MANAGE_USERS
+  VIEW_USER_PROFILES
+  ASSIGN_ROLES
+  VIEW_HR_CONTENT
+  VIEW_IT_CONTENT
+  VIEW_FINANCE_CONTENT
+  VIEW_MARKETING_CONTENT
+  VIEW_ADMIN_CONTENT
+  ADMIN_PANEL_ACCESS
+  SYSTEM_SETTINGS
+  ANALYTICS_ACCESS
+  AI_TRAINING_ACCESS
+  AI_ASSESSMENT_ACCESS
+  PROMPT_TUTOR_ACCESS
+}
 
-    // Group Management (SUPER_ADMIN, OWNER)
-    CREATE_GROUP
-    DELETE_GROUP
-    EDIT_GROUP
-    MANAGE_GROUP_MEMBERS
-    VIEW_ALL_GROUPS
-
-    // User Management (SUPER_ADMIN, OWNER)
-    MANAGE_USERS
-    VIEW_ALL_USER_PROFILES
-    ASSIGN_ROLES
-    DELETE_USERS
-
-    // Manager Permissions (MANAGER, SUPER_ADMIN, OWNER)
-    VIEW_GROUP_MEMBERS
-    MANAGE_OWN_GROUP_MEMBERS
-
-    // Content Access (Country-based)
-    VIEW_PH_RESOURCES           // Philippines resources
-    VIEW_COL_RESOURCES          // Colombia resources
-    VIEW_MX_RESOURCES           // Mexico resources
-    VIEW_US_RESOURCES           // United States resources
-    VIEW_IN_RESOURCES           // India resources
-
-    // Department Access
-    VIEW_HR_CONTENT
-    VIEW_IT_CONTENT
-    VIEW_FINANCE_CONTENT
-    VIEW_MARKETING_CONTENT
-    VIEW_SALES_CONTENT
-    VIEW_DEVELOPER_CONTENT
-
-    // System Administration (SUPER_ADMIN, OWNER)
-    ADMIN_PANEL_ACCESS
-    SYSTEM_SETTINGS
-    ANALYTICS_ACCESS
-
-    // AI Features (All roles)
-    AI_TRAINING_ACCESS
-    AI_ASSESSMENT_ACCESS
-    PROMPT_TUTOR_ACCESS
-
-    // Basic Access (All roles)
-    VIEW_OWN_PROFILE
-    EDIT_OWN_PROFILE
-    VIEW_OWN_GROUPS
+enum UserRole {
+  OWNER
+  ADMIN
+  TEAM_MANAGER
+  MEMBER
+  SUPER_ADMIN
+  MANAGER
 }
 
 enum UserStatus {
-    ACTIVE
-    INACTIVE
-    SUSPENDED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 
-model User {
-    id            String      @id @default(cuid())
-    email         String      @unique
-    name          String?
-    image         String?
-    role          UserRole    @default(MEMBER)
-    status        UserStatus  @default(ACTIVE)
-    country       String?     // Country code (PH, COL, MX, US, IN, etc.)
+// ARIA Conversation Persistence Models
+model aria_conversations {
+  id              String          @id @default(cuid())
+  user_id         String          @db.VarChar(255)
+  thread_id       String          @unique @db.VarChar(255)
 
-    // New group system
-    groupMemberships    GroupMembership[]
-    managedGroups       Group[]           @relation("GroupManager")
-    createdGroups       Group[]           @relation("GroupCreator")
+  // Metadata
+  started_at      DateTime        @default(now()) @db.Timestamp(6)
+  last_message_at DateTime        @updatedAt @db.Timestamp(6)
+  message_count   Int             @default(0)
 
-    // Activity tracking
-    lastLoginAt   DateTime?
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @updatedAt
+  // Context summary (lightweight)
+  topics          String[]
+  user_preferences Json?
 
-    // Analytics
-    loginCount    Int         @default(0)
+  // Status
+  is_active       Boolean         @default(true)
 
-    // Permissions
-    permissions   UserPermission[]
+  // Relations
+  messages        aria_messages[]
 
-    @@map("users")
+  @@index([user_id])
+  @@index([thread_id])
+  @@map("aria_conversations")
 }
 
+model aria_messages {
+  id              String            @id @default(cuid())
+  conversation_id String
 
+  // Message data
+  role            String            @db.VarChar(20)
+  content         String            @db.Text
 
-model Group {
-    id              String          @id @default(cuid())
-    name            String
-    description     String?
-    type            GroupType       @default(FUNCTIONAL)
-    visibility      GroupVisibility @default(PUBLIC)
+  // Metadata
+  timestamp       DateTime          @default(now()) @db.Timestamp(6)
+  token_count     Int?
 
-    // Group management
-    managerId       String?
-    manager         User?           @relation("GroupManager", fields: [managerId], references: [id])
-    createdById     String
-    createdBy       User            @relation("GroupCreator", fields: [createdById], references: [id])
+  // Relations
+  conversation    aria_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
 
-    // Group settings
-    isActive        Boolean         @default(true)
-    maxMembers      Int?            // Optional member limit
-    autoApprove     Boolean         @default(false) // Auto-approve join requests
-
-    // Timestamps
-    createdAt       DateTime        @default(now())
-    updatedAt       DateTime        @updatedAt
-
-    // Relations
-    memberships     GroupMembership[]
-
-    @@map("groups")
-}
-
-model GroupMembership {
-    id          String           @id @default(cuid())
-    userId      String
-    user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-    groupId     String
-    group       Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
-
-    // Membership details
-    status      MembershipStatus @default(PENDING)
-    role        String?          // Custom role within the group (e.g., "Lead", "Contributor")
-    joinedAt    DateTime?        // When they actually joined (approved)
-    invitedBy   String?          // Who invited them
-
-    // Permissions within this group
-    canInvite   Boolean          @default(false)
-    canRemove   Boolean          @default(false)
-    canEdit     Boolean          @default(false)
-
-    // Timestamps
-    createdAt   DateTime         @default(now())
-    updatedAt   DateTime         @updatedAt
-
-    @@unique([userId, groupId])
-    @@map("group_memberships")
-}
-
-model UserPermission {
-    id          String     @id @default(cuid())
-    userId      String
-    user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-    permission  Permission
-    resource    String?    // Optional resource identifier (e.g., group ID, content type)
-
-    // Timestamps
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-
-    @@unique([userId, permission, resource])
-    @@map("user_permissions")
+  @@index([conversation_id])
+  @@index([timestamp])
+  @@map("aria_messages")
 }

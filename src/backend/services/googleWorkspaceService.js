@@ -132,7 +132,7 @@ class GoogleWorkspaceService {
     const role = this.determineUserRole(workspaceUser);
 
     // Upsert user in database
-    const user = await prisma.user.upsert({
+    const user = await prisma.users.upsert({
       where: { email },
       update: {
         name,
@@ -255,7 +255,7 @@ class GoogleWorkspaceService {
     const type = this.determineGroupType(workspaceGroup);
 
     // Find or create a default creator (admin user)
-    const adminUser = await prisma.user.findFirst({
+    const adminUser = await prisma.users.findFirst({
       where: { role: 'ADMIN' },
     });
 

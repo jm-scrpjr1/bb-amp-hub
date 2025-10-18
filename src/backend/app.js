@@ -428,13 +428,13 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
     }
 
     // Get user statistics
-    const totalUsers = await prisma.user.count();
-    const activeUsers = await prisma.user.count({ where: { status: 'ACTIVE' } });
-    const inactiveUsers = await prisma.user.count({ where: { status: 'INACTIVE' } });
-    const suspendedUsers = await prisma.user.count({ where: { status: 'SUSPENDED' } });
+    const totalUsers = await prisma.users.count();
+    const activeUsers = await prisma.users.count({ where: { status: 'ACTIVE' } });
+    const inactiveUsers = await prisma.users.count({ where: { status: 'INACTIVE' } });
+    const suspendedUsers = await prisma.users.count({ where: { status: 'SUSPENDED' } });
 
     // Get user counts by role
-    const usersByRole = await prisma.user.groupBy({
+    const usersByRole = await prisma.users.groupBy({
       by: ['role'],
       _count: { role: true }
     });
@@ -453,7 +453,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    const recentUsers = await prisma.user.findMany({
+    const recentUsers = await prisma.users.findMany({
       where: {
         createdAt: {
           gte: sevenDaysAgo
@@ -478,7 +478,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const todayLogins = await prisma.user.count({
+    const todayLogins = await prisma.users.count({
       where: {
         lastLoginAt: {
           gte: today

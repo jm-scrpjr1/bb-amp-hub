@@ -2,7 +2,7 @@ const prisma = require('./lib/db');
 
 async function checkUserRole() {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findUnique({
       where: { email: 'jmadrino@boldbusiness.com' },
       include: {
         groupMemberships: true,

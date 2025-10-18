@@ -1,13 +1,12 @@
 const { PrismaClient } = require('@prisma/client');
 
-const globalForPrisma = globalThis;
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient({
+// ALWAYS create a fresh Prisma instance - don't use globalThis caching
+// This fixes the issue where globalThis.prisma was undefined
+const prisma = new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
-// Always cache the Prisma instance to prevent multiple instances
-globalForPrisma.prisma = prisma;
+console.log('✅ Prisma client initialized:', typeof prisma, prisma ? 'DEFINED' : 'UNDEFINED');
 
 // Test database connection
 async function testConnection() {

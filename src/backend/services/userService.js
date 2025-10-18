@@ -35,7 +35,7 @@ class UserService {
   static async getUserByEmail(email) {
     try {
       // Try to get user from database first
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { email: email.toLowerCase() }
       });
 
@@ -76,7 +76,7 @@ class UserService {
 
       // Try to upsert in database first
       try {
-        const user = await prisma.user.upsert({
+        const user = await prisma.users.upsert({
           where: { email },
           update: {
             name: authUser.name,
@@ -158,7 +158,7 @@ class UserService {
   // Get user with group memberships and managed groups
   static async getUserWithGroups(userId) {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         include: {
           groupMemberships: {
@@ -220,11 +220,11 @@ class UserService {
       }
 
       // Get total count
-      const total = await prisma.user.count({ where });
+      const total = await prisma.users.count({ where });
 
       // Get paginated users
       const skip = (pageNum - 1) * limitNum;
-      const users = await prisma.user.findMany({
+      const users = await prisma.users.findMany({
         where,
         skip,
         take: limitNum,

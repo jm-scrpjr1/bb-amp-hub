@@ -67,7 +67,7 @@ class GroupService {
           },
           _count: {
             select: {
-              memberships: {
+              group_memberships: {
                 where: {
                   status: 'ACTIVE'
                 }
@@ -78,10 +78,17 @@ class GroupService {
       });
 
       return {
-        groups: groups.map(group => ({
-          ...group,
-          memberCount: group._count.memberships
-        })),
+        groups: groups.map(group => {
+          const transformed = {
+            ...group,
+            createdBy: group.users_groups_createdByIdTousers,
+            manager: group.users_groups_managerIdTousers,
+            memberCount: group._count.group_memberships
+          };
+          delete transformed.users_groups_createdByIdTousers;
+          delete transformed.users_groups_managerIdTousers;
+          return transformed;
+        }),
         total,
         page,
         limit,
@@ -119,7 +126,7 @@ class GroupService {
               email: true
             }
           },
-          memberships: {
+          group_memberships: {
             where: {
               status: 'ACTIVE'
             },
@@ -352,7 +359,7 @@ class GroupService {
               },
               _count: {
                 select: {
-                  memberships: {
+                  group_memberships: {
                     where: {
                       status: 'ACTIVE'
                     }
@@ -373,11 +380,6 @@ class GroupService {
           memberCount: membership.group._count.group_memberships,
           membershipRole: membership.role,
           joinedAt: membership.joinedAt,
-          // Remove snake_case fields
-          users_groups_createdByIdTousers: undefined,
-          users_groups_managerIdTousers: undefined
-        }))
-        .filter(group => group.isActive); // Only active groups
           // Remove snake_case fields
           users_groups_createdByIdTousers: undefined,
           users_groups_managerIdTousers: undefined

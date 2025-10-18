@@ -6,9 +6,8 @@ const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: ['query', 'info', 'warn', 'error'],
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+// Always cache the Prisma instance to prevent multiple instances
+globalForPrisma.prisma = prisma;
 
 // Test database connection
 async function testConnection() {

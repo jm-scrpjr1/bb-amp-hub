@@ -38,11 +38,11 @@ class GroupService {
       }
 
       // Get total count for pagination
-      const total = await prisma.group.count({ where });
+      const total = await prisma.groups.count({ where });
 
       // Get groups with pagination
       const skip = (page - 1) * limit;
-      const groups = await prisma.group.findMany({
+      const groups = await prisma.groups.findMany({
         where,
         skip,
         take: limit,
@@ -102,7 +102,7 @@ class GroupService {
   // Get group by ID
   static async getGroupById(groupId) {
     try {
-      const group = await prisma.group.findUnique({
+      const group = await prisma.groups.findUnique({
         where: { id: groupId },
         include: {
           createdBy: {
@@ -176,7 +176,7 @@ class GroupService {
   static async updateGroup(groupId, updateData) {
     try {
       // First check if group exists
-      const existingGroup = await prisma.group.findUnique({
+      const existingGroup = await prisma.groups.findUnique({
         where: { id: groupId }
       });
 
@@ -186,7 +186,7 @@ class GroupService {
       const { tags, ...validUpdateData } = updateData;
 
       // Update the group
-      const updatedGroup = await prisma.group.update({
+      const updatedGroup = await prisma.groups.update({
         where: { id: groupId },
         data: {
           ...validUpdateData,
@@ -242,7 +242,7 @@ class GroupService {
   // Get group members
   static async getGroupMembers(groupId) {
     try {
-      const memberships = await prisma.groupMembership.findMany({
+      const memberships = await prisma.group_memberships.findMany({
         where: {
           groupId: groupId,
           status: 'ACTIVE'
@@ -328,7 +328,7 @@ class GroupService {
       } = options;
 
       // Get user's group memberships
-      const userMemberships = await prisma.groupMembership.findMany({
+      const userMemberships = await prisma.group_memberships.findMany({
         where: {
           userId: userId,
           status: 'ACTIVE'

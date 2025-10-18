@@ -363,6 +363,74 @@ app.post("/api/auth/google", async (req, res) => {
   }
 });
 
+// Validate authentication token endpoint
+app.get("/api/auth/validate", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: 'No authentication token provided'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token'
+      });
+    }
+
+    // Extract email from token
+    try {
+      const decoded = Buffer.from(token, 'base64').toString('utf-8');
+      const email = decoded.split(':')[0];
+
+      const user = await UserService.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          error: 'User not found'
+        });
+      }
+
+      // Get user's group memberships
+      const userGroupsResult = await GroupService.getUserGroups(user.id);
+      const userGroups = userGroupsResult.groups || [];
+      const managedGroups = userGroups.filter(group => group.membershipRole === 'MANAGER');
+
+      res.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          role: user.role,
+          status: user.status,
+          country: user.country,
+          permissions: user.permissions || [],
+          groupMemberships: userGroups,
+          managedGroups: managedGroups
+        }
+      });
+    } catch (decodeError) {
+      console.error('Token decode error:', decodeError);
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token format'
+      });
+    }
+  } catch (error) {
+    console.error('Error validating token:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Token validation failed'
+    });
+  }
+});
+
 // Placeholder for sync endpoints - will be added after authenticateUser is defined
 
 // Authentication middleware
@@ -534,7 +602,8 @@ app.get("/api/user/profile", authenticateUser, async (req, res) => {
     const user = req.user;
 
     // Get user's group memberships
-    const userGroups = await GroupService.getUserGroups(user.id);
+    const userGroupsResult = await GroupService.getUserGroups(user.id);
+    const userGroups = userGroupsResult.groups || [];
 
     // Get managed groups
     const managedGroups = userGroups.filter(group => group.membershipRole === 'MANAGER');
@@ -550,8 +619,8 @@ app.get("/api/user/profile", authenticateUser, async (req, res) => {
         status: user.status,
         country: user.country,
         permissions: user.permissions || [],
-        groupMemberships: userGroups || [],
-        managedGroups: managedGroups || []
+        groupMemberships: userGroups,
+        managedGroups: managedGroups
       }
     });
   } catch (error) {

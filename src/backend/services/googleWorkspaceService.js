@@ -264,7 +264,7 @@ class GoogleWorkspaceService {
     }
 
     // Upsert group in database
-    const group = await prisma.group.upsert({
+    const group = await prisma.groups.upsert({
       where: { name }, // Assuming group names are unique
       update: {
         description,

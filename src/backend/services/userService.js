@@ -161,7 +161,7 @@ class UserService {
       const user = await prisma.users.findUnique({
         where: { id: userId },
         include: {
-          groupMemberships: {
+          group_memberships: {
             where: { status: 'ACTIVE' },
             include: {
               group: {
@@ -174,7 +174,7 @@ class UserService {
               }
             }
           },
-          managedGroups: {
+          groups_groups_managerIdTousers: {
             select: {
               id: true,
               name: true,
@@ -184,6 +184,14 @@ class UserService {
           }
         }
       });
+
+      // Transform to camelCase for consistency with frontend
+      if (user) {
+        user.groupMemberships = user.group_memberships || [];
+        user.managedGroups = user.groups_groups_managerIdTousers || [];
+        delete user.group_memberships;
+        delete user.groups_groups_managerIdTousers;
+      }
 
       return user;
     } catch (error) {

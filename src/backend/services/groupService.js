@@ -51,14 +51,14 @@ class GroupService {
           { name: 'asc' }
         ],
         include: {
-          createdBy: {
+          users_groups_createdByIdTousers: {
             select: {
               id: true,
               name: true,
               email: true
             }
           },
-          manager: {
+          users_groups_managerIdTousers: {
             select: {
               id: true,
               name: true,
@@ -105,14 +105,14 @@ class GroupService {
       const group = await prisma.groups.findUnique({
         where: { id: groupId },
         include: {
-          createdBy: {
+          users_groups_createdByIdTousers: {
             select: {
               id: true,
               name: true,
               email: true
             }
           },
-          manager: {
+          users_groups_managerIdTousers: {
             select: {
               id: true,
               name: true,
@@ -193,14 +193,14 @@ class GroupService {
           updatedAt: new Date()
         },
         include: {
-          createdBy: {
+          users_groups_createdByIdTousers: {
             select: {
               id: true,
               name: true,
               email: true
             }
           },
-          manager: {
+          users_groups_managerIdTousers: {
             select: {
               id: true,
               name: true,
@@ -336,14 +336,14 @@ class GroupService {
         include: {
           group: {
             include: {
-              createdBy: {
+              users_groups_createdByIdTousers: {
                 select: {
                   id: true,
                   name: true,
                   email: true
                 }
               },
-              manager: {
+              users_groups_managerIdTousers: {
                 select: {
                   id: true,
                   name: true,
@@ -368,9 +368,19 @@ class GroupService {
       let groups = userMemberships
         .map(membership => ({
           ...membership.group,
-          memberCount: membership.group._count.memberships,
+          createdBy: membership.group.users_groups_createdByIdTousers,
+          manager: membership.group.users_groups_managerIdTousers,
+          memberCount: membership.group._count.group_memberships,
           membershipRole: membership.role,
-          joinedAt: membership.joinedAt
+          joinedAt: membership.joinedAt,
+          // Remove snake_case fields
+          users_groups_createdByIdTousers: undefined,
+          users_groups_managerIdTousers: undefined
+        }))
+        .filter(group => group.isActive); // Only active groups
+          // Remove snake_case fields
+          users_groups_createdByIdTousers: undefined,
+          users_groups_managerIdTousers: undefined
         }))
         .filter(group => group.isActive); // Only active groups
 

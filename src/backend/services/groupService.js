@@ -1,10 +1,8 @@
 // Group service for managing groups, memberships, and permissions
 // Updated to use Prisma database
 
-const { PrismaClient } = require('@prisma/client');
+const { prisma } = require('../lib/db');
 const { GroupType, GroupVisibility, MembershipStatus } = require('./permissionService');
-
-const prisma = new PrismaClient();
 
 class GroupService {
   // Get all groups with filtering and pagination

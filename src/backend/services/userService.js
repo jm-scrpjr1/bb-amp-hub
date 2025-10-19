@@ -96,6 +96,7 @@ class UserService {
             }
           },
           create: {
+            id: 'cm' + Math.random().toString(36).substr(2, 20), // Generate unique ID
             email,
             name: authUser.name,
             image: authUser.image,
@@ -104,6 +105,7 @@ class UserService {
             country: 'US', // Default country for new users
             lastLoginAt: new Date(),
             loginCount: 1,
+            updatedAt: new Date(), // Required field
           },
           include: { roles: true } // Include role relation
         });
@@ -147,7 +149,7 @@ class UserService {
           email,
           name: authUser.name,
           image: authUser.image,
-          role,
+          roleId, // Fixed: was 'role', should be 'roleId'
           status: UserStatus.ACTIVE,
           lastLoginAt: new Date(),
           loginCount: 1,

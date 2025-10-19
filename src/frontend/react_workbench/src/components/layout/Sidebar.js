@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useAuth } from '../../providers/AuthProvider';
-import BoldIdeaModal from '../ui/BoldIdeaModal';
 
 // Navigation items matching the Next.js workbench structure
 const navigationItems = [
@@ -77,8 +76,6 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   const { boldBusinessTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [activeItem, setActiveItem] = useState('home');
-  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
-  const [isBoldIdeaModalOpen, setIsBoldIdeaModalOpen] = useState(false);
 
   // Filter navigation items based on user permissions
   const getFilteredNavigationItems = () => {
@@ -111,8 +108,9 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
     }
 
     if (itemId === 'submit-bold-idea') {
-      // Open bold idea modal instead of navigating
-      setIsBoldIdeaModalOpen(true);
+      // Dispatch event to open bold idea modal (handled by App.js)
+      const event = new CustomEvent('openBoldIdeaModal');
+      window.dispatchEvent(event);
       return;
     }
 
@@ -128,19 +126,7 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
     return location.pathname.startsWith(path);
   };
 
-  // Listen for search-triggered modal events
-  useEffect(() => {
-    const handleOpenTicketModal = () => setIsTicketModalOpen(true);
-    const handleOpenBoldIdeaModal = () => setIsBoldIdeaModalOpen(true);
 
-    window.addEventListener('openTicketModal', handleOpenTicketModal);
-    window.addEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
-
-    return () => {
-      window.removeEventListener('openTicketModal', handleOpenTicketModal);
-      window.removeEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
-    };
-  }, []);
 
   const cn = (...classes) => classes.filter(Boolean).join(' ');
 
@@ -387,12 +373,6 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
             })}
           </nav>
         </div>
-
-        {/* Bold Idea Modal */}
-        <BoldIdeaModal
-          isOpen={isBoldIdeaModalOpen}
-          onClose={() => setIsBoldIdeaModalOpen(false)}
-        />
       </div>
     </>
   );

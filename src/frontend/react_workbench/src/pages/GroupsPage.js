@@ -85,7 +85,8 @@ const GroupsPage = () => {
 
   // Separate groups by type
   const departmentGroups = filteredGroups.filter(group => group.type === 'DEPARTMENT');
-  const otherGroups = filteredGroups.filter(group => group.type !== 'DEPARTMENT');
+  // My Groups: groups where user is a member (has membershipRole)
+  const myGroups = filteredGroups.filter(group => group.membershipRole);
 
   const getGroupIcon = (type, name) => {
     if (type === 'DEPARTMENT') {
@@ -360,7 +361,7 @@ const GroupsPage = () => {
               <span className="text-2xl">👥</span>
               <h2 className="text-xl font-semibold text-gray-900">My Groups</h2>
               <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                {otherGroups.length}
+                {myGroups.length}
               </span>
             </div>
             {loading ? (
@@ -368,11 +369,11 @@ const GroupsPage = () => {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                 <span className="ml-2 text-gray-600">Loading teams...</span>
               </div>
-            ) : otherGroups.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">No groups found.</p>
+            ) : myGroups.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">You are not a member of any groups yet.</p>
             ) : (
               <div className="space-y-3">
-                {otherGroups.map((group) => (
+                {myGroups.map((group) => (
                   <GroupCard
                     key={group.id}
                     group={group}

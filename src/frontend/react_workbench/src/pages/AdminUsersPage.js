@@ -306,7 +306,7 @@ const AdminUsersPage = () => {
 
             <div className="flex items-center text-sm text-gray-600">
               <Filter className="h-4 w-4 mr-2" />
-              {filteredUsers.length} of {users.length} users
+              {filteredUsers.length} of {allUsers.length} users
             </div>
           </div>
         </div>

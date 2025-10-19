@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { X, Users, Plus, Trash2, Search, AlertCircle, UserPlus } from 'lucide-react';
 import { apiService } from '../../services/apiService';
+import adminService from '../../services/adminService';
 import { useAuth } from '../../providers/AuthProvider';
 import { useRBAC } from '../../providers/RBACProvider';
 
@@ -48,8 +49,11 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
 
   const loadAvailableUsers = useCallback(async () => {
     try {
-      // Get all users to show in the add member dropdown
-      const response = await apiService.getUsers({ limit: 1000 });
+      // Load all users at once by setting a high limit (same as AdminUsersPage)
+      const response = await adminService.getUsers({
+        page: 1,
+        limit: 1000
+      });
       setAvailableUsers(response.users || []);
     } catch (err) {
       console.error('Error loading available users:', err);

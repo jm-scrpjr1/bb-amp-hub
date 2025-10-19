@@ -7,12 +7,20 @@ const { GoogleWorkspaceService } = require('./googleWorkspaceService');
 // Mock database for development - fallback when database is not available
 const mockUsers = new Map();
 
-// User roles and statuses - Updated for new RBAC system
+// User role IDs - Updated for new RBAC system with roles table
 const UserRole = {
-  OWNER: 'OWNER',           // God mode access to ALL
-  SUPER_ADMIN: 'SUPER_ADMIN', // Can manage groups and users (add, update, delete)
-  MANAGER: 'MANAGER',       // Can view users in the groups they belong to
-  MEMBER: 'MEMBER'          // Basic access own groups
+  OWNER: 'role_owner',           // God mode access to ALL
+  SUPER_ADMIN: 'role_super_admin', // Can manage groups and users (add, update, delete)
+  TEAM_MANAGER: 'role_team_manager',       // Can view users in the groups they belong to
+  MEMBER: 'role_member'          // Basic access own groups
+};
+
+// Role names for comparison
+const RoleName = {
+  OWNER: 'OWNER',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  TEAM_MANAGER: 'TEAM_MANAGER',
+  MEMBER: 'MEMBER'
 };
 
 const UserStatus = {
@@ -36,7 +44,8 @@ class UserService {
     try {
       // Try to get user from database first
       const user = await prisma.users.findUnique({
-        where: { email: email.toLowerCase() }
+        where: { email: email.toLowerCase() },
+        include: { role: true } // Include role relation
       });
 
       if (user) {
@@ -69,9 +78,9 @@ class UserService {
       const email = authUser.email.toLowerCase();
 
       // God mode: Owner email always gets OWNER role
-      const role = isOwnerEmail(email) ? UserRole.OWNER : UserRole.MEMBER;
+      const roleId = isOwnerEmail(email) ? UserRole.OWNER : UserRole.MEMBER;
 
-      console.log(`🔄 Upserting user: ${email} with role: ${role}`);
+      console.log(`🔄 Upserting user: ${email} with roleId: ${roleId}`);
       console.log(`📸 User image data:`, authUser.image);
 
       // Try to upsert in database first
@@ -90,13 +99,13 @@ class UserService {
             email,
             name: authUser.name,
             image: authUser.image,
-            role,
+            roleId,
             status: UserStatus.ACTIVE,
             country: 'US', // Default country for new users
             lastLoginAt: new Date(),
             loginCount: 1,
           },
-
+          include: { role: true } // Include role relation
         });
 
         // Auto-assign new users to General group if they're not in any groups
@@ -161,6 +170,7 @@ class UserService {
       const user = await prisma.users.findUnique({
         where: { id: userId },
         include: {
+          role: true, // Include role relation
           group_memberships: {
             where: { status: 'ACTIVE' },
             include: {
@@ -236,6 +246,7 @@ class UserService {
         where,
         skip,
         take: limitNum,
+        include: { role: true }, // Include role relation
         orderBy: {
           createdAt: 'desc'
         }
@@ -282,8 +293,8 @@ class UserService {
 
       // Role counts
       const usersByRole = {};
-      Object.values(UserRole).forEach(role => {
-        usersByRole[role] = users.filter(u => u.role === role).length;
+      Object.values(UserRole).forEach(roleId => {
+        usersByRole[roleId] = users.filter(u => u.roleId === roleId).length;
       });
 
       // Status counts
@@ -336,13 +347,16 @@ class UserService {
   // Fallback user creation when database is not available
   static createFallbackUser(email) {
     const isOwner = isOwnerEmail(email);
+    const roleId = isOwner ? UserRole.OWNER : UserRole.MEMBER;
+    const roleName = isOwner ? RoleName.OWNER : RoleName.MEMBER;
 
     return {
       id: 'fallback-' + email.replace('@', '-').replace('.', '-'),
       email: email.toLowerCase(),
       name: isOwner ? 'John Madrino' : 'User',
       image: null,
-      role: isOwner ? UserRole.OWNER : UserRole.MEMBER,
+      roleId,
+      role: { id: roleId, name: roleName }, // Mock role relation
       status: UserStatus.ACTIVE,
       loginCount: 0,
       lastLoginAt: new Date(),
@@ -355,6 +369,7 @@ class UserService {
 module.exports = {
   UserService,
   UserRole,
+  RoleName,
   UserStatus,
   OWNER_EMAILS,
   isOwnerEmail

@@ -247,10 +247,13 @@ class AIGroupService {
   // Private helper methods for AI logic
   static getRoleBasedRecommendations(user, allGroups, userGroups) {
     const recommendations = [];
-    
+
+    // Get role name (handle both old and new format)
+    const roleName = user.role?.name || user.role;
+
     // Recommend groups based on user role
-    if (user.role === 'TEAM_MANAGER') {
-      const managerGroups = allGroups.filter(g => 
+    if (roleName === 'TEAM_MANAGER') {
+      const managerGroups = allGroups.filter(g =>
         g.type === GroupType.DEPARTMENT || g.type === GroupType.FUNCTIONAL
       );
       
@@ -290,14 +293,17 @@ class AIGroupService {
   static analyzeUserGroupFit(user, group, currentMembers) {
     let score = 50; // Base score
     const reasons = [];
-    
+
+    // Get role name (handle both old and new format)
+    const roleName = user.role?.name || user.role;
+
     // Role compatibility
-    if (user.role === 'TEAM_MANAGER' && group.type === GroupType.DEPARTMENT) {
+    if (roleName === 'TEAM_MANAGER' && group.type === GroupType.DEPARTMENT) {
       score += 30;
       reasons.push('Management role fits department group');
     }
-    
-    if (user.role === 'MEMBER' && group.type === GroupType.PROJECT) {
+
+    if (roleName === 'MEMBER' && group.type === GroupType.PROJECT) {
       score += 20;
       reasons.push('Good fit for project collaboration');
     }
@@ -313,9 +319,9 @@ class AIGroupService {
       score += 10;
       reasons.push('Group needs more members');
     }
-    
-    const suggestedRole = user.role === 'TEAM_MANAGER' ? 'Contributor/Leader' : 'Contributor';
-    
+
+    const suggestedRole = roleName === 'TEAM_MANAGER' ? 'Contributor/Leader' : 'Contributor';
+
     return {
       score: Math.min(100, score),
       reasons,

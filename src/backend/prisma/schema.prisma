@@ -243,6 +243,37 @@ model users {
   teams_users_teamIdToteams        teams?              @relation("users_teamIdToteams", fields: [teamId], references: [id])
 }
 
+model aria_conversations {
+  id               String          @id @default(cuid())
+  user_id          String          @db.VarChar(255)
+  thread_id        String          @unique @db.VarChar(255)
+  started_at       DateTime        @default(now()) @db.Timestamp(6)
+  last_message_at  DateTime        @updatedAt @db.Timestamp(6)
+  message_count    Int             @default(0)
+  topics           String[]
+  user_preferences Json?
+  is_active        Boolean         @default(true)
+  messages         aria_messages[]
+
+  @@index([user_id])
+  @@index([thread_id])
+  @@map("aria_conversations")
+}
+
+model aria_messages {
+  id              String             @id @default(cuid())
+  conversation_id String
+  role            String             @db.VarChar(20)
+  content         String
+  timestamp       DateTime           @default(now()) @db.Timestamp(6)
+  token_count     Int?
+  conversation    aria_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([timestamp])
+  @@map("aria_messages")
+}
+
 enum GroupType {
   DEPARTMENT
   PROJECT
@@ -286,6 +317,12 @@ enum Permission {
   PROMPT_TUTOR_ACCESS
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
 enum UserRole {
   OWNER
   ADMIN
@@ -293,56 +330,4 @@ enum UserRole {
   MEMBER
   SUPER_ADMIN
   MANAGER
-}
-
-enum UserStatus {
-  ACTIVE
-  INACTIVE
-  SUSPENDED
-}
-
-// ARIA Conversation Persistence Models
-model aria_conversations {
-  id              String          @id @default(cuid())
-  user_id         String          @db.VarChar(255)
-  thread_id       String          @unique @db.VarChar(255)
-
-  // Metadata
-  started_at      DateTime        @default(now()) @db.Timestamp(6)
-  last_message_at DateTime        @updatedAt @db.Timestamp(6)
-  message_count   Int             @default(0)
-
-  // Context summary (lightweight)
-  topics          String[]
-  user_preferences Json?
-
-  // Status
-  is_active       Boolean         @default(true)
-
-  // Relations
-  messages        aria_messages[]
-
-  @@index([user_id])
-  @@index([thread_id])
-  @@map("aria_conversations")
-}
-
-model aria_messages {
-  id              String            @id @default(cuid())
-  conversation_id String
-
-  // Message data
-  role            String            @db.VarChar(20)
-  content         String            @db.Text
-
-  // Metadata
-  timestamp       DateTime          @default(now()) @db.Timestamp(6)
-  token_count     Int?
-
-  // Relations
-  conversation    aria_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-
-  @@index([conversation_id])
-  @@index([timestamp])
-  @@map("aria_messages")
 }

@@ -128,8 +128,8 @@ class GoogleWorkspaceService {
     const name = workspaceUser.name?.fullName || workspaceUser.name?.givenName || 'Unknown';
     const isActive = !workspaceUser.suspended;
 
-    // Determine role based on email or organizational unit
-    const role = this.determineUserRole(workspaceUser);
+    // Determine role based on email or organizational unit (returns roleId)
+    const roleId = this.determineUserRole(workspaceUser);
 
     // Upsert user in database
     const user = await prisma.users.upsert({
@@ -137,16 +137,17 @@ class GoogleWorkspaceService {
       update: {
         name,
         status: isActive ? 'ACTIVE' : 'INACTIVE',
-        role,
+        roleId,
         updatedAt: new Date(),
       },
       create: {
         email,
         name,
-        role,
+        roleId,
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         loginCount: 0,
       },
+      include: { role: true }, // Include role relation
     });
 
     return user;
@@ -156,26 +157,26 @@ class GoogleWorkspaceService {
     const email = workspaceUser.primaryEmail.toLowerCase();
     const orgUnitPath = workspaceUser.orgUnitPath || '';
 
-    // Owner/God mode
+    // Owner/God mode - return role ID
     if (email === 'jlope@boldbusiness.com' || email === 'jmadrino@boldbusiness.com') {
-      return 'OWNER';
+      return 'role_owner';
     }
 
-    // Admin based on organizational unit or specific emails
-    if (orgUnitPath.includes('/Admin') || 
+    // Super Admin based on organizational unit or specific emails
+    if (orgUnitPath.includes('/Admin') ||
         orgUnitPath.includes('/IT') ||
         workspaceUser.isAdmin) {
-      return 'ADMIN';
+      return 'role_super_admin';
     }
 
     // Team managers based on organizational unit
-    if (orgUnitPath.includes('/Managers') || 
+    if (orgUnitPath.includes('/Managers') ||
         orgUnitPath.includes('/Team Leads')) {
-      return 'TEAM_MANAGER';
+      return 'role_team_manager';
     }
 
     // Default to member
-    return 'MEMBER';
+    return 'role_member';
   }
 
   async getUserFromWorkspace(email) {
@@ -254,13 +255,13 @@ class GoogleWorkspaceService {
     // Determine group type based on name or description
     const type = this.determineGroupType(workspaceGroup);
 
-    // Find or create a default creator (admin user)
+    // Find or create a default creator (super admin user)
     const adminUser = await prisma.users.findFirst({
-      where: { role: 'ADMIN' },
+      where: { roleId: 'role_super_admin' },
     });
 
     if (!adminUser) {
-      throw new Error('No admin user found to assign as group creator');
+      throw new Error('No super admin user found to assign as group creator');
     }
 
     // Upsert group in database

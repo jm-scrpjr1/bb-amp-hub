@@ -535,7 +535,8 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
         id: true,
         email: true,
         name: true,
-        role: true,
+        roleId: true,
+        role: { select: { name: true } }, // Include role name
         status: true,
         createdAt: true,
         lastLoginAt: true

@@ -1,17 +1,24 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
 import { X, Users, Plus, Trash2, Search, AlertCircle, UserPlus } from 'lucide-react';
 import { apiService } from '../../services/apiService';
+import { useAuth } from '../../providers/AuthProvider';
+import { useRBAC } from '../../providers/RBACProvider';
 
 const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, group, onMembersUpdated }) {
+  const { user: currentUser } = useAuth();
+  const { canManageGroup } = useRBAC();
+
   const [members, setMembers] = useState([]);
   const [availableUsers, setAvailableUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [userSearchTerm, setUserSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [selectedRole, setSelectedRole] = useState('MEMBER');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -23,6 +30,18 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
       loadAvailableUsers();
     }
   }, [group, isOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest('.user-search-container')) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserDropdown]);
 
   const loadGroupMembers = useCallback(async () => {
     if (!group) return;
@@ -65,11 +84,13 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
       
       // Reload members
       await loadGroupMembers();
-      
+
       // Reset form
       setSelectedUser('');
+      setUserSearchTerm('');
       setSelectedRole('MEMBER');
-      
+      setShowUserDropdown(false);
+
       if (onMembersUpdated) {
         onMembersUpdated();
       }
@@ -101,11 +122,16 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
     if (!isSubmitting) {
       setError(null);
       setSearchTerm('');
+      setUserSearchTerm('');
       setSelectedUser('');
       setSelectedRole('MEMBER');
+      setShowUserDropdown(false);
       onClose();
     }
   }, [isSubmitting, onClose]);
+
+  // Check if current user can manage this group
+  const canManageThisGroup = group ? canManageGroup(group.id) : false;
 
   const filteredMembers = members.filter(member =>
     member.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,6 +140,12 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
 
   const availableUsersForAdd = availableUsers.filter(user =>
     !members.some(member => member.userId === user.id)
+  );
+
+  // Filter users based on search term
+  const filteredAvailableUsers = availableUsersForAdd.filter(user =>
+    user.name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
   );
 
   if (!mounted || !isOpen) return null;
@@ -150,50 +182,78 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
           )}
 
           {/* Add Member Form */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
-              Add New Member
-            </h3>
-            <form onSubmit={handleAddMember} className="flex gap-3">
-              <div className="flex-1">
-                <select
-                  value={selectedUser}
-                  onChange={(e) => setSelectedUser(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-                >
-                  <option value="">Select a user...</option>
-                  {availableUsersForAdd.map(user => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
+          {!canManageThisGroup ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-yellow-600" />
+                <p className="text-sm text-yellow-800">
+                  You don't have permission to manage members in this group. Only ADMIN, SUPER_ADMIN, OWNER, or group MANAGERS can add/remove members.
+                </p>
               </div>
-              <div>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  disabled={isSubmitting}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+            </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Add New Member
+              </h3>
+              <form onSubmit={handleAddMember} className="flex gap-3">
+                <div className="flex-1 relative user-search-container">
+                  <input
+                    type="text"
+                    value={userSearchTerm}
+                    onChange={(e) => {
+                      setUserSearchTerm(e.target.value);
+                      setShowUserDropdown(true);
+                    }}
+                    onFocus={() => setShowUserDropdown(true)}
+                    placeholder="Search users..."
+                    disabled={isSubmitting}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                  />
+                  {showUserDropdown && filteredAvailableUsers.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredAvailableUsers.map(user => (
+                        <button
+                          key={user.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedUser(user.id);
+                            setUserSearchTerm(`${user.name} (${user.email})`);
+                            setShowUserDropdown(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-600">{user.email}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    disabled={isSubmitting}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                  >
+                    <option value="MEMBER">Member</option>
+                    <option value="MANAGER">Manager</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  disabled={!selectedUser || isSubmitting}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
-                  <option value="MEMBER">Member</option>
-                  <option value="MANAGER">Manager</option>
-                  <option value="ADMIN">Admin</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                disabled={!selectedUser || isSubmitting}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-              >
-                <Plus className="h-4 w-4" />
-                {isSubmitting ? 'Adding...' : 'Add'}
-              </button>
-            </form>
-          </div>
+                  <Plus className="h-4 w-4" />
+                  {isSubmitting ? 'Adding...' : 'Add'}
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Search Members */}
           <div className="relative">
@@ -261,13 +321,15 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleRemoveMember(member.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Remove member"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {canManageThisGroup && (
+                      <button
+                        onClick={() => handleRemoveMember(member.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Remove member"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

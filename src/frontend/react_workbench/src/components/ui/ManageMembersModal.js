@@ -56,19 +56,18 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
     }
   }, []);
 
-  const handleAddMember = useCallback(async (e) => {
-    e.preventDefault();
-    if (!selectedUser || !group) return;
+  const handleAddMember = useCallback(async (userId, role) => {
+    if (!userId || !group) return;
 
     setIsSubmitting(true);
     setError(null);
 
     try {
       await apiService.addGroupMember(group.id, {
-        userId: selectedUser,
-        role: selectedRole
+        userId: userId,
+        role: role
       });
-      
+
       // Reload members
       await loadGroupMembers();
 
@@ -85,7 +84,7 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedUser, selectedRole, group, loadGroupMembers, onMembersUpdated]);
+  }, [group, loadGroupMembers, onMembersUpdated]);
 
   const handleRemoveMember = useCallback(async (userId) => {
     if (!group || !window.confirm('Are you sure you want to remove this member?')) return;
@@ -182,7 +181,7 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                 <UserPlus className="h-5 w-5" />
                 Add New Member
               </h3>
-              <form onSubmit={handleAddMember} className="space-y-3">
+              <div className="space-y-3">
                 <div className="relative">
                   <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
@@ -194,45 +193,62 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                   />
                 </div>
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <select
-                      value={selectedUser}
-                      onChange={(e) => setSelectedUser(e.target.value)}
-                      required
-                      disabled={isSubmitting}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-                    >
-                      <option value="">Select a user...</option>
-                      {filteredAvailableUsers.map(user => (
-                        <option key={user.id} value={user.id}>
-                          {user.name} ({user.email})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <select
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      disabled={isSubmitting}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
-                    >
-                      <option value="MEMBER">Member</option>
-                      <option value="MANAGER">Manager</option>
-                      <option value="ADMIN">Admin</option>
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={!selectedUser || isSubmitting}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                  >
-                    <Plus className="h-4 w-4" />
-                    {isSubmitting ? 'Adding...' : 'Add'}
-                  </button>
+
+                {/* Available Users List */}
+                <div className="bg-white border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+                  {filteredAvailableUsers.length > 0 ? (
+                    filteredAvailableUsers.map(user => (
+                      <div
+                        key={user.id}
+                        className={`flex items-center justify-between p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors ${
+                          selectedUser === user.id ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                            {user.name?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{user.name}</h4>
+                            <p className="text-sm text-gray-600">{user.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={selectedUser === user.id ? selectedRole : 'MEMBER'}
+                            onChange={(e) => {
+                              setSelectedUser(user.id);
+                              setSelectedRole(e.target.value);
+                            }}
+                            disabled={isSubmitting}
+                            className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                          >
+                            <option value="MEMBER">Member</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="ADMIN">Admin</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const role = selectedUser === user.id ? selectedRole : 'MEMBER';
+                              handleAddMember(user.id, role);
+                            }}
+                            disabled={isSubmitting}
+                            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      {userSearchTerm ? 'No users found' : 'All users are already members'}
+                    </div>
+                  )}
                 </div>
-              </form>
+              </div>
             </div>
           )}
 

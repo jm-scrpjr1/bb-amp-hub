@@ -122,14 +122,16 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
     member.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const availableUsersForAdd = availableUsers.filter(user =>
-    !members.some(member => member.userId === user.id)
-  );
-
-  // Filter users based on search term
-  const filteredAvailableUsers = availableUsersForAdd.filter(user =>
+  // First filter ALL users by search term (search across all users in system)
+  const searchFilteredUsers = availableUsers.filter(user =>
+    !userSearchTerm ||
     user.name?.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
+  // Then filter out users who are already members
+  const filteredAvailableUsers = searchFilteredUsers.filter(user =>
+    !members.some(member => member.userId === user.id)
   );
 
   if (!mounted || !isOpen) return null;

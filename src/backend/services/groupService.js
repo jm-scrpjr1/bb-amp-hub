@@ -287,23 +287,134 @@ class GroupService {
   // Add member to group
   static async addGroupMember(groupId, userId, role = 'MEMBER') {
     try {
-      const membershipId = `membership-${groupId}-${userId}`;
-      
-      const membership = {
-        id: membershipId,
-        groupId,
-        userId,
-        role,
-        status: MembershipStatus.ACTIVE,
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
+      // Check if membership already exists
+      const existingMembership = await prisma.group_memberships.findFirst({
+        where: {
+          groupId,
+          userId
+        }
+      });
 
-      mockMemberships.set(membershipId, membership);
-      return membership;
+      if (existingMembership) {
+        // If membership exists but was removed, reactivate it
+        if (existingMembership.status === 'REMOVED' || existingMembership.status === 'INACTIVE') {
+          const updatedMembership = await prisma.group_memberships.update({
+            where: { id: existingMembership.id },
+            data: {
+              status: 'ACTIVE',
+              role,
+              joinedAt: new Date(),
+              updatedAt: new Date()
+            },
+            include: {
+              users: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true,
+                  roleId: true,
+                  country: true
+                }
+              }
+            }
+          });
+
+          // Transform to match expected format
+          return {
+            ...updatedMembership,
+            user: updatedMembership.users,
+            users: undefined
+          };
+        }
+        // If already active, return error
+        console.log('User is already a member of this group');
+        return null;
+      }
+
+      // Create new membership
+      const membershipId = 'cm' + Math.random().toString(36).substr(2, 20);
+      const membership = await prisma.group_memberships.create({
+        data: {
+          id: membershipId,
+          groupId,
+          userId,
+          role,
+          status: 'ACTIVE',
+          joinedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              roleId: true,
+              country: true
+            }
+          }
+        }
+      });
+
+      // Transform to match expected format
+      return {
+        ...membership,
+        user: membership.users,
+        users: undefined
+      };
     } catch (error) {
       console.error('Error adding group member:', error);
+      return null;
+    }
+  }
+
+  // Update member role in group
+  static async updateGroupMember(groupId, userId, role) {
+    try {
+      const membership = await prisma.group_memberships.findFirst({
+        where: {
+          groupId,
+          userId,
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        console.log('Membership not found');
+        return null;
+      }
+
+      const updatedMembership = await prisma.group_memberships.update({
+        where: { id: membership.id },
+        data: {
+          role,
+          updatedAt: new Date()
+        },
+        include: {
+          users: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+              roleId: true,
+              country: true
+            }
+          }
+        }
+      });
+
+      // Transform to match expected format
+      return {
+        ...updatedMembership,
+        user: updatedMembership.users,
+        users: undefined
+      };
+    } catch (error) {
+      console.error('Error updating group member:', error);
       return null;
     }
   }
@@ -311,17 +422,29 @@ class GroupService {
   // Remove member from group
   static async removeGroupMember(groupId, userId) {
     try {
-      const membershipId = `membership-${groupId}-${userId}`;
-      const membership = mockMemberships.get(membershipId);
-      
-      if (membership) {
-        membership.status = MembershipStatus.REMOVED;
-        membership.updatedAt = new Date();
-        mockMemberships.set(membershipId, membership);
-        return true;
+      const membership = await prisma.group_memberships.findFirst({
+        where: {
+          groupId,
+          userId,
+          status: 'ACTIVE'
+        }
+      });
+
+      if (!membership) {
+        console.log('Membership not found');
+        return false;
       }
-      
-      return false;
+
+      // Soft delete by updating status to REMOVED
+      await prisma.group_memberships.update({
+        where: { id: membership.id },
+        data: {
+          status: 'REMOVED',
+          updatedAt: new Date()
+        }
+      });
+
+      return true;
     } catch (error) {
       console.error('Error removing group member:', error);
       return false;

@@ -261,7 +261,7 @@ class GroupService {
               name: true,
               email: true,
               image: true,
-              role: true,
+              roleId: true,
               country: true
             }
           }

@@ -255,7 +255,7 @@ class GroupService {
           status: 'ACTIVE'
         },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               name: true,
@@ -268,11 +268,16 @@ class GroupService {
         },
         orderBy: [
           { role: 'asc' },
-          { user: { name: 'asc' } }
+          { users: { name: 'asc' } }
         ]
       });
 
-      return memberships;
+      // Transform to camelCase for frontend
+      return memberships.map(membership => ({
+        ...membership,
+        user: membership.users,
+        users: undefined
+      }));
     } catch (error) {
       console.error('Error fetching group members:', error);
       return [];

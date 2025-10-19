@@ -108,12 +108,12 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
   }, [isSubmitting, onClose]);
 
   const filteredMembers = members.filter(member =>
-    member.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    member.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    member.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    member.user?.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const availableUsersForAdd = availableUsers.filter(user =>
-    !members.some(member => member.id === user.id)
+    !members.some(member => member.userId === user.id)
   );
 
   if (!mounted || !isOpen) return null;
@@ -231,11 +231,11 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                   <div key={member.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        {member.name?.charAt(0)?.toUpperCase() || 'U'}
+                        {member.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                       <div>
-                        <h4 className="font-medium text-gray-900">{member.name}</h4>
-                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <h4 className="font-medium text-gray-900">{member.user?.name}</h4>
+                        <p className="text-sm text-gray-600">{member.user?.email}</p>
                         <div className="flex gap-2 mt-1">
                           <span className={`inline-block text-xs px-2 py-1 rounded-full ${
                             member.role === 'ADMIN'

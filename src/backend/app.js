@@ -1069,6 +1069,38 @@ app.post('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
   }
 });
 
+// Update member role in group endpoint
+app.put('/api/groups/:groupId/members/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { groupId, userId } = req.params;
+    const { role } = req.body;
+
+    // Check if user can manage this group
+    if (!PermissionService.canManageGroup(req.user, groupId)) {
+      return res.status(403).json({ error: 'Insufficient permissions to manage this group' });
+    }
+
+    if (!role) {
+      return res.status(400).json({ error: 'Role is required' });
+    }
+
+    const membership = await GroupService.updateGroupMember(groupId, userId, role);
+
+    if (!membership) {
+      return res.status(404).json({ error: 'Member not found in group' });
+    }
+
+    res.json({
+      success: true,
+      membership,
+      message: 'Member role updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating group member:', error);
+    res.status(500).json({ error: 'Failed to update member role' });
+  }
+});
+
 // Remove member from group endpoint
 app.delete('/api/groups/:groupId/members/:userId', authenticateUser, async (req, res) => {
   try {

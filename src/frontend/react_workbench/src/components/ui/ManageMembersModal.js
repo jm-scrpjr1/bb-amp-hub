@@ -18,7 +18,6 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -30,18 +29,6 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
       loadAvailableUsers();
     }
   }, [group, isOpen]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showUserDropdown && !event.target.closest('.user-search-container')) {
-        setShowUserDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserDropdown]);
 
   const loadGroupMembers = useCallback(async () => {
     if (!group) return;
@@ -89,7 +76,6 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
       setSelectedUser('');
       setUserSearchTerm('');
       setSelectedRole('MEMBER');
-      setShowUserDropdown(false);
 
       if (onMembersUpdated) {
         onMembersUpdated();
@@ -125,7 +111,6 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
       setUserSearchTerm('');
       setSelectedUser('');
       setSelectedRole('MEMBER');
-      setShowUserDropdown(false);
       onClose();
     }
   }, [isSubmitting, onClose]);
@@ -198,49 +183,34 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                 Add New Member
               </h3>
               <form onSubmit={handleAddMember} className="space-y-3">
-                <div className="relative user-search-container">
+                <div className="relative">
                   <Search className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     value={userSearchTerm}
-                    onChange={(e) => {
-                      setUserSearchTerm(e.target.value);
-                      setShowUserDropdown(true);
-                    }}
-                    onFocus={() => setShowUserDropdown(true)}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
                     placeholder="Search users..."
                     disabled={isSubmitting}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                   />
-                  {showUserDropdown && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                      {filteredAvailableUsers.length > 0 ? (
-                        filteredAvailableUsers.map(user => (
-                          <button
-                            key={user.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedUser(user.id);
-                              setUserSearchTerm(`${user.name} (${user.email})`);
-                              setShowUserDropdown(false);
-                            }}
-                            className={`w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0 ${
-                              selectedUser === user.id ? 'bg-blue-50' : ''
-                            }`}
-                          >
-                            <div className="font-medium text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-600">{user.email}</div>
-                          </button>
-                        ))
-                      ) : (
-                        <div className="px-3 py-4 text-center text-gray-500">
-                          No users found
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
                 <div className="flex gap-3">
+                  <div className="flex-1">
+                    <select
+                      value={selectedUser}
+                      onChange={(e) => setSelectedUser(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                    >
+                      <option value="">Select a user...</option>
+                      {filteredAvailableUsers.map(user => (
+                        <option key={user.id} value={user.id}>
+                          {user.name} ({user.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <select
                       value={selectedRole}

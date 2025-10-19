@@ -495,20 +495,29 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
+    console.log('✅ Permission check passed, fetching analytics...');
+
     // Get user statistics
+    console.log('Fetching user counts...');
     const totalUsers = await prisma.users.count();
     const activeUsers = await prisma.users.count({ where: { status: 'ACTIVE' } });
     const inactiveUsers = await prisma.users.count({ where: { status: 'INACTIVE' } });
     const suspendedUsers = await prisma.users.count({ where: { status: 'SUSPENDED' } });
+    console.log('User counts:', { totalUsers, activeUsers, inactiveUsers, suspendedUsers });
 
     // Get user counts by role
+    console.log('Fetching users by role...');
     const usersByRole = await prisma.users.groupBy({
       by: ['roleId'],
       _count: { roleId: true }
     });
+    console.log('Users by role:', usersByRole);
 
     // Get role names for the stats
+    console.log('Fetching roles...');
     const roles = await prisma.roles.findMany();
+    console.log('Roles:', roles);
+
     const roleMap = roles.reduce((acc, role) => {
       acc[role.id] = role.name;
       return acc;
@@ -519,6 +528,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
       acc[roleName] = item._count.roleId;
       return acc;
     }, {});
+    console.log('Role stats:', roleStats);
 
     // Group statistics - not available yet (no group table)
     const totalGroups = 0;
@@ -526,6 +536,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
     const privateGroups = 0;
 
     // Get recent users (last 7 days)
+    console.log('Fetching recent users...');
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -550,8 +561,10 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
         lastLoginAt: true
       }
     });
+    console.log('Recent users count:', recentUsers.length);
 
     // Get login activity (users who logged in today)
+    console.log('Fetching today logins...');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -562,6 +575,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
         }
       }
     });
+    console.log('Today logins:', todayLogins);
 
     const analytics = {
       users: {
@@ -587,12 +601,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
       }
     };
 
-    console.log('📊 Analytics generated:', {
-      totalUsers,
-      activeUsers,
-      totalGroups,
-      recentUsersCount: recentUsers.length
-    });
+    console.log('📊 Analytics generated successfully');
 
     res.json({
       success: true,
@@ -600,8 +609,14 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching analytics:', error);
-    res.status(500).json({ error: 'Failed to fetch analytics' });
+    console.error('❌ Error fetching analytics:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
+    res.status(500).json({
+      error: 'Failed to fetch analytics',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

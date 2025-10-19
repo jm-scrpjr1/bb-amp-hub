@@ -154,8 +154,18 @@ class BackendAuthService {
   async makeAuthenticatedRequest(endpoint, options = {}) {
     try {
       if (!this.token) {
+        console.error('❌ No authentication token available');
+        console.log('Checking localStorage:', localStorage.getItem('auth_token'));
         throw new Error('No authentication token');
       }
+
+      console.log('🔍 Making authenticated request:', {
+        endpoint,
+        apiUrl: this.apiUrl,
+        fullUrl: `${this.apiUrl}${endpoint}`,
+        hasToken: !!this.token,
+        tokenPreview: this.token?.substring(0, 20) + '...'
+      });
 
       const response = await fetch(`${this.apiUrl}${endpoint}`, {
         ...options,
@@ -167,17 +177,40 @@ class BackendAuthService {
         },
       });
 
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
       if (!response.ok) {
+        // Try to get error details from response body
+        let errorDetails = response.statusText;
+        try {
+          const errorBody = await response.json();
+          errorDetails = errorBody.message || errorBody.error || JSON.stringify(errorBody);
+          console.error('❌ Error response body:', errorBody);
+        } catch (e) {
+          // Response body is not JSON
+          try {
+            errorDetails = await response.text();
+            console.error('❌ Error response text:', errorDetails);
+          } catch (e2) {
+            // Can't read response body
+          }
+        }
+
         if (response.status === 401) {
           this.logout();
           throw new Error('Authentication expired');
         }
-        throw new Error(`Request failed: ${response.statusText}`);
+        throw new Error(`Request failed: ${errorDetails}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error('Authenticated request failed:', error);
+      console.error('❌ Authenticated request failed:', error);
+      console.error('Error stack:', error.stack);
       throw error;
     }
   }

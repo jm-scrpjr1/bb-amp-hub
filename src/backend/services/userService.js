@@ -174,7 +174,7 @@ class UserService {
           group_memberships: {
             where: { status: 'ACTIVE' },
             include: {
-              group: {
+              groups: {  // Fixed: was 'group', should be 'groups'
                 select: {
                   id: true,
                   name: true,

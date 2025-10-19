@@ -7,6 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model aria_conversations {
+  id               String          @id
+  user_id          String          @db.VarChar(255)
+  thread_id        String          @unique @db.VarChar(255)
+  started_at       DateTime        @default(now()) @db.Timestamp(6)
+  last_message_at  DateTime        @db.Timestamp(6)
+  message_count    Int             @default(0)
+  topics           String[]
+  user_preferences Json?
+  is_active        Boolean         @default(true)
+  aria_messages    aria_messages[]
+
+  @@index([thread_id])
+  @@index([user_id])
+}
+
+model aria_messages {
+  id                 String             @id
+  conversation_id    String
+  role               String             @db.VarChar(20)
+  content            String
+  timestamp          DateTime           @default(now()) @db.Timestamp(6)
+  token_count        Int?
+  aria_conversations aria_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@index([conversation_id])
+  @@index([timestamp])
+}
+
 model assessment_categories {
   id                   Int                    @id @default(autoincrement())
   name                 String                 @unique @db.VarChar(100)
@@ -130,6 +159,16 @@ model groups {
   users_groups_managerIdTousers   users?              @relation("groups_managerIdTousers", fields: [managerId], references: [id])
 }
 
+model roles {
+  id          String   @id
+  name        String   @unique @db.VarChar(50)
+  description String?
+  level       Int      @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  users       users[]
+}
+
 model system_analytics {
   id               String   @id
   date             DateTime @unique @default(now())
@@ -227,51 +266,21 @@ model users {
   email                            String              @unique
   name                             String?
   image                            String?
-  role                             UserRole            @default(MEMBER)
   status                           UserStatus          @default(ACTIVE)
   teamId                           String?
   lastLoginAt                      DateTime?
   createdAt                        DateTime            @default(now())
-  updatedAt                        DateTime
+  updatedAt                        DateTime            @updatedAt
   loginCount                       Int                 @default(0)
   country                          String?             @default("US") @db.VarChar(2)
+  roleId                           String
   group_memberships                group_memberships[]
   groups_groups_createdByIdTousers groups[]            @relation("groups_createdByIdTousers")
   groups_groups_managerIdTousers   groups[]            @relation("groups_managerIdTousers")
   teams_teams_managerIdTousers     teams[]             @relation("teams_managerIdTousers")
   user_permissions                 user_permissions[]
+  roles                            roles               @relation(fields: [roleId], references: [id])
   teams_users_teamIdToteams        teams?              @relation("users_teamIdToteams", fields: [teamId], references: [id])
-}
-
-model aria_conversations {
-  id               String          @id @default(cuid())
-  user_id          String          @db.VarChar(255)
-  thread_id        String          @unique @db.VarChar(255)
-  started_at       DateTime        @default(now()) @db.Timestamp(6)
-  last_message_at  DateTime        @updatedAt @db.Timestamp(6)
-  message_count    Int             @default(0)
-  topics           String[]
-  user_preferences Json?
-  is_active        Boolean         @default(true)
-  messages         aria_messages[]
-
-  @@index([user_id])
-  @@index([thread_id])
-  @@map("aria_conversations")
-}
-
-model aria_messages {
-  id              String             @id @default(cuid())
-  conversation_id String
-  role            String             @db.VarChar(20)
-  content         String
-  timestamp       DateTime           @default(now()) @db.Timestamp(6)
-  token_count     Int?
-  conversation    aria_conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
-
-  @@index([conversation_id])
-  @@index([timestamp])
-  @@map("aria_messages")
 }
 
 enum GroupType {
@@ -321,13 +330,4 @@ enum UserStatus {
   ACTIVE
   INACTIVE
   SUSPENDED
-}
-
-enum UserRole {
-  OWNER
-  ADMIN
-  TEAM_MANAGER
-  MEMBER
-  SUPER_ADMIN
-  MANAGER
 }

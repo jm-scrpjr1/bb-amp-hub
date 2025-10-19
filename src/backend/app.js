@@ -349,7 +349,7 @@ app.post("/api/auth/google", async (req, res) => {
         email: user.email,
         name: user.name,
         image: user.image,
-        role: user.role,
+        role: user.roles?.name || user.role, // Support both new (roles.name) and old (role) format
         status: user.status,
         permissions: user.permissions || [],
         groupMemberships: user.groupMemberships || [],

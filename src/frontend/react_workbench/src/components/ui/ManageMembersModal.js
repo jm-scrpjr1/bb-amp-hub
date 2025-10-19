@@ -240,6 +240,7 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                     </div>
                   )}
                 </div>
+                <div className="flex gap-3">
                   <div>
                     <select
                       value={selectedRole}

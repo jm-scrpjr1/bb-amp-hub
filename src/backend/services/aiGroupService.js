@@ -249,7 +249,7 @@ class AIGroupService {
     const recommendations = [];
 
     // Get role name (handle both old and new format)
-    const roleName = user.role?.name || user.role;
+    const roleName = user.roles?.name || user.role?.name || user.role;
 
     // Recommend groups based on user role
     if (roleName === 'TEAM_MANAGER') {
@@ -295,7 +295,7 @@ class AIGroupService {
     const reasons = [];
 
     // Get role name (handle both old and new format)
-    const roleName = user.role?.name || user.role;
+    const roleName = user.roles?.name || user.role?.name || user.role;
 
     // Role compatibility
     if (roleName === 'TEAM_MANAGER' && group.type === GroupType.DEPARTMENT) {

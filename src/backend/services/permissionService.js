@@ -6,8 +6,9 @@ const { isOwnerEmail, UserRole, RoleName, UserStatus } = require('./userService'
 // Helper function to get role name from user object
 function getUserRoleName(user) {
   if (!user) return null;
-  // Handle both old format (user.role as string) and new format (user.role as object)
+  // Handle both old format (user.role as string) and new format (user.roles as object)
   if (typeof user.role === 'string') return user.role;
+  if (user.roles && user.roles.name) return user.roles.name;
   if (user.role && user.role.name) return user.role.name;
   return null;
 }

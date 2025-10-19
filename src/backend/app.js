@@ -466,7 +466,7 @@ const authenticateUser = async (req, res, next) => {
 
       console.log('✅ User authenticated:', {
         email: req.user.email,
-        role: req.user.role,
+        role: req.user.roles?.name || req.user.role?.name,
         groupMemberships: req.user.groupMemberships?.length || 0,
         managedGroups: req.user.managedGroups?.length || 0
       });
@@ -488,7 +488,7 @@ const authenticateUser = async (req, res, next) => {
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
   try {
-    console.log('🔍 Analytics endpoint called by user:', req.user?.email, 'role:', req.user?.role);
+    console.log('🔍 Analytics endpoint called by user:', req.user?.email, 'role:', req.user?.roles?.name || req.user?.role?.name);
 
     if (!PermissionService.canAccessAdminPanel(req.user)) {
       console.log('❌ User lacks permission to access admin analytics');
@@ -503,12 +503,20 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
 
     // Get user counts by role
     const usersByRole = await prisma.users.groupBy({
-      by: ['role'],
-      _count: { role: true }
+      by: ['roleId'],
+      _count: { roleId: true }
     });
 
+    // Get role names for the stats
+    const roles = await prisma.roles.findMany();
+    const roleMap = roles.reduce((acc, role) => {
+      acc[role.id] = role.name;
+      return acc;
+    }, {});
+
     const roleStats = usersByRole.reduce((acc, item) => {
-      acc[item.role] = item._count.role;
+      const roleName = roleMap[item.roleId] || item.roleId;
+      acc[roleName] = item._count.roleId;
       return acc;
     }, {});
 
@@ -536,7 +544,7 @@ app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
         email: true,
         name: true,
         roleId: true,
-        role: { select: { name: true } }, // Include role name
+        roles: { select: { name: true } }, // Include role name
         status: true,
         createdAt: true,
         lastLoginAt: true
@@ -974,7 +982,7 @@ app.get('/api/groups/:groupId/members', authenticateUser, async (req, res) => {
     console.log('🔍 Group members request:', {
       groupId,
       userEmail: req.user?.email,
-      userRole: req.user?.role,
+      userRole: req.user?.roles?.name || req.user?.role?.name,
       hasGodMode: PermissionService.hasGodMode(req.user)
     });
 
@@ -1172,7 +1180,7 @@ app.post('/api/groups/ai/suggestions', authenticateUser, async (req, res) => {
 // Users API
 app.get('/api/users', authenticateUser, async (req, res) => {
   try {
-    console.log('🔍 Users endpoint called by user:', req.user?.email, 'role:', req.user?.role);
+    console.log('🔍 Users endpoint called by user:', req.user?.email, 'role:', req.user?.roles?.name || req.user?.role?.name);
 
     if (!PermissionService.canManageUsers(req.user)) {
       console.log('❌ User lacks permission to manage users');

@@ -45,7 +45,7 @@ class UserService {
       // Try to get user from database first
       const user = await prisma.users.findUnique({
         where: { email: email.toLowerCase() },
-        include: { role: true } // Include role relation
+        include: { roles: true } // Include role relation
       });
 
       if (user) {
@@ -105,7 +105,7 @@ class UserService {
             lastLoginAt: new Date(),
             loginCount: 1,
           },
-          include: { role: true } // Include role relation
+          include: { roles: true } // Include role relation
         });
 
         // Auto-assign new users to General group if they're not in any groups
@@ -170,7 +170,7 @@ class UserService {
       const user = await prisma.users.findUnique({
         where: { id: userId },
         include: {
-          role: true, // Include role relation
+          roles: true, // Include role relation
           group_memberships: {
             where: { status: 'ACTIVE' },
             include: {
@@ -246,7 +246,7 @@ class UserService {
         where,
         skip,
         take: limitNum,
-        include: { role: true }, // Include role relation
+        include: { roles: true }, // Include role relation
         orderBy: {
           createdAt: 'desc'
         }
@@ -356,7 +356,7 @@ class UserService {
       name: isOwner ? 'John Madrino' : 'User',
       image: null,
       roleId,
-      role: { id: roleId, name: roleName }, // Mock role relation
+      roles: { id: roleId, name: roleName }, // Mock role relation (named 'roles' to match schema)
       status: UserStatus.ACTIVE,
       loginCount: 0,
       lastLoginAt: new Date(),

@@ -147,7 +147,7 @@ class GoogleWorkspaceService {
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         loginCount: 0,
       },
-      include: { role: true }, // Include role relation
+      include: { roles: true }, // Include role relation
     });
 
     return user;

@@ -55,7 +55,7 @@ server {
     # CORS headers for API
     add_header Access-Control-Allow-Origin "https://main.d1wapgj6lifsrx.amplifyapp.com" always;
     add_header Access-Control-Allow-Origin "https://aiworkbench.boldbusiness.com" always;
-    add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+    add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" always;
     add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
     add_header Access-Control-Allow-Credentials "true" always;
 
@@ -63,7 +63,7 @@ server {
     if (\$request_method = 'OPTIONS') {
         add_header Access-Control-Allow-Origin "https://main.d1wapgj6lifsrx.amplifyapp.com" always;
         add_header Access-Control-Allow-Origin "https://aiworkbench.boldbusiness.com" always;
-        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS" always;
         add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
         add_header Access-Control-Allow-Credentials "true" always;
         add_header Content-Length 0;

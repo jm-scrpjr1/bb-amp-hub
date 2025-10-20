@@ -469,7 +469,7 @@ class GroupService {
           status: 'ACTIVE'
         },
         include: {
-          group: {
+          groups: {
             include: {
               users_groups_createdByIdTousers: {
                 select: {
@@ -502,10 +502,10 @@ class GroupService {
       // Extract groups and apply filters
       let groups = userMemberships
         .map(membership => ({
-          ...membership.group,
-          createdBy: membership.group.users_groups_createdByIdTousers,
-          manager: membership.group.users_groups_managerIdTousers,
-          memberCount: membership.group._count.group_memberships,
+          ...membership.groups,
+          createdBy: membership.groups.users_groups_createdByIdTousers,
+          manager: membership.groups.users_groups_managerIdTousers,
+          memberCount: membership.groups._count.group_memberships,
           membershipRole: membership.role,
           joinedAt: membership.joinedAt,
           // Remove snake_case fields

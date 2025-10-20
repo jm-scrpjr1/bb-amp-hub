@@ -164,6 +164,33 @@ const AuthProvider = ({ children }) => {
     return await backendAuthService.syncGroupsFromWorkspace();
   };
 
+  const refreshUser = async () => {
+    try {
+      if (environmentConfig.enableBackendAuth && backendAuthService.isAuthenticated()) {
+        const userData = await backendAuthService.getUserProfile();
+        if (userData) {
+          setUser(userData);
+          return userData;
+        }
+      }
+
+      // Fallback to token validation
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        const userData = await authService.validateToken(token);
+        if (userData) {
+          setUser(userData);
+          return userData;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -173,7 +200,8 @@ const AuthProvider = ({ children }) => {
     signOut,
     checkAuthStatus,
     syncUsersFromWorkspace,
-    syncGroupsFromWorkspace
+    syncGroupsFromWorkspace,
+    refreshUser
   };
 
   return (

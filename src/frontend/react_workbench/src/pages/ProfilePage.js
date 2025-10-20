@@ -1,17 +1,90 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { useAuth } from '../providers/AuthProvider';
+import { toast } from 'react-hot-toast';
 
 const ProfilePage = () => {
-  const { user, isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate('/auth/signin');
     }
   }, [isAuthenticated, loading, navigate]);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+
+      // Convert image to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Image = reader.result;
+        setImagePreview(base64Image);
+
+        // Update user profile with new image
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com'}/api/user/profile`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({
+            image: base64Image
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update profile image');
+        }
+
+        const updatedUser = await response.json();
+
+        // Refresh user data in auth context
+        await refreshUser();
+
+        toast.success('Profile image updated successfully!');
+        setImagePreview(null);
+      };
+
+      reader.onerror = () => {
+        toast.error('Failed to read image file');
+        setUploading(false);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+      setImagePreview(null);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -36,18 +109,43 @@ const ProfilePage = () => {
         {/* Profile Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-8 text-white">
           <div className="flex items-center space-x-6">
-            <div className="h-24 w-24 bg-blue-800 rounded-full flex items-center justify-center border-4 border-white/20">
-              {user?.image ? (
-                <img
-                  src={user.image}
-                  alt={user?.name || 'User'}
-                  className="h-24 w-24 rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-white text-2xl font-bold">
-                  {user?.name?.charAt(0) || 'U'}
-                </span>
-              )}
+            <div className="relative group">
+              <div className="h-24 w-24 bg-blue-800 rounded-full flex items-center justify-center border-4 border-white/20 overflow-hidden">
+                {(imagePreview || user?.image) ? (
+                  <img
+                    src={imagePreview || user.image}
+                    alt={user?.name || 'User'}
+                    className="h-24 w-24 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-2xl font-bold">
+                    {user?.name?.charAt(0) || 'U'}
+                  </span>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full">
+                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={handleImageClick}
+                disabled={uploading}
+                className="absolute bottom-0 right-0 bg-white text-blue-600 rounded-full p-2 shadow-lg hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Upload profile picture"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
             </div>
             <div>
               <h1 className="text-3xl font-bold mb-2">{user?.name || 'User'}</h1>

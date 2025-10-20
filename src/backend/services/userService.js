@@ -331,15 +331,21 @@ class UserService {
   // Update user profile
   static async updateUser(userId, data) {
     try {
-      // Find user by ID
-      const user = Array.from(mockUsers.values()).find(u => u.id === userId);
-      if (!user) return null;
+      // Update user in database
+      const updatedUser = await prisma.users.update({
+        where: { id: userId },
+        data: {
+          ...data,
+          updatedAt: new Date()
+        },
+        include: { roles: true }
+      });
 
-      // Update user data
-      Object.assign(user, data, { updatedAt: new Date() });
-      mockUsers.set(user.email, user);
-
-      return user;
+      // Return user with role name
+      return {
+        ...updatedUser,
+        role: updatedUser.roles?.name || 'MEMBER'
+      };
     } catch (error) {
       console.error('Error updating user:', error);
       return null;

@@ -43,33 +43,54 @@ const ProfilePage = () => {
       // Convert image to base64
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const base64Image = reader.result;
-        setImagePreview(base64Image);
+        try {
+          const base64Image = reader.result;
+          setImagePreview(base64Image);
 
-        // Update user profile with new image
-        const apiUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
-        const response = await fetch(`${apiUrl}/user/profile`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          },
-          body: JSON.stringify({
-            image: base64Image
-          })
-        });
+          // Update user profile with new image
+          const apiUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
+          const response = await fetch(`${apiUrl}/user/profile`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({
+              image: base64Image
+            })
+          });
 
-        if (!response.ok) {
-          throw new Error('Failed to update profile image');
+          if (!response.ok) {
+            // Get error message from response
+            let errorMessage = 'Failed to update profile image';
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+              // If response is not JSON, use status text
+              if (response.status === 413) {
+                errorMessage = 'Image file is too large. Please use a smaller image (max 5MB).';
+              } else {
+                errorMessage = `Error: ${response.statusText || response.status}`;
+              }
+            }
+            throw new Error(errorMessage);
+          }
+
+          const updatedUser = await response.json();
+
+          // Refresh user data in auth context
+          await refreshUser();
+
+          toast.success('Profile image updated successfully!');
+          setImagePreview(null);
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          toast.error(error.message || 'Failed to upload image');
+          setImagePreview(null);
+        } finally {
+          setUploading(false);
         }
-
-        const updatedUser = await response.json();
-
-        // Refresh user data in auth context
-        await refreshUser();
-
-        toast.success('Profile image updated successfully!');
-        setImagePreview(null);
       };
 
       reader.onerror = () => {
@@ -80,9 +101,8 @@ const ProfilePage = () => {
       reader.readAsDataURL(file);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast.error('Failed to upload image');
+      toast.error(error.message || 'Failed to upload image');
       setImagePreview(null);
-    } finally {
       setUploading(false);
     }
   };

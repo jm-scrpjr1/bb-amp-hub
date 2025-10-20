@@ -48,7 +48,7 @@ if (!isProduction || !behindProxy) {
 }
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Import services
 const { UserService } = require('./services/userService');

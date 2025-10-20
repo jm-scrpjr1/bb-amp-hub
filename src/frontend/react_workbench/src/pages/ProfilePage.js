@@ -47,7 +47,8 @@ const ProfilePage = () => {
         setImagePreview(base64Image);
 
         // Update user profile with new image
-        const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com'}/api/user/profile`, {
+        const apiUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
+        const response = await fetch(`${apiUrl}/user/profile`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

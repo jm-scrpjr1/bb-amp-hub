@@ -53,7 +53,11 @@ class BackendAuthService {
       localStorage.setItem('auth_token', this.token);
 
       console.log('✅ Backend authentication successful');
-      return authResult.user;
+      // Return user with token so AuthProvider can store it properly
+      return {
+        ...authResult.user,
+        token: authResult.token
+      };
     } catch (error) {
       console.error('❌ Backend authentication failed:', error);
       console.error('Error details:', error.message);

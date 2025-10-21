@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Users, Trash2 } from 'lucide-react';
+import { Edit, Users, Trash2, Eye } from 'lucide-react';
 import MainLayout from '../components/layout/MainLayout';
 import { EditGroupModal, ManageMembersModal } from '../components/ui';
 import { useGroupPermissions } from '../providers/RBACProvider';
@@ -26,6 +26,7 @@ const GroupsPage = () => {
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedGroupForAction, setSelectedGroupForAction] = useState(null);
+  const [isViewMode, setIsViewMode] = useState(false);
 
   useEffect(() => {
     loadGroups();
@@ -116,6 +117,13 @@ const GroupsPage = () => {
   // Modal handlers
   const handleEditGroup = (group) => {
     setSelectedGroupForAction(group);
+    setIsViewMode(false);
+    setShowEditModal(true);
+  };
+
+  const handleViewGroup = (group) => {
+    setSelectedGroupForAction(group);
+    setIsViewMode(true);
     setShowEditModal(true);
   };
 
@@ -205,40 +213,52 @@ const GroupsPage = () => {
           </div>
 
           {/* Management buttons */}
-          {groupPermissions.canManageGroup(group.id) && (
-            <div className="flex items-center gap-1 mt-3 pt-3 border-t border-gray-200">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditGroup(group);
-                }}
-                className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                title="Edit group"
-              >
-                <Edit className="h-4 w-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleManageMembers(group);
-                }}
-                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                title="Manage members"
-              >
-                <Users className="h-4 w-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteGroup(group);
-                }}
-                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                title="Delete group"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-1 mt-3 pt-3 border-t border-gray-200">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewGroup(group);
+              }}
+              className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              title="View group details"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+            {groupPermissions.canManageGroup(group.id) && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditGroup(group);
+                  }}
+                  className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                  title="Edit group"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleManageMembers(group);
+                  }}
+                  className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Manage members"
+                >
+                  <Users className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteGroup(group);
+                  }}
+                  className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete group"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -537,9 +557,11 @@ const GroupsPage = () => {
         onClose={() => {
           setShowEditModal(false);
           setSelectedGroupForAction(null);
+          setIsViewMode(false);
         }}
         group={selectedGroupForAction}
         onGroupUpdated={handleGroupUpdated}
+        viewMode={isViewMode}
       />
 
       <ManageMembersModal

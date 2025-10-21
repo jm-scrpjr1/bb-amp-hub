@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, memo } from 'react';
-import { X, Edit, Save, AlertCircle } from 'lucide-react';
+import { X, Edit, Save, AlertCircle, Eye } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 
-const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, onGroupUpdated }) {
+const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, onGroupUpdated, viewMode = false }) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -86,12 +86,20 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Edit className="h-5 w-5 text-purple-600" />
+            <div className={`p-2 ${viewMode ? 'bg-green-100' : 'bg-purple-100'} rounded-lg`}>
+              {viewMode ? (
+                <Eye className="h-5 w-5 text-green-600" />
+              ) : (
+                <Edit className="h-5 w-5 text-purple-600" />
+              )}
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Edit Group</h2>
-              <p className="text-sm text-gray-600">Update group details and settings</p>
+              <h2 className="text-xl font-semibold text-gray-900">
+                {viewMode ? 'View Group' : 'Edit Group'}
+              </h2>
+              <p className="text-sm text-gray-600">
+                {viewMode ? 'Group details and settings' : 'Update group details and settings'}
+              </p>
             </div>
           </div>
           <button
@@ -124,8 +132,8 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
               value={formData.name}
               onChange={handleInputChange}
               required
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+              disabled={isSubmitting || viewMode}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
               placeholder="Enter group name"
             />
           </div>
@@ -140,9 +148,9 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              disabled={isSubmitting}
+              disabled={isSubmitting || viewMode}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
               placeholder="Describe the group's purpose"
             />
           </div>
@@ -158,8 +166,8 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
                 name="type"
                 value={formData.type}
                 onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                disabled={isSubmitting || viewMode}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
               >
                 <option value="DEPARTMENT">Department</option>
                 <option value="FUNCTIONAL">Functional</option>
@@ -177,8 +185,8 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
                 name="visibility"
                 value={formData.visibility}
                 onChange={handleInputChange}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                disabled={isSubmitting || viewMode}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
               >
                 <option value="PUBLIC">Public</option>
                 <option value="PRIVATE">Private</option>
@@ -199,9 +207,9 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
                 name="maxMembers"
                 value={formData.maxMembers}
                 onChange={handleInputChange}
-                disabled={isSubmitting}
+                disabled={isSubmitting || viewMode}
                 min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
                 placeholder="Leave empty for unlimited"
               />
             </div>
@@ -213,7 +221,7 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
                 name="autoApprove"
                 checked={formData.autoApprove}
                 onChange={handleInputChange}
-                disabled={isSubmitting}
+                disabled={isSubmitting || viewMode}
                 className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded disabled:opacity-50"
               />
               <label htmlFor="autoApprove" className="ml-2 block text-sm text-gray-700">
@@ -233,8 +241,8 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
               name="tags"
               value={formData.tags}
               onChange={handleInputChange}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50"
+              disabled={isSubmitting || viewMode}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:bg-gray-50"
               placeholder="Enter tags separated by commas"
             />
             <p className="text-xs text-gray-500 mt-1">Separate multiple tags with commas</p>
@@ -248,16 +256,18 @@ const EditGroupModal = memo(function EditGroupModal({ isOpen, onClose, group, on
               disabled={isSubmitting}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
-              Cancel
+              {viewMode ? 'Close' : 'Cancel'}
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" />
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
-            </button>
+            {!viewMode && (
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
+              >
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            )}
           </div>
         </form>
       </div>

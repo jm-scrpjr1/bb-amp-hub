@@ -44,6 +44,7 @@ const AdminUsersPage = () => {
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(null);
 
   const usersPerPage = 10;
@@ -157,6 +158,13 @@ const AdminUsersPage = () => {
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
+    setIsViewMode(false);
+    setShowEditModal(true);
+  };
+
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setIsViewMode(true);
     setShowEditModal(true);
   };
 
@@ -383,17 +391,18 @@ const AdminUsersPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
+                          onClick={() => handleViewUser(user)}
+                          className="text-green-600 hover:text-green-900 p-1 rounded"
+                          title="View details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleEditUser(user)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded"
                           title="Edit user"
                         >
                           <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          className="text-gray-600 hover:text-gray-900 p-1 rounded"
-                          title="View details"
-                        >
-                          <Eye className="h-4 w-4" />
                         </button>
                         {user.email !== 'jmadrino@boldbusiness.com' && (
                           <button
@@ -469,10 +478,12 @@ const AdminUsersPage = () => {
           onClose={() => {
             setShowEditModal(false);
             setSelectedUser(null);
+            setIsViewMode(false);
           }}
           onSave={() => {
             loadAllUsers();
           }}
+          viewMode={isViewMode}
         />
       )}
     </MainLayout>

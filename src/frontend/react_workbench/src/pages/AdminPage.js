@@ -227,7 +227,10 @@ const AdminPage = () => {
             </div>
           </Link>
 
-          <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow group cursor-pointer">
+          <Link
+            to="/groups"
+            className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow group"
+          >
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
                 <Users className="h-6 w-6 text-purple-600" />
@@ -240,7 +243,7 @@ const AdminPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
           <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow group cursor-pointer">
             <div className="flex items-center space-x-4">

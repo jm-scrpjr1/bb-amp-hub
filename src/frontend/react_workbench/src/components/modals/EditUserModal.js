@@ -42,7 +42,8 @@ const EditUserModal = ({ user, onClose, onSave, viewMode = false }) => {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+      setError(null);
+
       // Load roles, teams, and groups
       const [rolesData, teamsData, groupsData, userGroupsData] = await Promise.all([
         adminService.getRoles(),
@@ -51,14 +52,20 @@ const EditUserModal = ({ user, onClose, onSave, viewMode = false }) => {
         adminService.getUserGroups(user.id)
       ]);
 
-      setRoles(rolesData.roles || []);
-      setTeams(teamsData.teams || []);
-      setGroups(groupsData.groups || []);
-      setUserGroups(userGroupsData.groups || []);
-      
-      // Set selected groups
-      setSelectedGroups(userGroupsData.groups?.map(g => g.id) || []);
-      
+      // Ensure we have arrays
+      const rolesArray = Array.isArray(rolesData?.roles) ? rolesData.roles : [];
+      const teamsArray = Array.isArray(teamsData?.teams) ? teamsData.teams : [];
+      const groupsArray = Array.isArray(groupsData?.groups) ? groupsData.groups : [];
+      const userGroupsArray = Array.isArray(userGroupsData?.groups) ? userGroupsData.groups : [];
+
+      setRoles(rolesArray);
+      setTeams(teamsArray);
+      setGroups(groupsArray);
+      setUserGroups(userGroupsArray);
+
+      // Set selected groups - ensure we're mapping over an array
+      setSelectedGroups(userGroupsArray.map(g => g.id));
+
       // Set form data with current user values
       setFormData({
         status: user.status || 'ACTIVE',
@@ -66,7 +73,7 @@ const EditUserModal = ({ user, onClose, onSave, viewMode = false }) => {
         country: user.country || 'US',
         teamId: user.teamId || '',
       });
-      
+
     } catch (err) {
       console.error('Error loading data:', err);
       setError('Failed to load user data');

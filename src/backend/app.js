@@ -1297,6 +1297,92 @@ app.delete('/api/users/:userId', authenticateUser, async (req, res) => {
   }
 });
 
+// Get user's groups
+app.get('/api/users/:userId/groups', authenticateUser, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Users can view their own groups, or admins can view any
+    if (req.user.id !== userId && !PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const groups = await GroupService.getUserGroups(userId);
+
+    res.json({
+      success: true,
+      groups
+    });
+  } catch (error) {
+    console.error('Error fetching user groups:', error);
+    res.status(500).json({ error: 'Failed to fetch user groups' });
+  }
+});
+
+// Roles API
+app.get('/api/roles', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const roles = await prisma.roles.findMany({
+      orderBy: { level: 'asc' }
+    });
+
+    res.json({
+      success: true,
+      roles
+    });
+  } catch (error) {
+    console.error('Error fetching roles:', error);
+    res.status(500).json({ error: 'Failed to fetch roles' });
+  }
+});
+
+// Teams API
+app.get('/api/teams', authenticateUser, async (req, res) => {
+  try {
+    if (!PermissionService.canManageUsers(req.user)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const teams = await prisma.teams.findMany({
+      include: {
+        users_teams_managerIdTousers: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        _count: {
+          select: {
+            users_users_teamIdToteams: true
+          }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    res.json({
+      success: true,
+      teams: teams.map(team => ({
+        id: team.id,
+        name: team.name,
+        description: team.description,
+        manager: team.users_teams_managerIdTousers,
+        memberCount: team._count.users_users_teamIdToteams,
+        createdAt: team.createdAt,
+        updatedAt: team.updatedAt
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    res.status(500).json({ error: 'Failed to fetch teams' });
+  }
+});
+
 // Permissions API
 app.get('/api/permissions/user/:userId', authenticateUser, async (req, res) => {
   try {

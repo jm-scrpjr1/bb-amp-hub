@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
+import EditUserModal from '../components/modals/EditUserModal';
 import adminService from '../services/adminService';
 import { useAuth } from '../providers/AuthProvider';
 import { useRBAC } from '../providers/RBACProvider';
@@ -460,6 +461,20 @@ const AdminUsersPage = () => {
           )}
         </div>
       </div>
+
+      {/* Edit User Modal */}
+      {showEditModal && selectedUser && (
+        <EditUserModal
+          user={selectedUser}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedUser(null);
+          }}
+          onSave={() => {
+            loadAllUsers();
+          }}
+        />
+      )}
     </MainLayout>
   );
 };

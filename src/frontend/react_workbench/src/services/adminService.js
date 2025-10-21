@@ -245,6 +245,51 @@ class AdminService {
       throw error;
     }
   }
+
+  async removeGroupMember(groupId, userId) {
+    try {
+      const response = await this.backendAuth.makeAuthenticatedRequest(`/groups/${groupId}/members/${userId}`, {
+        method: 'DELETE'
+      });
+      return response;
+    } catch (error) {
+      console.error('Error removing group member:', error);
+      throw error;
+    }
+  }
+
+  // Roles Management
+  async getRoles() {
+    try {
+      const response = await this.backendAuth.makeAuthenticatedRequest('/roles');
+      return response;
+    } catch (error) {
+      console.error('Error fetching roles:', error);
+      throw error;
+    }
+  }
+
+  // Teams Management
+  async getTeams() {
+    try {
+      const response = await this.backendAuth.makeAuthenticatedRequest('/teams');
+      return response;
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+      throw error;
+    }
+  }
+
+  // User Groups
+  async getUserGroups(userId) {
+    try {
+      const response = await this.backendAuth.makeAuthenticatedRequest(`/users/${userId}/groups`);
+      return response;
+    } catch (error) {
+      console.error('Error fetching user groups:', error);
+      throw error;
+    }
+  }
 }
 
 export default new AdminService();

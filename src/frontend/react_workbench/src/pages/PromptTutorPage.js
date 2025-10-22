@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
 import { Search, Heart, MoreVertical } from 'lucide-react';
@@ -198,6 +199,7 @@ const agents = [
 ];
 
 const PromptTutorPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [likedAgents, setLikedAgents] = useState(new Set());
@@ -218,6 +220,14 @@ const PromptTutorPage = () => {
 
   const handleAgentLeave = () => {
     setHoveredAgent(null);
+  };
+
+  const handleAgentClick = (agent) => {
+    // Navigate to Recruiting Prompts page if it's the Recruiting agent
+    if (agent.category === 'Recruiting') {
+      navigate('/recruiting-prompts');
+    }
+    // Add other navigation logic here for other agents if needed
   };
 
   const toggleLike = (agentId) => {
@@ -305,6 +315,7 @@ const PromptTutorPage = () => {
                 transition={{ delay: 0.4 + index * 0.1 }}
                 onMouseEnter={() => handleAgentHover(agent.id, agent.wittyMessages)}
                 onMouseLeave={handleAgentLeave}
+                onClick={() => handleAgentClick(agent)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >

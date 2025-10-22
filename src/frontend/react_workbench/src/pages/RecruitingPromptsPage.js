@@ -114,23 +114,54 @@ const RecruitingPromptsPage = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Implement OpenAI Assistant API call
-      // For now, simulate a response
-      setTimeout(() => {
-        const assistantMessage = {
-          role: 'assistant',
-          content: 'Resume Builder is processing your file... (Integration in progress)',
-          timestamp: new Date().toISOString()
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setIsLoading(false);
-      }, 1500);
+      // Get user email from localStorage
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+
+      // Prepare form data for file upload
+      const formData = new FormData();
+      formData.append('message', inputMessage || 'Please process my resume and format it according to your instructions.');
+      formData.append('threadId', threadId || 'new');
+      formData.append('userId', user?.email || 'anonymous');
+
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+
+      // Call Resume Builder API
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/resume-builder`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to process resume');
+      }
+
+      // Update thread ID
+      if (data.threadId) {
+        setThreadId(data.threadId);
+      }
+
+      // Add assistant response
+      const assistantMessage = {
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Clear uploaded file after successful processing
+      setUploadedFile(null);
+      setIsLoading(false);
 
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage = {
         role: 'error',
-        content: 'Sorry, something went wrong. Please try again.',
+        content: `Sorry, something went wrong: ${error.message}`,
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, errorMessage]);

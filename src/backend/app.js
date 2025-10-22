@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const openaiService = require('./services/openaiService');
+const resumeBuilderService = require('./services/resumeBuilderService');
 const { testConnection, prisma } = require('./lib/db');
 const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
 const app = express();
@@ -867,6 +868,58 @@ app.get('/api/chat/health', async (req, res) => {
       status: 'unhealthy',
       error: error.message,
       apiKeyConfigured: !!process.env.OPENAI_API_KEY
+    });
+  }
+});
+
+// Resume Builder API with file upload support
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/api/resume-builder', upload.single('file'), async (req, res) => {
+  try {
+    const { message, threadId, userId } = req.body;
+    const file = req.file;
+
+    console.log('📄 Resume Builder request received');
+    console.log('💬 Message:', message);
+    console.log('🧵 Thread ID:', threadId || 'new');
+    console.log('📎 File:', file ? file.originalname : 'none');
+    console.log('👤 User ID:', userId || 'anonymous');
+
+    // Upload file to OpenAI if provided
+    let fileId = null;
+    if (file) {
+      fileId = await resumeBuilderService.uploadFile(file.buffer, file.originalname);
+    }
+
+    // Process the resume
+    const result = await resumeBuilderService.processResume(
+      message || 'Please process my resume and format it according to your instructions.',
+      threadId,
+      fileId,
+      userId
+    );
+
+    if (!result.success) {
+      return res.status(500).json({
+        error: 'Resume processing failed',
+        message: result.error
+      });
+    }
+
+    res.json({
+      response: result.response,
+      success: true,
+      threadId: result.threadId,
+      assistantId: 'asst_9YxNyc29mE6NXFHZmsJoQel7'
+    });
+
+  } catch (error) {
+    console.error('❌ Resume Builder error:', error);
+    res.status(500).json({
+      error: 'Resume Builder request failed',
+      message: error.message
     });
   }
 });

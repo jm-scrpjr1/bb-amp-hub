@@ -127,9 +127,8 @@ const RecruitingPromptsPage = () => {
   const handleDownloadPDF = () => {
     if (!enhancedResult?.pdfUrl) return;
 
-    // pdfUrl already includes /api/download-resume/..., so we need to use the base URL without /api
-    const baseUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
-    const downloadUrl = baseUrl.replace('/api', '') + enhancedResult.pdfUrl;
+    // pdfUrl already includes /api/download-resume/..., so we just need the base domain
+    const downloadUrl = `https://api.boldbusiness.com${enhancedResult.pdfUrl}`;
     window.open(downloadUrl, '_blank');
   };
 

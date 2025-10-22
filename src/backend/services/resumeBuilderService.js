@@ -215,15 +215,18 @@ class ResumeBuilderService {
       console.log('📄 Generating PDF from HTML...');
 
       // Read and convert header image to base64
-      const headerImagePath = path.join(__dirname, '../../frontend/react_workbench/public/images/Resume Header.png');
+      // Use absolute path from the services directory
+      const headerImagePath = path.resolve(__dirname, '../frontend/react_workbench/public/images/Resume Header.png');
       let headerImageBase64 = '';
 
       try {
+        console.log('🔍 Looking for header image at:', headerImagePath);
         const imageBuffer = fs.readFileSync(headerImagePath);
         headerImageBase64 = `data:image/png;base64,${imageBuffer.toString('base64')}`;
         console.log('✅ Header image loaded successfully');
       } catch (imgError) {
         console.warn('⚠️ Could not load header image:', imgError.message);
+        console.warn('📂 Tried path:', headerImagePath);
       }
 
       // Create full HTML document with styling and header
@@ -312,12 +315,12 @@ class ResumeBuilderService {
       font-weight: 600;
     }
     .footer {
-      margin-top: 40px;
-      padding-top: 20px;
+      margin-top: 25px;
+      padding-top: 15px;
       border-top: 1px solid #e5e7eb;
       text-align: center;
       color: #9ca3af;
-      font-size: 11px;
+      font-size: 10px;
     }
   </style>
 </head>
@@ -351,12 +354,13 @@ class ResumeBuilderService {
         path: pdfPath,
         format: 'A4',
         margin: {
-          top: '20mm',
-          right: '20mm',
-          bottom: '20mm',
-          left: '20mm'
+          top: '10mm',
+          right: '15mm',
+          bottom: '15mm',
+          left: '15mm'
         },
-        printBackground: true
+        printBackground: true,
+        preferCSSPageSize: false
       });
 
       console.log('✅ PDF generated successfully:', filename);

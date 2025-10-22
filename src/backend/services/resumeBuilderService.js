@@ -280,10 +280,21 @@ class ResumeBuilderService {
 </html>
       `;
 
-      // Generate unique filename
-      const sanitizedName = applicantName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      // Generate unique filename with format: "Boldified Resume (INITIALS).pdf"
+      const getInitials = (name) => {
+        if (!name || name === 'Unknown' || name === 'Resume') {
+          return 'XX';
+        }
+        const words = name.trim().split(/\s+/);
+        if (words.length === 1) {
+          return words[0].substring(0, 2).toUpperCase();
+        }
+        return words.map(w => w[0]).join('').toUpperCase().substring(0, 3);
+      };
+
+      const initials = getInitials(applicantName);
       const timestamp = Date.now();
-      const filename = `resume_${sanitizedName}_${timestamp}.pdf`;
+      const filename = `Boldified Resume (${initials})_${timestamp}.pdf`;
       pdfPath = path.join(os.tmpdir(), filename);
 
       // Launch puppeteer and generate PDF

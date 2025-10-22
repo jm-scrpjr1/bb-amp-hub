@@ -47,7 +47,8 @@ class AriaConversationService {
             thread_id: threadId,
             message_count: 0,
             topics: [],
-            is_active: true
+            is_active: true,
+            last_message_at: new Date() // Add timestamp
           }
         });
 
@@ -80,7 +81,8 @@ class AriaConversationService {
           thread_id: threadId,
           message_count: 0,
           topics: [],
-          is_active: true
+          is_active: true,
+          last_message_at: new Date() // Add timestamp
         }
       });
 

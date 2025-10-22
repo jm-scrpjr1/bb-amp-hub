@@ -173,23 +173,16 @@ const FloatingChatbot = ({ className = '' }) => {
     }
   }, [messages, threadId, user?.email, isInitialized]);
 
-  // Clear conversation when user logs out
+  // Reset UI state when user logs out (but keep localStorage for when they log back in)
   useEffect(() => {
     if (!user?.email && isInitialized) {
-      // User logged out, clear conversation data
+      // User logged out, reset UI state only
       setMessages([]);
       setThreadId(null);
       setIsInitialized(false);
 
-      // Clear localStorage for all users (since we don't know which user logged out)
-      if (typeof window !== 'undefined') {
-        const keys = Object.keys(localStorage);
-        keys.forEach(key => {
-          if (key.startsWith('aria_conversation_') || key.startsWith('aria_thread_')) {
-            localStorage.removeItem(key);
-          }
-        });
-      }
+      // DO NOT clear localStorage - conversations should persist across login sessions
+      // This allows users to resume their ARIA conversations after logging back in
     }
   }, [user?.email, isInitialized]);
 

@@ -40,11 +40,28 @@ const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Check backend authentication first if enabled
+      // Check for persisted user data first (fastest)
+      const nextjsUser = localStorage.getItem('nextjs_auth_user');
+      if (nextjsUser) {
+        try {
+          const userData = JSON.parse(nextjsUser);
+          setUser(userData);
+          setIsAuthenticated(true);
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Error parsing user data from localStorage:', error);
+          localStorage.removeItem('nextjs_auth_user');
+        }
+      }
+
+      // Check backend authentication if enabled
       if (environmentConfig.enableBackendAuth && backendAuthService.isAuthenticated()) {
         try {
           const userData = await backendAuthService.getUserProfile();
           if (userData) {
+            // Persist user data to localStorage
+            localStorage.setItem('nextjs_auth_user', JSON.stringify(userData));
             setUser(userData);
             setIsAuthenticated(true);
             setLoading(false);
@@ -56,25 +73,12 @@ const AuthProvider = ({ children }) => {
         }
       }
 
-      // Check for NextJS auth token and transfer it to React app format
+      // Check for NextJS auth token (legacy migration)
       const nextjsToken = localStorage.getItem('nextjs_auth_token');
-      const nextjsUser = localStorage.getItem('nextjs_auth_user');
-
-      if (nextjsToken && nextjsUser) {
+      if (nextjsToken) {
         // Transfer NextJS auth to React app format
         localStorage.setItem('authToken', nextjsToken);
         localStorage.removeItem('nextjs_auth_token');
-
-        try {
-          const userData = JSON.parse(nextjsUser);
-          localStorage.removeItem('nextjs_auth_user');
-          setUser(userData);
-          setIsAuthenticated(true);
-          return; // Skip fallback validation
-        } catch (error) {
-          console.error('Error parsing NextJS user data:', error);
-          localStorage.removeItem('nextjs_auth_user');
-        }
       }
 
       // Fallback to frontend token validation
@@ -122,6 +126,8 @@ const AuthProvider = ({ children }) => {
 
       if (userData && userData.email) {
         localStorage.setItem('authToken', userData.token);
+        // Persist user data to localStorage for page reloads
+        localStorage.setItem('nextjs_auth_user', JSON.stringify(userData));
         setUser(userData);
         setIsAuthenticated(true);
         console.log('Google sign-in successful:', userData.name);
@@ -139,6 +145,7 @@ const AuthProvider = ({ children }) => {
     try {
       googleAuthService.signOut();
       localStorage.removeItem('authToken');
+      localStorage.removeItem('nextjs_auth_user'); // Clear persisted user data
       if (environmentConfig.enableBackendAuth) {
         backendAuthService.logout();
       }

@@ -42,6 +42,7 @@ class AriaConversationService {
         console.log(`✨ Creating new conversation for user ${userId}`);
         const newConversation = await prisma.aria_conversations.create({
           data: {
+            id: 'cm' + Math.random().toString(36).substr(2, 20), // Generate unique ID
             user_id: userId,
             thread_id: threadId,
             message_count: 0,
@@ -71,9 +72,10 @@ class AriaConversationService {
   static async saveConversation(userId, threadId) {
     try {
       console.log(`💾 Saving new conversation for user ${userId}, thread ${threadId}`);
-      
+
       const conversation = await prisma.aria_conversations.create({
         data: {
+          id: 'cm' + Math.random().toString(36).substr(2, 20), // Generate unique ID
           user_id: userId,
           thread_id: threadId,
           message_count: 0,

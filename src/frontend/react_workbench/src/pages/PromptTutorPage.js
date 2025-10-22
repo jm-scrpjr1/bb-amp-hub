@@ -14,6 +14,7 @@ const categories = [
   { id: 'marketing', name: 'Marketing', active: false },
   { id: 'coding', name: 'Coding', active: false },
   { id: 'it', name: 'IT', active: false },
+  { id: 'recruiting', name: 'Recruiting', active: false },
 ];
 
 const getAnimationVariants = (animation) => {
@@ -175,6 +176,23 @@ const agents = [
       "Ready to write cleaner code? ✨",
       "I compile faster than coffee brews! ☕",
       "Coding excellence awaits! 🚀"
+    ]
+  },
+  {
+    id: 7,
+    name: 'Recruiting',
+    description: 'Find and attract top talent with AI-powered recruiting',
+    image: '/images/AI TRAINING 1.png',
+    bgColor: 'bg-purple-600',
+    category: 'Recruiting',
+    animation: 'float',
+    liked: false,
+    wittyMessages: [
+      "Let's find your next superstar! 🌟",
+      "Talent acquisition made easy! 🎯",
+      "Ready to build your dream team? 👥",
+      "I'll help you spot the best candidates! 🔍",
+      "Recruiting excellence starts here! 🚀"
     ]
   }
 ];

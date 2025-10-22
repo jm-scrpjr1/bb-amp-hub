@@ -214,52 +214,80 @@ class ResumeBuilderService {
     try {
       console.log('📄 Generating PDF from HTML...');
 
-      // Create full HTML document with styling
+      // Read and convert header image to base64
+      const headerImagePath = path.join(__dirname, '../../frontend/react_workbench/public/images/Resume Header.png');
+      let headerImageBase64 = '';
+
+      try {
+        const imageBuffer = fs.readFileSync(headerImagePath);
+        headerImageBase64 = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+        console.log('✅ Header image loaded successfully');
+      } catch (imgError) {
+        console.warn('⚠️ Could not load header image:', imgError.message);
+      }
+
+      // Create full HTML document with styling and header
       const fullHTML = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       line-height: 1.6;
       color: #333;
+      background: white;
+    }
+    .header-image {
+      width: 100%;
+      display: block;
+      margin-bottom: 30px;
+    }
+    .content {
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px 60px;
+      padding: 0 60px 40px 60px;
     }
     h1 {
       color: #2c3e50;
       font-size: 32px;
-      margin-bottom: 5px;
-      border-bottom: 3px solid #3498db;
+      margin-bottom: 8px;
+      border-bottom: 3px solid #6366f1;
       padding-bottom: 10px;
     }
     h5 {
-      color: #7f8c8d;
+      color: #6b7280;
       font-size: 18px;
       font-weight: 500;
       margin-top: 0;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
     h2 {
       color: #2c3e50;
-      font-size: 20px;
-      margin-top: 30px;
+      font-size: 22px;
+      margin-top: 35px;
       margin-bottom: 15px;
-      border-bottom: 2px solid #ecf0f1;
-      padding-bottom: 5px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 8px;
+      font-weight: 600;
     }
     p {
-      margin: 10px 0;
+      margin: 12px 0;
+      font-size: 14px;
     }
     ul {
-      margin: 10px 0;
+      margin: 12px 0;
       padding-left: 25px;
     }
     li {
       margin: 8px 0;
+      font-size: 14px;
     }
     table {
       width: 100%;
@@ -268,33 +296,46 @@ class ResumeBuilderService {
     }
     table td {
       padding: 5px 0;
+      vertical-align: top;
     }
-    b {
-      color: #2c3e50;
+    table td:first-child {
+      width: 70%;
+    }
+    table td:last-child {
+      width: 30%;
+      text-align: right;
+      color: #6b7280;
+      font-size: 13px;
+    }
+    b, strong {
+      color: #1f2937;
+      font-weight: 600;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 11px;
     }
   </style>
 </head>
 <body>
-  ${htmlContent}
+  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Boldified Resume Header" class="header-image" />` : ''}
+  <div class="content">
+    ${htmlContent}
+    <div class="footer">
+      Enhanced by Bold Business AI Workbench - Boldified Resume Builder
+    </div>
+  </div>
 </body>
 </html>
       `;
 
-      // Generate unique filename with format: "Boldified Resume (INITIALS).pdf"
-      const getInitials = (name) => {
-        if (!name || name === 'Unknown' || name === 'Resume') {
-          return 'XX';
-        }
-        const words = name.trim().split(/\s+/);
-        if (words.length === 1) {
-          return words[0].substring(0, 2).toUpperCase();
-        }
-        return words.map(w => w[0]).join('').toUpperCase().substring(0, 3);
-      };
-
-      const initials = getInitials(applicantName);
+      // Generate unique filename with format: "Boldified Resume.pdf"
       const timestamp = Date.now();
-      const filename = `Boldified Resume (${initials})_${timestamp}.pdf`;
+      const filename = `Boldified Resume_${timestamp}.pdf`;
       pdfPath = path.join(os.tmpdir(), filename);
 
       // Launch puppeteer and generate PDF

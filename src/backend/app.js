@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const openaiService = require('./services/openaiService');
 const resumeBuilderService = require('./services/resumeBuilderService');
 const { testConnection, prisma } = require('./lib/db');
@@ -908,11 +909,44 @@ app.post('/api/resume-builder', upload.single('file'), async (req, res) => {
       });
     }
 
+    // If we have JSON format response with HTML, generate PDF
+    if (result.format === 'json' && result.enhancedHTML) {
+      console.log('📄 Generating PDF from enhanced HTML...');
+
+      const pdfResult = await resumeBuilderService.generatePDF(
+        result.enhancedHTML,
+        result.applicantName
+      );
+
+      if (pdfResult.success) {
+        // Store PDF info for download
+        const pdfUrl = `/api/download-resume/${path.basename(pdfResult.filename)}`;
+
+        // Store the file path temporarily (in production, use Redis or database)
+        global.tempPDFs = global.tempPDFs || {};
+        global.tempPDFs[path.basename(pdfResult.filename)] = pdfResult.pdfPath;
+
+        return res.json({
+          success: true,
+          format: 'enhanced',
+          summary: result.summary,
+          improvements: result.improvements,
+          applicantName: result.applicantName,
+          applicantTitle: result.applicantTitle,
+          pdfUrl: pdfUrl,
+          pdfFilename: pdfResult.filename,
+          threadId: result.threadId,
+          assistantId: 'asst_QKKMPc2rfE8O6gHx25WCugzo'
+        });
+      }
+    }
+
+    // Fallback to old format
     res.json({
-      response: result.response,
+      response: result.response || result.enhancedHTML,
       success: true,
       threadId: result.threadId,
-      assistantId: 'asst_9YxNyc29mE6NXFHZmsJoQel7'
+      assistantId: 'asst_QKKMPc2rfE8O6gHx25WCugzo'
     });
 
   } catch (error) {
@@ -921,6 +955,38 @@ app.post('/api/resume-builder', upload.single('file'), async (req, res) => {
       error: 'Resume Builder request failed',
       message: error.message
     });
+  }
+});
+
+// Download enhanced resume PDF
+app.get('/api/download-resume/:filename', (req, res) => {
+  try {
+    const filename = req.params.filename;
+    const pdfPath = global.tempPDFs?.[filename];
+
+    if (!pdfPath || !require('fs').existsSync(pdfPath)) {
+      return res.status(404).json({ error: 'PDF not found' });
+    }
+
+    res.download(pdfPath, filename, (err) => {
+      if (err) {
+        console.error('Error downloading PDF:', err);
+      }
+      // Clean up after download
+      setTimeout(() => {
+        try {
+          require('fs').unlinkSync(pdfPath);
+          delete global.tempPDFs[filename];
+          console.log('🗑️ Cleaned up PDF:', filename);
+        } catch (cleanupErr) {
+          console.error('Error cleaning up PDF:', cleanupErr);
+        }
+      }, 5000); // 5 second delay to ensure download completes
+    });
+
+  } catch (error) {
+    console.error('❌ Download error:', error);
+    res.status(500).json({ error: 'Download failed' });
   }
 });
 

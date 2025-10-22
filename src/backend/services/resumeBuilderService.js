@@ -1,4 +1,18 @@
 const OpenAI = require('openai');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { File } = require('@web-std/file');
+const { Blob } = require('@web-std/blob');
+const puppeteer = require('puppeteer');
+
+// Polyfill File and Blob for Node.js < 20
+if (typeof globalThis.File === 'undefined') {
+  globalThis.File = File;
+}
+if (typeof globalThis.Blob === 'undefined') {
+  globalThis.Blob = Blob;
+}
 
 class ResumeBuilderService {
   constructor() {
@@ -8,8 +22,8 @@ class ResumeBuilderService {
       organization: process.env.OPENAI_ORG_ID
     });
 
-    // Resume Builder Assistant ID
-    this.assistantId = 'asst_9YxNyc29mE6NXFHZmsJoQel7';
+    // Resume Builder Assistant ID (Enhanced version with JSON output)
+    this.assistantId = 'asst_QKKMPc2rfE8O6gHx25WCugzo';
 
     // Store active threads
     this.activeThreads = new Map();
@@ -29,17 +43,31 @@ class ResumeBuilderService {
   async uploadFile(fileBuffer, fileName) {
     try {
       console.log('📤 Uploading file to OpenAI:', fileName);
-      
-      // Create a File object from buffer
+
+      // Determine MIME type based on file extension
+      const mimeType = fileName.toLowerCase().endsWith('.pdf')
+        ? 'application/pdf'
+        : 'application/octet-stream';
+
+      // Create a File object from buffer using the polyfilled File class
+      const fileObj = new File([fileBuffer], fileName, { type: mimeType });
+
+      console.log('📋 File details:', {
+        name: fileObj.name,
+        size: fileObj.size,
+        type: fileObj.type
+      });
+
       const file = await this.client.files.create({
-        file: new File([fileBuffer], fileName),
+        file: fileObj,
         purpose: 'assistants'
       });
 
       console.log('✅ File uploaded successfully:', file.id);
       return file.id;
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('❌ Error uploading file:', error);
+      console.error('❌ Error details:', JSON.stringify(error, null, 2));
       throw error;
     }
   }
@@ -86,11 +114,12 @@ class ResumeBuilderService {
       );
 
       console.log('🏃 Started Resume Builder run:', run.id);
+      console.log('🔍 Retrieving run status for thread:', currentThreadId, 'run:', run.id);
 
       // Poll for completion
       let runStatus = await this.client.beta.threads.runs.retrieve(
-        currentThreadId,
-        run.id
+        run.id,
+        { thread_id: currentThreadId }
       );
 
       let attempts = 0;
@@ -104,8 +133,8 @@ class ResumeBuilderService {
 
         await new Promise(resolve => setTimeout(resolve, 1000));
         runStatus = await this.client.beta.threads.runs.retrieve(
-          currentThreadId,
-          run.id
+          run.id,
+          { thread_id: currentThreadId }
         );
         attempts++;
         console.log(`⏳ Run status: ${runStatus.status} (${attempts}/${maxAttempts})`);
@@ -131,11 +160,41 @@ class ResumeBuilderService {
       const responseText = assistantMessage.content[0]?.text?.value || 'No response generated';
 
       console.log('✅ Resume Builder responded');
+      console.log('📄 Raw response:', responseText.substring(0, 200) + '...');
+
+      // Parse JSON response
+      let parsedResponse;
+      try {
+        // Try to extract JSON from response (in case there's extra text)
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0]);
+        } else {
+          parsedResponse = JSON.parse(responseText);
+        }
+      } catch (parseError) {
+        console.error('❌ Failed to parse JSON response:', parseError);
+        // Fallback to old format
+        return {
+          success: true,
+          response: responseText,
+          threadId: currentThreadId,
+          format: 'html'
+        };
+      }
+
+      console.log('✅ Parsed JSON response successfully');
+      console.log('📊 Improvements:', parsedResponse.improvements?.length || 0);
 
       return {
         success: true,
-        response: responseText,
-        threadId: currentThreadId
+        enhancedHTML: parsedResponse.enhancedHTML,
+        improvements: parsedResponse.improvements || [],
+        summary: parsedResponse.summary || 'Resume enhanced successfully',
+        applicantName: parsedResponse.applicantName || 'Unknown',
+        applicantTitle: parsedResponse.applicantTitle || 'Professional',
+        threadId: currentThreadId,
+        format: 'json'
       };
 
     } catch (error) {
@@ -145,6 +204,127 @@ class ResumeBuilderService {
         error: error.message,
         threadId: threadId
       };
+    }
+  }
+
+  async generatePDF(htmlContent, applicantName = 'Resume') {
+    let browser = null;
+    let pdfPath = null;
+
+    try {
+      console.log('📄 Generating PDF from HTML...');
+
+      // Create full HTML document with styling
+      const fullHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 60px;
+    }
+    h1 {
+      color: #2c3e50;
+      font-size: 32px;
+      margin-bottom: 5px;
+      border-bottom: 3px solid #3498db;
+      padding-bottom: 10px;
+    }
+    h5 {
+      color: #7f8c8d;
+      font-size: 18px;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #2c3e50;
+      font-size: 20px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 5px;
+    }
+    p {
+      margin: 10px 0;
+    }
+    ul {
+      margin: 10px 0;
+      padding-left: 25px;
+    }
+    li {
+      margin: 8px 0;
+    }
+    table {
+      width: 100%;
+      margin: 15px 0;
+      border-collapse: collapse;
+    }
+    table td {
+      padding: 5px 0;
+    }
+    b {
+      color: #2c3e50;
+    }
+  </style>
+</head>
+<body>
+  ${htmlContent}
+</body>
+</html>
+      `;
+
+      // Generate unique filename
+      const sanitizedName = applicantName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const timestamp = Date.now();
+      const filename = `resume_${sanitizedName}_${timestamp}.pdf`;
+      pdfPath = path.join(os.tmpdir(), filename);
+
+      // Launch puppeteer and generate PDF
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      const page = await browser.newPage();
+      await page.setContent(fullHTML, { waitUntil: 'networkidle0' });
+
+      await page.pdf({
+        path: pdfPath,
+        format: 'A4',
+        margin: {
+          top: '20mm',
+          right: '20mm',
+          bottom: '20mm',
+          left: '20mm'
+        },
+        printBackground: true
+      });
+
+      console.log('✅ PDF generated successfully:', filename);
+
+      return {
+        success: true,
+        pdfPath: pdfPath,
+        filename: filename
+      };
+
+    } catch (error) {
+      console.error('❌ PDF generation error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
     }
   }
 }

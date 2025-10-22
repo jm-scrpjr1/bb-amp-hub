@@ -176,6 +176,8 @@ const AuthProvider = ({ children }) => {
       if (environmentConfig.enableBackendAuth && backendAuthService.isAuthenticated()) {
         const userData = await backendAuthService.getUserProfile();
         if (userData) {
+          // Persist updated user data to localStorage (including uploaded profile images)
+          localStorage.setItem('nextjs_auth_user', JSON.stringify(userData));
           setUser(userData);
           return userData;
         }
@@ -186,6 +188,8 @@ const AuthProvider = ({ children }) => {
       if (token) {
         const userData = await authService.validateToken(token);
         if (userData) {
+          // Persist updated user data to localStorage
+          localStorage.setItem('nextjs_auth_user', JSON.stringify(userData));
           setUser(userData);
           return userData;
         }

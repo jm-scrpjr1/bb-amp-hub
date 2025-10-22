@@ -83,18 +83,39 @@ class UserService {
       console.log(`🔄 Upserting user: ${email} with roleId: ${roleId}`);
       console.log(`📸 User image data:`, authUser.image);
 
+      // Check if user already exists and has a custom uploaded image
+      const existingUser = await prisma.users.findUnique({
+        where: { email }
+      });
+
+      // Determine if we should update the image
+      // Only update image if:
+      // 1. User doesn't exist (new user), OR
+      // 2. User exists but doesn't have a custom uploaded image (base64)
+      const hasCustomImage = existingUser?.image?.startsWith('data:image/');
+      const shouldUpdateImage = !existingUser || !hasCustomImage;
+
+      console.log(`📸 Existing user has custom image: ${hasCustomImage}`);
+      console.log(`📸 Should update image: ${shouldUpdateImage}`);
+
       // Try to upsert in database first
       try {
+        const updateData = {
+          name: authUser.name,
+          lastLoginAt: new Date(),
+          loginCount: {
+            increment: 1
+          }
+        };
+
+        // Only update image if user doesn't have a custom uploaded one
+        if (shouldUpdateImage) {
+          updateData.image = authUser.image;
+        }
+
         const user = await prisma.users.upsert({
           where: { email },
-          update: {
-            name: authUser.name,
-            image: authUser.image,
-            lastLoginAt: new Date(),
-            loginCount: {
-              increment: 1
-            }
-          },
+          update: updateData,
           create: {
             id: 'cm' + Math.random().toString(36).substr(2, 20), // Generate unique ID
             email,

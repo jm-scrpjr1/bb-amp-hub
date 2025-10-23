@@ -240,7 +240,7 @@ class ResumeBuilderService {
         console.warn('⚠️ Could not load footer image:', imgError.message);
       }
 
-      // Create full HTML document with styling, header on all pages, and footer image
+      // Create full HTML document with styling, header and footer images
       const fullHTML = `
 <!DOCTYPE html>
 <html>
@@ -262,29 +262,20 @@ class ResumeBuilderService {
       color: #333;
       background: white;
     }
-    .page-header {
+    .header-image {
       width: 100%;
       display: block;
-      position: running(header);
+      margin-bottom: 20px;
     }
-    .page-footer {
+    .footer-image {
       width: 100%;
       display: block;
-      position: running(footer);
-      margin-top: 10px;
-    }
-    @page {
-      @top-center {
-        content: element(header);
-      }
-      @bottom-center {
-        content: element(footer);
-      }
+      margin-top: 30px;
     }
     .content {
       max-width: 800px;
       margin: 0 auto;
-      padding: 100px 50px 80px 50px;
+      padding: 0 50px;
     }
     h1 {
       color: #2c3e50;
@@ -358,11 +349,11 @@ class ResumeBuilderService {
   </style>
 </head>
 <body>
-  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Header" class="page-header" />` : ''}
-  ${footerImageBase64 ? `<img src="${footerImageBase64}" alt="Footer" class="page-footer" />` : ''}
+  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Boldified Resume Header" class="header-image" />` : ''}
   <div class="content">
     ${htmlContent}
   </div>
+  ${footerImageBase64 ? `<img src="${footerImageBase64}" alt="Boldified Resume Footer" class="footer-image" />` : ''}
 </body>
 </html>
       `;

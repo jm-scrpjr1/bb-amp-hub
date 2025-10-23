@@ -240,7 +240,14 @@ class ResumeBuilderService {
         console.warn('⚠️ Could not load footer image:', imgError.message);
       }
 
-      // Create full HTML document with styling (no header/footer in body - using templates)
+      // Extract applicant name from HTML content (look for first h1)
+      const nameMatch = htmlContent.match(/<h1[^>]*>(.*?)<\/h1>/);
+      const applicantNameFromHTML = nameMatch ? nameMatch[1] : applicantName;
+
+      // Remove the h1 name from content since we'll display it separately
+      const contentWithoutName = htmlContent.replace(/<h1[^>]*>.*?<\/h1>/, '');
+
+      // Create full HTML document with styling
       const fullHTML = `
 <!DOCTYPE html>
 <html>
@@ -248,7 +255,10 @@ class ResumeBuilderService {
   <meta charset="UTF-8">
   <style>
     @page {
-      margin: 0;
+      margin-top: 45mm;    /* Space for header image */
+      margin-bottom: 35mm; /* Space for footer image */
+      margin-left: 15mm;
+      margin-right: 15mm;
       size: A4;
     }
     * {
@@ -261,29 +271,21 @@ class ResumeBuilderService {
       line-height: 1.4;
       color: #333;
       background: white;
-      padding-top: 80mm;    /* Space for header */
-      padding-bottom: 50mm; /* Space for footer */
     }
-    .content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 50px;
+    .name-section {
+      background: #f3f4f6;
+      border: 2px solid #374151;
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
     }
-    h1 {
-      color: #2c3e50;
-      font-size: 28px;
-      margin-bottom: 6px;
-      border-bottom: 3px solid #6366f1;
-      padding-bottom: 8px;
-      page-break-after: avoid;
-    }
-    h5 {
-      color: #6b7280;
-      font-size: 16px;
-      font-weight: 500;
-      margin-top: 0;
-      margin-bottom: 18px;
-      page-break-after: avoid;
+    .content-box {
+      border: 2px solid #374151;
+      padding: 30px;
+      min-height: 600px;
+      background: #fafafa;
     }
     h2 {
       color: #2c3e50;
@@ -293,6 +295,14 @@ class ResumeBuilderService {
       border-bottom: 2px solid #e5e7eb;
       padding-bottom: 6px;
       font-weight: 600;
+      page-break-after: avoid;
+    }
+    h5 {
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 0;
+      margin-bottom: 12px;
       page-break-after: avoid;
     }
     p {
@@ -341,8 +351,11 @@ class ResumeBuilderService {
   </style>
 </head>
 <body>
-  <div class="content">
-    ${htmlContent}
+  <div class="name-section">
+    ${applicantNameFromHTML}
+  </div>
+  <div class="content-box">
+    ${contentWithoutName}
   </div>
 </body>
 </html>
@@ -379,17 +392,11 @@ class ResumeBuilderService {
       await page.pdf({
         path: pdfPath,
         format: 'A4',
-        margin: {
-          top: '80mm',    // Space for header (increased)
-          right: '15mm',
-          bottom: '50mm', // Space for footer (increased)
-          left: '15mm'
-        },
         displayHeaderFooter: true,
         headerTemplate: headerTemplate,
         footerTemplate: footerTemplate,
         printBackground: true,
-        preferCSSPageSize: false
+        preferCSSPageSize: true  // Use CSS @page margins
       });
 
       console.log('✅ PDF generated successfully:', filename);

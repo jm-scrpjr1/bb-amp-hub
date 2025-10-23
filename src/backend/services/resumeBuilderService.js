@@ -240,7 +240,7 @@ class ResumeBuilderService {
         console.warn('⚠️ Could not load footer image:', imgError.message);
       }
 
-      // Create full HTML document with styling, header and footer images
+      // Create full HTML document with styling (no header/footer in body - using templates)
       const fullHTML = `
 <!DOCTYPE html>
 <html>
@@ -261,16 +261,6 @@ class ResumeBuilderService {
       line-height: 1.4;
       color: #333;
       background: white;
-    }
-    .header-image {
-      width: 100%;
-      display: block;
-      margin-bottom: 20px;
-    }
-    .footer-image {
-      width: 100%;
-      display: block;
-      margin-top: 30px;
     }
     .content {
       max-width: 800px;
@@ -349,14 +339,26 @@ class ResumeBuilderService {
   </style>
 </head>
 <body>
-  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Boldified Resume Header" class="header-image" />` : ''}
   <div class="content">
     ${htmlContent}
   </div>
-  ${footerImageBase64 ? `<img src="${footerImageBase64}" alt="Boldified Resume Footer" class="footer-image" />` : ''}
 </body>
 </html>
       `;
+
+      // Create header template for Puppeteer (appears on every page)
+      const headerTemplate = headerImageBase64 ? `
+        <div style="width: 100%; margin: 0; padding: 0;">
+          <img src="${headerImageBase64}" style="width: 100%; display: block; margin: 0;" />
+        </div>
+      ` : '<div></div>';
+
+      // Create footer template for Puppeteer (appears on every page)
+      const footerTemplate = footerImageBase64 ? `
+        <div style="width: 100%; margin: 0; padding: 0;">
+          <img src="${footerImageBase64}" style="width: 100%; display: block; margin: 0;" />
+        </div>
+      ` : '<div></div>';
 
       // Generate unique filename with format: "Boldified Resume.pdf"
       const timestamp = Date.now();
@@ -376,11 +378,14 @@ class ResumeBuilderService {
         path: pdfPath,
         format: 'A4',
         margin: {
-          top: '10mm',
+          top: '60mm',    // Space for header
           right: '15mm',
-          bottom: '15mm',
+          bottom: '40mm', // Space for footer
           left: '15mm'
         },
+        displayHeaderFooter: true,
+        headerTemplate: headerTemplate,
+        footerTemplate: footerTemplate,
         printBackground: true,
         preferCSSPageSize: false
       });

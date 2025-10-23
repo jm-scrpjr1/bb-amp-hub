@@ -255,10 +255,10 @@ class ResumeBuilderService {
   <meta charset="UTF-8">
   <style>
     @page {
-      margin-top: 45mm;    /* Space for header image */
-      margin-bottom: 35mm; /* Space for footer image */
-      margin-left: 15mm;
-      margin-right: 15mm;
+      margin-top: 48mm;    /* Space for header image */
+      margin-bottom: 38mm; /* Space for footer image */
+      margin-left: 20mm;
+      margin-right: 20mm;
       size: A4;
     }
     * {
@@ -272,30 +272,31 @@ class ResumeBuilderService {
       color: #333;
       background: white;
     }
-    .name-section {
-      background: #f3f4f6;
-      border: 2px solid #374151;
-      padding: 15px 20px;
-      margin-bottom: 10px;
-      font-size: 20px;
-      font-weight: 600;
-      color: #1f2937;
+    .page-content {
+      padding: 0;
     }
-    .content-box {
-      border: 2px solid #374151;
-      padding: 30px;
-      min-height: 600px;
-      background: #fafafa;
+    .name-section {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #6366f1;
+      page-break-after: avoid;
     }
     h2 {
       color: #2c3e50;
       font-size: 18px;
-      margin-top: 20px;
-      margin-bottom: 10px;
+      margin-top: 24px;
+      margin-bottom: 12px;
       border-bottom: 2px solid #e5e7eb;
       padding-bottom: 6px;
       font-weight: 600;
       page-break-after: avoid;
+      page-break-inside: avoid;
+    }
+    h2:first-child {
+      margin-top: 0;
     }
     h5 {
       color: #6b7280;
@@ -304,11 +305,14 @@ class ResumeBuilderService {
       margin-top: 0;
       margin-bottom: 12px;
       page-break-after: avoid;
+      page-break-inside: avoid;
     }
     p {
       margin: 8px 0;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
+      orphans: 3;
+      widows: 3;
     }
     ul {
       margin: 8px 0;
@@ -317,22 +321,23 @@ class ResumeBuilderService {
       -webkit-columns: 2;
       -moz-columns: 2;
       column-gap: 20px;
+      page-break-inside: avoid;
     }
     li {
       margin: 4px 0;
       font-size: 13px;
-      line-height: 1.4;
+      line-height: 1.5;
       break-inside: avoid;
       page-break-inside: avoid;
     }
     table {
       width: 100%;
-      margin: 10px 0;
+      margin: 12px 0;
       border-collapse: collapse;
       page-break-inside: avoid;
     }
     table td {
-      padding: 4px 0;
+      padding: 6px 0;
       vertical-align: top;
     }
     table td:first-child {
@@ -348,13 +353,17 @@ class ResumeBuilderService {
       color: #1f2937;
       font-weight: 600;
     }
+    /* Section grouping - avoid breaking job entries */
+    .job-entry, .education-entry {
+      page-break-inside: avoid;
+    }
   </style>
 </head>
 <body>
-  <div class="name-section">
-    ${applicantNameFromHTML}
-  </div>
-  <div class="content-box">
+  <div class="page-content">
+    <div class="name-section">
+      ${applicantNameFromHTML}
+    </div>
     ${contentWithoutName}
   </div>
 </body>

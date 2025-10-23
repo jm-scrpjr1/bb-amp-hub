@@ -261,6 +261,8 @@ class ResumeBuilderService {
       line-height: 1.4;
       color: #333;
       background: white;
+      padding-top: 80mm;    /* Space for header */
+      padding-bottom: 50mm; /* Space for footer */
     }
     .content {
       max-width: 800px;
@@ -378,9 +380,9 @@ class ResumeBuilderService {
         path: pdfPath,
         format: 'A4',
         margin: {
-          top: '60mm',    // Space for header
+          top: '80mm',    // Space for header (increased)
           right: '15mm',
-          bottom: '40mm', // Space for footer
+          bottom: '50mm', // Space for footer (increased)
           left: '15mm'
         },
         displayHeaderFooter: true,

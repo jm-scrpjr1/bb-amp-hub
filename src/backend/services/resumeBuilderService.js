@@ -214,28 +214,43 @@ class ResumeBuilderService {
     try {
       console.log('📄 Generating PDF from HTML...');
 
-      // Read and convert header image to base64
-      // Use absolute path from the services directory
-      const headerImagePath = path.resolve(__dirname, '../frontend/react_workbench/public/images/Resume Header.png');
+      // Read and convert header and footer images to base64
+      const imagesPath = path.resolve(__dirname, '../frontend/react_workbench/public/images');
+      const headerImagePath = path.join(imagesPath, 'Resume Header.png');
+      const footerImagePath = path.join(imagesPath, 'Resume Footer.png');
+
       let headerImageBase64 = '';
+      let footerImageBase64 = '';
 
       try {
         console.log('🔍 Looking for header image at:', headerImagePath);
-        const imageBuffer = fs.readFileSync(headerImagePath);
-        headerImageBase64 = `data:image/png;base64,${imageBuffer.toString('base64')}`;
+        const headerBuffer = fs.readFileSync(headerImagePath);
+        headerImageBase64 = `data:image/png;base64,${headerBuffer.toString('base64')}`;
         console.log('✅ Header image loaded successfully');
       } catch (imgError) {
         console.warn('⚠️ Could not load header image:', imgError.message);
-        console.warn('📂 Tried path:', headerImagePath);
       }
 
-      // Create full HTML document with styling and header
+      try {
+        console.log('🔍 Looking for footer image at:', footerImagePath);
+        const footerBuffer = fs.readFileSync(footerImagePath);
+        footerImageBase64 = `data:image/png;base64,${footerBuffer.toString('base64')}`;
+        console.log('✅ Footer image loaded successfully');
+      } catch (imgError) {
+        console.warn('⚠️ Could not load footer image:', imgError.message);
+      }
+
+      // Create full HTML document with styling, header on all pages, and footer image
       const fullHTML = `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <style>
+    @page {
+      margin: 0;
+      size: A4;
+    }
     * {
       margin: 0;
       padding: 0;
@@ -243,62 +258,88 @@ class ResumeBuilderService {
     }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
+      line-height: 1.4;
       color: #333;
       background: white;
     }
-    .header-image {
+    .page-header {
       width: 100%;
       display: block;
-      margin-bottom: 30px;
+      position: running(header);
+    }
+    .page-footer {
+      width: 100%;
+      display: block;
+      position: running(footer);
+      margin-top: 10px;
+    }
+    @page {
+      @top-center {
+        content: element(header);
+      }
+      @bottom-center {
+        content: element(footer);
+      }
     }
     .content {
       max-width: 800px;
       margin: 0 auto;
-      padding: 0 60px 40px 60px;
+      padding: 100px 50px 80px 50px;
     }
     h1 {
       color: #2c3e50;
-      font-size: 32px;
-      margin-bottom: 8px;
+      font-size: 28px;
+      margin-bottom: 6px;
       border-bottom: 3px solid #6366f1;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
+      page-break-after: avoid;
     }
     h5 {
       color: #6b7280;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 500;
       margin-top: 0;
-      margin-bottom: 25px;
+      margin-bottom: 18px;
+      page-break-after: avoid;
     }
     h2 {
       color: #2c3e50;
-      font-size: 22px;
-      margin-top: 35px;
-      margin-bottom: 15px;
+      font-size: 18px;
+      margin-top: 20px;
+      margin-bottom: 10px;
       border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
       font-weight: 600;
+      page-break-after: avoid;
     }
     p {
-      margin: 12px 0;
-      font-size: 14px;
+      margin: 8px 0;
+      font-size: 13px;
+      line-height: 1.5;
     }
     ul {
-      margin: 12px 0;
-      padding-left: 25px;
+      margin: 8px 0;
+      padding-left: 20px;
+      columns: 2;
+      -webkit-columns: 2;
+      -moz-columns: 2;
+      column-gap: 20px;
     }
     li {
-      margin: 8px 0;
-      font-size: 14px;
+      margin: 4px 0;
+      font-size: 13px;
+      line-height: 1.4;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     table {
       width: 100%;
-      margin: 15px 0;
+      margin: 10px 0;
       border-collapse: collapse;
+      page-break-inside: avoid;
     }
     table td {
-      padding: 5px 0;
+      padding: 4px 0;
       vertical-align: top;
     }
     table td:first-child {
@@ -308,29 +349,19 @@ class ResumeBuilderService {
       width: 30%;
       text-align: right;
       color: #6b7280;
-      font-size: 13px;
+      font-size: 12px;
     }
     b, strong {
       color: #1f2937;
       font-weight: 600;
     }
-    .footer {
-      margin-top: 25px;
-      padding-top: 15px;
-      border-top: 1px solid #e5e7eb;
-      text-align: center;
-      color: #9ca3af;
-      font-size: 10px;
-    }
   </style>
 </head>
 <body>
-  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Boldified Resume Header" class="header-image" />` : ''}
+  ${headerImageBase64 ? `<img src="${headerImageBase64}" alt="Header" class="page-header" />` : ''}
+  ${footerImageBase64 ? `<img src="${footerImageBase64}" alt="Footer" class="page-footer" />` : ''}
   <div class="content">
     ${htmlContent}
-    <div class="footer">
-      Enhanced by Bold Business AI Workbench - Boldified Resume Builder
-    </div>
   </div>
 </body>
 </html>

@@ -432,8 +432,8 @@ const PromptLibraryPage = () => {
                     className="mt-6 p-6 bg-gray-50 rounded-xl border border-gray-200"
                   >
                     <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-blue-600" />
-                      AI Response
+                      <Sparkles className="w-5 h-5 text-purple-600" />
+                      ARIA's Response
                     </h3>
                     <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                       {result}

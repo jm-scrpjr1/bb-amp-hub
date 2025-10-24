@@ -12,6 +12,24 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// Function to clean up excessive markdown formatting
+function cleanMarkdownResponse(text) {
+  if (!text) return text;
+
+  // Replace **text** with just bold text (keep single asterisks for emphasis)
+  // But make headers more readable by converting ### to simple bold text
+  let cleaned = text
+    // Convert ### headers to bold text without the ###
+    .replace(/^###\s+(.+)$/gm, '$1')
+    .replace(/^##\s+(.+)$/gm, '$1')
+    .replace(/^#\s+(.+)$/gm, '$1')
+    // Keep **bold** formatting as is (it renders nicely)
+    // Remove excessive asterisks (more than 2)
+    .replace(/\*{3,}/g, '**');
+
+  return cleaned;
+}
+
 // Configure multer for file uploads
 const upload = multer({
   dest: 'uploads/',
@@ -253,7 +271,9 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
             max_tokens: 2000
           });
 
-          const response = visionCompletion.choices[0].message.content;
+          // Clean up the response to remove excessive markdown
+          const rawResponse = visionCompletion.choices[0].message.content;
+          const response = cleanMarkdownResponse(rawResponse);
 
           // Increment usage count
           await prisma.prompt_library.update({
@@ -303,7 +323,9 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
       max_tokens: 2000
     });
 
-    const response = completion.choices[0].message.content;
+    // Clean up the response to remove excessive markdown
+    const rawResponse = completion.choices[0].message.content;
+    const response = cleanMarkdownResponse(rawResponse);
 
     // Increment usage count
     await prisma.prompt_library.update({

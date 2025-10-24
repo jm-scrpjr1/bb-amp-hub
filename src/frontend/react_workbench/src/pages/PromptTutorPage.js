@@ -377,7 +377,7 @@ const PromptTutorPage = () => {
             {filteredAgents.map((agent, index) => (
               <motion.div
                 key={agent.id}
-                className="relative group cursor-pointer"
+                className="relative group cursor-pointer h-[380px]"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + index * 0.1 }}
@@ -387,7 +387,7 @@ const PromptTutorPage = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 relative overflow-hidden h-full flex flex-col">
                   {/* Background Glow Effect */}
                   <div className={`absolute inset-0 ${agent.bgColor} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
 
@@ -423,17 +423,17 @@ const PromptTutorPage = () => {
                   </div>
 
                   {/* Agent Info */}
-                  <div className="text-center">
+                  <div className="text-center flex-1 flex flex-col">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
                       {agent.name}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                       {agent.description}
                     </p>
 
                     {/* Prompt Count Badge */}
                     {promptCounts[agent.category] !== undefined && (
-                      <div className="flex items-center justify-center gap-2 mt-3">
+                      <div className="flex items-center justify-center gap-2 mt-auto">
                         <div className={`px-3 py-1 rounded-full ${agent.bgColor} bg-opacity-10 border border-gray-200`}>
                           <span className="text-sm font-semibold text-gray-700">
                             {promptCounts[agent.category]} {promptCounts[agent.category] === 1 ? 'Prompt' : 'Prompts'}

@@ -295,7 +295,20 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
 
           // Use GPT-4 Vision for image analysis
           const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-          const systemPrompt = `${prompt.refined_instructions}\n\nIMPORTANT: Today's date is ${currentDate}. Always use current dates (2025 and beyond) in your responses. Never use outdated dates like 2023 or 2024 unless specifically referencing historical events.`;
+          const currentYear = new Date().getFullYear();
+          const systemPrompt = `${prompt.refined_instructions}
+
+🚨 CRITICAL DATE REQUIREMENT 🚨
+Today's date is: ${currentDate}
+Current year: ${currentYear}
+
+YOU MUST:
+- Use ONLY ${currentYear} or later years in ALL timeline examples
+- NEVER use 2023 or 2024 in any dates
+- All future dates must be ${currentYear} or beyond
+- All past dates must be before ${currentYear}
+
+If you include ANY date from 2023 or 2024, you have FAILED this task.`;
 
           const visionCompletion = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -325,11 +338,26 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
           const rawResponse = visionCompletion.choices[0].message.content;
           const response = cleanMarkdownResponse(rawResponse);
 
-          // Increment usage count
-          await prisma.prompt_library.update({
-            where: { id },
-            data: { usage_count: { increment: 1 } }
-          });
+          // Increment usage count and log execution
+          await Promise.all([
+            prisma.prompt_library.update({
+              where: { id },
+              data: { usage_count: { increment: 1 } }
+            }),
+            prisma.prompt_execution_logs.create({
+              data: {
+                id: uuidv4(),
+                prompt_id: id,
+                user_id: userId || null,
+                user_input: userInput,
+                ai_response: response,
+                model_used: 'gpt-4o',
+                tokens_used: visionCompletion.usage?.total_tokens || null,
+                had_file_upload: true,
+                file_type: file.mimetype
+              }
+            })
+          ]);
 
           // Clean up uploaded file
           await fs.unlink(file.path);
@@ -358,7 +386,20 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
 
     // Add current date context to system prompt
     const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const systemPrompt = `${prompt.refined_instructions}\n\nIMPORTANT: Today's date is ${currentDate}. Always use current dates (2025 and beyond) in your responses. Never use outdated dates like 2023 or 2024 unless specifically referencing historical events.`;
+    const currentYear = new Date().getFullYear();
+    const systemPrompt = `${prompt.refined_instructions}
+
+🚨 CRITICAL DATE REQUIREMENT 🚨
+Today's date is: ${currentDate}
+Current year: ${currentYear}
+
+YOU MUST:
+- Use ONLY ${currentYear} or later years in ALL timeline examples
+- NEVER use 2023 or 2024 in any dates
+- All future dates must be ${currentYear} or beyond
+- All past dates must be before ${currentYear}
+
+If you include ANY date from 2023 or 2024, you have FAILED this task.`;
 
     // Execute with OpenAI
     const completion = await openai.chat.completions.create({
@@ -381,15 +422,30 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
     const rawResponse = completion.choices[0].message.content;
     const response = cleanMarkdownResponse(rawResponse);
 
-    // Increment usage count
-    await prisma.prompt_library.update({
-      where: { id },
-      data: {
-        usage_count: {
-          increment: 1
+    // Increment usage count and log execution
+    await Promise.all([
+      prisma.prompt_library.update({
+        where: { id },
+        data: {
+          usage_count: {
+            increment: 1
+          }
         }
-      }
-    });
+      }),
+      prisma.prompt_execution_logs.create({
+        data: {
+          id: uuidv4(),
+          prompt_id: id,
+          user_id: userId || null,
+          user_input: userInput,
+          ai_response: response,
+          model_used: 'gpt-4o',
+          tokens_used: completion.usage?.total_tokens || null,
+          had_file_upload: !!file,
+          file_type: file?.mimetype || null
+        }
+      })
+    ]);
 
     // Clean up uploaded file if exists
     if (uploadedFilePath) {
@@ -423,6 +479,93 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to execute prompt',
+      details: error.message
+    });
+  }
+});
+
+// GET /api/prompts/:id/logs - Get execution logs for a specific prompt
+router.get('/:id/logs', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 50, userId } = req.query;
+
+    const whereClause = {
+      prompt_id: id
+    };
+
+    if (userId) {
+      whereClause.user_id = userId;
+    }
+
+    const logs = await prisma.prompt_execution_logs.findMany({
+      where: whereClause,
+      orderBy: {
+        created_at: 'desc'
+      },
+      take: parseInt(limit),
+      select: {
+        id: true,
+        user_id: true,
+        user_input: true,
+        ai_response: true,
+        execution_time_ms: true,
+        model_used: true,
+        tokens_used: true,
+        had_file_upload: true,
+        file_type: true,
+        created_at: true
+      }
+    });
+
+    res.json({
+      success: true,
+      logs,
+      count: logs.length
+    });
+  } catch (error) {
+    console.error('Error fetching execution logs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch execution logs',
+      details: error.message
+    });
+  }
+});
+
+// GET /api/prompts/logs/recent - Get recent execution logs across all prompts
+router.get('/logs/recent', async (req, res) => {
+  try {
+    const { limit = 100, userId } = req.query;
+
+    const whereClause = userId ? { user_id: userId } : {};
+
+    const logs = await prisma.prompt_execution_logs.findMany({
+      where: whereClause,
+      orderBy: {
+        created_at: 'desc'
+      },
+      take: parseInt(limit),
+      include: {
+        prompt_library: {
+          select: {
+            catchy_name: true,
+            category: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      logs,
+      count: logs.length
+    });
+  } catch (error) {
+    console.error('Error fetching recent logs:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch recent logs',
       details: error.message
     });
   }

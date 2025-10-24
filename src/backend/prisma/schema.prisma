@@ -262,21 +262,41 @@ model user_question_responses {
 }
 
 model prompt_library {
-  id                    String                  @id
-  category              String                  @db.VarChar(100)
-  designation           String?                 @db.VarChar(100)
-  catchy_name           String?                 @db.VarChar(200)
-  prompt_type           String?                 @db.VarChar(200)
+  id                    String                     @id
+  category              String                     @db.VarChar(100)
+  designation           String?                    @db.VarChar(100)
+  catchy_name           String?                    @db.VarChar(200)
+  prompt_type           String?                    @db.VarChar(200)
   description           String
   refined_instructions  String
-  is_active             Boolean                 @default(true)
-  usage_count           Int                     @default(0)
-  created_at            DateTime                @default(now())
-  updated_at            DateTime                @updatedAt
+  is_active             Boolean                    @default(true)
+  usage_count           Int                        @default(0)
+  created_at            DateTime                   @default(now())
+  updated_at            DateTime                   @updatedAt
   user_prompt_favorites user_prompt_favorites[]
+  execution_logs        prompt_execution_logs[]
 
   @@index([category])
   @@index([is_active])
+}
+
+model prompt_execution_logs {
+  id                 String          @id
+  prompt_id          String
+  user_id            String?
+  user_input         String
+  ai_response        String
+  execution_time_ms  Int?
+  model_used         String?         @default("gpt-4o") @db.VarChar(50)
+  tokens_used        Int?
+  had_file_upload    Boolean         @default(false)
+  file_type          String?         @db.VarChar(100)
+  created_at         DateTime        @default(now())
+  prompt_library     prompt_library  @relation(fields: [prompt_id], references: [id], onDelete: Cascade)
+
+  @@index([prompt_id])
+  @@index([user_id])
+  @@index([created_at])
 }
 
 model user_prompt_favorites {

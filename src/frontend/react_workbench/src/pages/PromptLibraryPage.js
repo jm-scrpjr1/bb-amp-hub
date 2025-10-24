@@ -14,8 +14,12 @@ const convertMarkdownToHTML = (text) => {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     // Convert *italic* to <em>
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Convert line breaks to <br>
-    .replace(/\n/g, '<br/>');
+    // Clean up excessive newlines (more than 2 consecutive)
+    .replace(/\n{3,}/g, '\n\n')
+    // Convert line breaks to <br>, but NOT around HTML tags
+    .replace(/\n(?!<)/g, '<br/>')
+    // Remove <br/> immediately before HTML tags
+    .replace(/<br\/>\s*(<table|<\/table|<thead|<\/thead|<tbody|<\/tbody|<tr|<\/tr|<th|<\/th|<td|<\/td)/gi, '$1');
 };
 
 const PromptLibraryPage = () => {

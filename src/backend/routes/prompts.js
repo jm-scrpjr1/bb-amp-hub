@@ -17,13 +17,10 @@ function cleanMarkdownResponse(text) {
   if (!text) return text;
 
   // Replace **text** with just bold text (keep single asterisks for emphasis)
-  // But make headers more readable by converting ### to simple bold text
+  // But make headers more readable by converting all # headers to simple bold text
   let cleaned = text
-    // Convert ### headers to bold text without the ###
-    .replace(/^###\s+(.+)$/gm, '$1')
-    .replace(/^##\s+(.+)$/gm, '$1')
-    .replace(/^#\s+(.+)$/gm, '$1')
-    // Keep **bold** formatting as is (it renders nicely)
+    // Convert all markdown headers (####, ###, ##, #) to bold text without the hashes
+    .replace(/^#{1,6}\s+(.+)$/gm, '**$1**')
     // Remove excessive asterisks (more than 2)
     .replace(/\*{3,}/g, '**');
 

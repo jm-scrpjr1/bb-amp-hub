@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
-import { Search, Heart, Sparkles, ArrowLeft, Loader } from 'lucide-react';
+import { Search, Heart, Sparkles, ArrowLeft, Loader, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PromptLibraryPage = () => {

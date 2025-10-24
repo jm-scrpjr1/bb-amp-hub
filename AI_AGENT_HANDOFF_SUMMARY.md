@@ -422,7 +422,6 @@ cd src/backend && node -e "require('./lib/db').testConnection()"
 ## 📞 SUPPORT CONTACTS
 
 - **Git User:** jlope@boldbusiness.com
-- **GitHub User:** KaptanSupportTeam (kaptan@moatable.com)
 - **Repository:** https://github.com/jm-scrpjr1/bb-amp-hub.git
 
 ---

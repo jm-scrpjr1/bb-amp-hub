@@ -12,19 +12,69 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Function to clean up excessive markdown formatting
+// Function to clean up excessive markdown formatting and convert tables to HTML
 function cleanMarkdownResponse(text) {
   if (!text) return text;
 
-  // Replace **text** with just bold text (keep single asterisks for emphasis)
-  // But make headers more readable by converting all # headers to simple bold text
   let cleaned = text
     // Convert all markdown headers (####, ###, ##, #) to bold text without the hashes
     .replace(/^#{1,6}\s+(.+)$/gm, '**$1**')
     // Remove excessive asterisks (more than 2)
     .replace(/\*{3,}/g, '**');
 
+  // Convert markdown tables to HTML tables for proper rendering
+  cleaned = convertMarkdownTablesToHTML(cleaned);
+
   return cleaned;
+}
+
+// Function to convert markdown tables to HTML tables
+function convertMarkdownTablesToHTML(text) {
+  if (!text) return text;
+
+  // Regex to match markdown tables
+  const tableRegex = /(\|.+\|[\r\n]+\|[-:\s|]+\|[\r\n]+(?:\|.+\|[\r\n]*)+)/g;
+
+  return text.replace(tableRegex, (match) => {
+    const lines = match.trim().split(/[\r\n]+/);
+
+    if (lines.length < 3) return match; // Not a valid table
+
+    // Extract header row
+    const headerRow = lines[0].split('|').map(cell => cell.trim()).filter(cell => cell);
+
+    // Skip separator row (lines[1])
+
+    // Extract data rows
+    const dataRows = lines.slice(2).map(line =>
+      line.split('|').map(cell => cell.trim()).filter(cell => cell)
+    );
+
+    // Build HTML table
+    let html = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">\n';
+
+    // Header
+    html += '  <thead>\n    <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">\n';
+    headerRow.forEach(cell => {
+      html += `      <th style="padding: 12px; text-align: left; font-weight: 600; border: 1px solid #e5e7eb;">${cell}</th>\n`;
+    });
+    html += '    </tr>\n  </thead>\n';
+
+    // Body
+    html += '  <tbody>\n';
+    dataRows.forEach((row, idx) => {
+      const bgColor = idx % 2 === 0 ? '#ffffff' : '#f9fafb';
+      html += `    <tr style="background-color: ${bgColor};">\n`;
+      row.forEach(cell => {
+        html += `      <td style="padding: 12px; border: 1px solid #e5e7eb;">${cell}</td>\n`;
+      });
+      html += '    </tr>\n';
+    });
+    html += '  </tbody>\n';
+    html += '</table>';
+
+    return html;
+  });
 }
 
 // Configure multer for file uploads
@@ -244,12 +294,15 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
           const base64Image = imageBuffer.toString('base64');
 
           // Use GPT-4 Vision for image analysis
+          const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          const systemPrompt = `${prompt.refined_instructions}\n\nIMPORTANT: Today's date is ${currentDate}. Always use current dates (2025 and beyond) in your responses. Never use outdated dates like 2023 or 2024 unless specifically referencing historical events.`;
+
           const visionCompletion = await openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [
               {
                 role: 'system',
-                content: prompt.refined_instructions
+                content: systemPrompt
               },
               {
                 role: 'user',
@@ -303,13 +356,17 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
     // Combine user input with file content
     const fullUserInput = fileContent ? `${userInput}\n\nFile Content:\n${fileContent}` : userInput;
 
+    // Add current date context to system prompt
+    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const systemPrompt = `${prompt.refined_instructions}\n\nIMPORTANT: Today's date is ${currentDate}. Always use current dates (2025 and beyond) in your responses. Never use outdated dates like 2023 or 2024 unless specifically referencing historical events.`;
+
     // Execute with OpenAI
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: prompt.refined_instructions
+          content: systemPrompt
         },
         {
           role: 'user',

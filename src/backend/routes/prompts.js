@@ -12,6 +12,31 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+// Function to replace outdated dates (2023, 2024) with current dates (2025+)
+function replaceDatesWith2025(text) {
+  if (!text) return text;
+
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
+
+  // Replace year patterns: 2023 -> 2025, 2024 -> 2025
+  let updated = text
+    // Replace standalone years
+    .replace(/\b2023\b/g, currentYear.toString())
+    .replace(/\b2024\b/g, currentYear.toString())
+    // Replace date patterns like "November 1, 2023"
+    .replace(/(\w+\s+\d{1,2},\s*)2023/g, `$1${currentYear}`)
+    .replace(/(\w+\s+\d{1,2},\s*)2024/g, `$1${currentYear}`)
+    // Replace patterns like "2023-11-01" or "2023/11/01"
+    .replace(/2023([-\/])/g, `${currentYear}$1`)
+    .replace(/2024([-\/])/g, `${currentYear}$1`)
+    // Replace patterns like "Nov 2023" or "November 2023"
+    .replace(/(\w+\s+)2023/g, `$1${currentYear}`)
+    .replace(/(\w+\s+)2024/g, `$1${currentYear}`);
+
+  return updated;
+}
+
 // Function to clean up excessive markdown formatting and convert tables to HTML
 function cleanMarkdownResponse(text) {
   if (!text) return text;
@@ -24,6 +49,9 @@ function cleanMarkdownResponse(text) {
 
   // Convert markdown tables to HTML tables for proper rendering
   cleaned = convertMarkdownTablesToHTML(cleaned);
+
+  // Replace any 2023/2024 dates with current year (2025+)
+  cleaned = replaceDatesWith2025(cleaned);
 
   return cleaned;
 }

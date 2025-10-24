@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
-import { Search, Heart, Sparkles, ArrowLeft, Loader, X } from 'lucide-react';
+import { Search, Heart, Sparkles, ArrowLeft, Loader, X, Upload, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PromptLibraryPage = () => {
@@ -16,6 +16,8 @@ const PromptLibraryPage = () => {
   const [executing, setExecuting] = useState(false);
   const [result, setResult] = useState(null);
   const [favorites, setFavorites] = useState(new Set());
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const categoryColors = {
     'General Use': 'from-indigo-600 to-purple-600',
@@ -104,6 +106,44 @@ const PromptLibraryPage = () => {
     }
   };
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+      'text/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert('Invalid file type. Allowed: PDF, DOCX, DOC, TXT, CSV, XLS, XLSX, JPG, PNG, GIF');
+      return;
+    }
+
+    setUploadedFile(file);
+  };
+
+  const removeFile = () => {
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const executePrompt = async () => {
     if (!userInput.trim() || !selectedPrompt) return;
 
@@ -114,17 +154,20 @@ const PromptLibraryPage = () => {
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
 
+      // Use FormData if file is uploaded
+      const formData = new FormData();
+      formData.append('userInput', userInput);
+      formData.append('userId', user?.email || 'anonymous');
+
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/prompts/${selectedPrompt.id}/execute`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            userInput: userInput,
-            userId: user?.email || 'anonymous'
-          })
+          body: formData // Don't set Content-Type header, let browser set it with boundary
         }
       );
 
@@ -268,6 +311,10 @@ const PromptLibraryPage = () => {
                 setSelectedPrompt(null);
                 setUserInput('');
                 setResult(null);
+                setUploadedFile(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
               }}
             >
               <motion.div
@@ -292,6 +339,10 @@ const PromptLibraryPage = () => {
                       setSelectedPrompt(null);
                       setUserInput('');
                       setResult(null);
+                      setUploadedFile(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
                     }}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                   >
@@ -307,9 +358,47 @@ const PromptLibraryPage = () => {
                   <textarea
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
-                    placeholder="Enter your request here..."
+                    placeholder="Describe what you need help with..."
                     className="w-full h-32 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
                   />
+                </div>
+
+                {/* File Upload Section */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Attach File (Optional)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <Upload className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm text-gray-700">Choose File</span>
+                    </button>
+                    {uploadedFile && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <FileText className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm text-blue-700">{uploadedFile.name}</span>
+                        <button
+                          onClick={removeFile}
+                          className="ml-2 text-blue-600 hover:text-blue-800"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Supported: PDF, DOCX, DOC, TXT, CSV, XLS, XLSX, JPG, PNG, GIF (Max 10MB)
+                  </p>
                 </div>
 
                 {/* Execute Button */}

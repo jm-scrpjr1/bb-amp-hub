@@ -3,10 +3,42 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const { v4: uuidv4 } = require('uuid');
 const OpenAI = require('openai');
+const multer = require('multer');
+const fs = require('fs').promises;
+const path = require('path');
 
 const prisma = new PrismaClient();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
+});
+
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow common document types
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', // .doc
+      'text/plain',
+      'text/csv',
+      'application/vnd.ms-excel', // .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'image/jpeg',
+      'image/png',
+      'image/gif'
+    ];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: PDF, DOCX, DOC, TXT, CSV, XLS, XLSX, JPG, PNG, GIF'));
+    }
+  }
 });
 
 // GET /api/prompts - List all prompts with optional filters
@@ -153,11 +185,14 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST /api/prompts/:id/execute - Execute a prompt with user input
-router.post('/:id/execute', async (req, res) => {
+// POST /api/prompts/:id/execute - Execute a prompt with user input and optional file
+router.post('/:id/execute', upload.single('file'), async (req, res) => {
+  let uploadedFilePath = null;
+
   try {
     const { id } = req.params;
     const { userInput, userId } = req.body;
+    const file = req.file;
 
     if (!userInput) {
       return res.status(400).json({
@@ -178,6 +213,79 @@ router.post('/:id/execute', async (req, res) => {
       });
     }
 
+    let fileContent = '';
+
+    // If file is uploaded, read its content
+    if (file) {
+      uploadedFilePath = file.path;
+
+      try {
+        // Read file content based on type
+        if (file.mimetype === 'text/plain' || file.mimetype === 'text/csv') {
+          fileContent = await fs.readFile(file.path, 'utf-8');
+        } else if (file.mimetype.includes('image')) {
+          // For images, we'll use vision API
+          const imageBuffer = await fs.readFile(file.path);
+          const base64Image = imageBuffer.toString('base64');
+
+          // Use GPT-4 Vision for image analysis
+          const visionCompletion = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: prompt.refined_instructions
+              },
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: userInput },
+                  {
+                    type: 'image_url',
+                    image_url: {
+                      url: `data:${file.mimetype};base64,${base64Image}`
+                    }
+                  }
+                ]
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 2000
+          });
+
+          const response = visionCompletion.choices[0].message.content;
+
+          // Increment usage count
+          await prisma.prompt_library.update({
+            where: { id },
+            data: { usage_count: { increment: 1 } }
+          });
+
+          // Clean up uploaded file
+          await fs.unlink(file.path);
+
+          return res.json({
+            success: true,
+            response,
+            prompt: {
+              id: prompt.id,
+              catchy_name: prompt.catchy_name,
+              category: prompt.category
+            }
+          });
+        } else {
+          // For other file types, just mention the file was uploaded
+          fileContent = `\n\n[File uploaded: ${file.originalname} (${file.mimetype})]`;
+        }
+      } catch (fileError) {
+        console.error('Error reading file:', fileError);
+        fileContent = `\n\n[File uploaded but could not be read: ${file.originalname}]`;
+      }
+    }
+
+    // Combine user input with file content
+    const fullUserInput = fileContent ? `${userInput}\n\nFile Content:\n${fileContent}` : userInput;
+
     // Execute with OpenAI
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -188,7 +296,7 @@ router.post('/:id/execute', async (req, res) => {
         },
         {
           role: 'user',
-          content: userInput
+          content: fullUserInput
         }
       ],
       temperature: 0.7,
@@ -207,6 +315,15 @@ router.post('/:id/execute', async (req, res) => {
       }
     });
 
+    // Clean up uploaded file if exists
+    if (uploadedFilePath) {
+      try {
+        await fs.unlink(uploadedFilePath);
+      } catch (unlinkError) {
+        console.error('Error deleting uploaded file:', unlinkError);
+      }
+    }
+
     res.json({
       success: true,
       response,
@@ -218,6 +335,15 @@ router.post('/:id/execute', async (req, res) => {
     });
   } catch (error) {
     console.error('Error executing prompt:', error);
+
+    // Clean up uploaded file on error
+    if (uploadedFilePath) {
+      try {
+        await fs.unlink(uploadedFilePath);
+      } catch (unlinkError) {
+        console.error('Error deleting uploaded file:', unlinkError);
+      }
+    }
     res.status(500).json({
       success: false,
       error: 'Failed to execute prompt',

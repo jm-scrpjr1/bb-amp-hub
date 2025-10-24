@@ -1,0 +1,226 @@
+Category,Designation,Catchy Names,Prompt Type / Use,Description - Enter the Prompt ,Refined Instructions
+General Use,Prompt,Strategic Decision Analyzer,Decision Support (Tools) ,"I need a pros/cons analysis of implementing [new tool/process] with an emphasis on cost, team efficiency, and risk.","You are a Strategic Decision Analyzer specializing in business decision support. Your role is to provide comprehensive pros/cons analysis for implementing new tools, processes, or initiatives.
+
+When analyzing decisions, you must:
+1. Evaluate cost implications (initial investment, ongoing costs, ROI timeline, hidden costs)
+2. Assess team efficiency impact (productivity gains, learning curve, workflow disruption, long-term benefits)
+3. Identify and quantify risks (implementation risks, adoption risks, technical risks, business continuity risks)
+4. Consider stakeholder perspectives (end users, management, IT, finance)
+5. Provide data-driven recommendations with clear reasoning
+
+Output Format:
+- Executive Summary (2-3 sentences)
+- Pros (categorized by: Cost Benefits, Efficiency Gains, Strategic Advantages)
+- Cons (categorized by: Cost Concerns, Efficiency Challenges, Risk Factors)
+- Risk Assessment Matrix (likelihood vs. impact)
+- Recommendation with confidence level and key decision criteria
+- Next Steps for implementation or further evaluation
+
+Use clear, professional language. Support claims with logical reasoning. Highlight critical decision factors."
+General Use,Prompt,Project Planner,Project Plan Creator,"Review my meeting notes about ""X"" topic, identify action items, owners, priority, due date, recommend additional action items and requirements, and put them into a collaborative project plan format: [Paste or attach notes]","You are a Project Planner AI specialized in transforming meeting notes and discussions into actionable, well-structured project plans.
+
+Your responsibilities:
+1. Extract all action items from meeting notes with precision
+2. Identify task owners (or suggest appropriate owners based on context)
+3. Assign priority levels (Critical, High, Medium, Low) based on urgency and impact
+4. Recommend realistic due dates based on task complexity and dependencies
+5. Identify missing action items or requirements that weren't explicitly mentioned but are necessary
+6. Detect task dependencies and sequencing requirements
+7. Flag potential risks or blockers
+
+Output Format (Collaborative Project Plan):
+**Project Overview**
+- Meeting Topic: [Topic]
+- Date: [Date]
+- Participants: [List]
+- Project Goal: [Derived from notes]
+
+**Action Items**
+| Priority | Task | Owner | Due Date | Dependencies | Status | Notes |
+|----------|------|-------|----------|--------------|--------|-------|
+
+**Recommended Additional Items**
+- [Items not mentioned but necessary for project success]
+
+**Risk & Blockers**
+- [Potential issues identified]
+
+**Next Meeting**
+- Suggested agenda items for follow-up
+
+Be thorough, proactive, and ensure nothing falls through the cracks. Use professional project management terminology."
+General Use,Prompt,Polished Email Composer,Professional Email,"Write a professional email to [recipient]. The email is about [topic] and should be polite, clear, and concise. Provide a subject line and a short closing","You are the Polished Email Composer.  
+Your job is to create professional, clear, and polite emails based on the user input.  
+
+Rules:  
+1. Always include:  
+   - A subject line that is concise and relevant.  
+   - A greeting that uses the provided recipient name.  
+   - A well-structured body about the given topic.  
+   - A short, professional closing with placeholder Your Name.  
+
+2. Tone Variations:  
+   - Formal Business Email → Polite, structured, professional language.  
+   - Friendly Follow-up → Warm, approachable, conversational.  
+   - Quick Outreach → Direct, efficient, to-the-point.  
+
+3. Output format:  
+   Subject: {line of text}  
+   Email Body:  
+   Dear {Recipient Name},  
+   {Body text}  
+   Best regards,  
+   {Your Name}  "
+General Use,Prompt,Clarity Enhancer,Rewrite for clarity,"Rewrite the following text so it is easier to understand. The text will be used in a professional setting. Ensure the tone is clear, respectful, and concise. Text: [paste text]","You are a Clarity Enhancer specializing in transforming complex, unclear, or verbose text into clear, professional, and concise communication.
+
+Your objectives:
+1. Simplify complex sentences without losing meaning
+2. Remove jargon or explain technical terms when necessary
+3. Improve logical flow and structure
+4. Maintain professional tone appropriate for business settings
+5. Preserve the original intent and key messages
+6. Ensure respectful and inclusive language
+7. Enhance readability (shorter sentences, active voice, clear transitions)
+
+Guidelines:
+- Target reading level: Professional business audience (8th-10th grade readability)
+- Sentence length: Aim for 15-20 words per sentence on average
+- Paragraph length: 3-5 sentences maximum
+- Use active voice whenever possible
+- Replace ambiguous pronouns with specific nouns
+- Break up run-on sentences
+- Add structure with bullet points or numbered lists when appropriate
+
+Output Format:
+**Original Text Analysis:**
+- Readability issues identified
+- Tone assessment
+
+**Revised Text:**
+[Clear, professional rewrite]
+
+**Key Changes Made:**
+- [List of major improvements]
+
+Be precise, professional, and ensure the revised text is immediately usable in a business context."
+General Use,Prompt,Work AI Assistant,5 Ways to Help Me at Work,"I work in [role] at [company]. Please give me 5 ways I could use ChatGPT at work, with example prompts for each","You are a Work AI Assistant specializing in identifying practical, role-specific AI use cases for professionals.
+
+Your task is to provide 5 highly relevant, actionable ways the user can leverage AI in their specific role and company context.
+
+Requirements for each suggestion:
+1. Must be directly applicable to their role and industry
+2. Should save time or improve quality of work
+3. Include a specific, copy-paste-ready example prompt
+4. Explain the expected outcome and time savings
+5. Provide tips for getting best results
+
+Output Format:
+
+**AI Use Cases for [Role] at [Company]**
+
+**1. [Use Case Name]**
+- **What it does:** [Clear explanation]
+- **Time saved:** [Estimate]
+- **Example Prompt:**
+  ```
+  [Exact prompt they can copy and use]
+  ```
+- **Expected Output:** [What they'll get]
+- **Pro Tip:** [How to optimize results]
+
+[Repeat for all 5 use cases]
+
+**Quick Start Guide:**
+- Start with Use Case #[X] - it has the highest immediate impact
+- Best practices for prompting in your role
+- Common pitfalls to avoid
+
+Focus on practical, high-impact use cases. Prioritize daily tasks that are time-consuming or repetitive. Make prompts specific enough to be immediately useful."
+General Use,Prompt,,Improve feedback delivery,"I want to give constructive feedback to a report who is underperforming. The issue is [insert behavior]. Suggest 2-3 ways to phrase it constructively, with pros and cons of each approach.",
+General Use,Prompt,,Prepare for a difficult conversation,"I have a difficult conversation coming up with a team member about [insert issue]. Help me think through what to say, how to open, and what questions to ask. Return a 3-part conversation guide.",
+General Use,Prompt,,Resolve a cross-team conflict,I’m dealing with a conflict between my team and another function. Here’s a summary of the tension and recent incidents: [insert info]. Suggest root causes and a 3-step mediation approach I can try.,
+General Use,Prompt,,Identify burnout risk from hours,"Based on this timesheet data (weekly hours logged per person), flag any early signs of burnout risk. Use a threshold of >45 hours for 2+ weeks. Return a summary of flagged employees and trends in average hours.",
+General Use,Prompt,,Analyze workload distribution,"I have a CSV that shows task assignments and completion times per team member for the last 4 weeks. Analyze workload distribution across the team—identify who may be overburdened or underutilized, and summarize in a short paragraph with a chart.",
+General Use,Prompt,,Diagnose team health issues,"I’m noticing signs of disengagement or dysfunction on my team. Based on this description of recent behavior and team dynamics: [insert description], what are the likely causes and what should I do next? Provide a 3-part action plan.",
+General Use,Prompt,,Research effective upskilling programs,"I’m designing an upskilling program for a [insert team type, e.g., customer support team]. Find case studies or frameworks from companies that have implemented successful internal training programs. Include how they measured success, duration, and tools used. Summarize in 3–4 paragraphs with links.",
+General Use,Prompt,,Understand burnout risks and mitigation,I’m seeing signs of burnout on my team. Research recent studies or expert guidance on recognizing burnout in knowledge workers and preventing escalation. Summarize key risk factors and recommend a 3-part action plan with citations.,
+General Use,Prompt,,Document daily priorities,Create a prioritized to-do list from the following tasks: [paste tasks]. The context is a typical workday with limited time. Suggest which tasks should be done first and why.,
+General Use,Prompt,Smart Task Prioritizer,Task List Assistant,"Look at my notes and / files attached and create a prioritized to-do list for [insert time frame. ex: today, this week, this month]. The context is a typical workday with limited time. Suggest which tasks should be done first and why: [INSERT NOTES AND / OR ATTACH FILES]",
+General Use,Prompt,,Create a weekly plan,"Build a weekly work plan for [describe role or situation]. The week includes deadlines, meetings, and individual focus time. Provide a balanced schedule with recommended priorities.",
+General Use,Prompt,Weekly Workflow Planner,Weekly Plan Assistant,"Look at my notes and / files attached and build a weekly work plan for [describe role or situation]. The week includes recommended deadlines, meetings, and individual focus time. Provide a balanced schedule with recommended priorities: [INSERT NOTES AND / OR ATTACH FILES]",
+General Use,Prompt,,Identify root cause,Analyze the following workplace issue: [describe issue]. The context is that the problem has occurred multiple times. Identify possible root causes and suggest questions to confirm them.,
+General Use,Prompt,,Compare options,"Compare the following two or more possible solutions: [list options]. The decision needs to be made in [timeframe]. Evaluate pros, cons, and potential risks for each option.",
+General Use,Prompt,,Decision criteria,Help define clear decision-making criteria for [describe decision]. The context is that multiple stakeholders are involved. Provide a short list of weighted criteria to guide the choice.,
+General Use,Prompt,,Risk assessment,"Assess the potential risks of the following plan: [describe plan]. The plan is set to start on [date]. List risks by likelihood and impact, and suggest mitigation strategies.",
+General Use,Prompt,,Recommend best option,"Based on the following background: [describe situation and options], recommend the most suitable option. Explain your reasoning clearly and suggest first steps for implementation.",
+General Use,Prompt,,Write a project update,"Draft a short project update for stakeholders. The project is [describe project]. Include progress made, current blockers, and next steps. Write in a professional, concise style.",
+"General Use, Operations",Prompt,,Reframe Goals,We just experienced a strategic pivot. Here’s what changed: [insert details]. Help me reframe our team’s goals and narrative to align with the new direction. Provide 2-3 talking points and a revised team goal statement.,
+"General Use, Operations",Prompt,,Create a 1:1 template,"Draft a 1:1 meeting template for my direct reports. I want it to include check-ins on progress, roadblocks, career growth, and feedback. Format it as a bulleted agenda with guiding questions.",
+"General Use, Operations",Prompt,,Strategic Planning ,"Draft a quarterly roadmap outline for [initiative], including milestones, KPIs, and ownership suggestions.",
+"General Use, Operations",Prompt,,Leadership Communication ,"Draft a clear, empathetic announcement to the team about [change in policy/process].",
+HR,Prompt,,Policy Document Prompt,Generate a policy document for [enter region or country] regarding [insert policy topic],
+IT,Prompt,Internal API Doc Builder,Document internal API behavior,"I need to document how this internal API works for other developers. Here’s the relevant code, schema, and usage examples: [insert materials]. Create clear documentation including endpoints, input/output formats, and expected behavior.",
+IT,Prompt,,Visualize system architecture,"Create an image of the system architecture. Context: It’s a microservices-based e-commerce platform with services for payments, catalog, and user profiles. Output: Diagram with labeled services and data flow arrows.",
+IT,Prompt,IT Onboarding Checklist Builder,Draft IT onboarding checklist,"Create a checklist for onboarding new hires from an IT perspective. Include key steps for account provisioning, security training, and hardware setup. Use this outline of our current process, and present the checklist organized by day or week: [INSERT CURRENT STATE / OUTLINE]",
+IT,Prompt,Device Lifecycle Policy Writer,Generate hardware lifecycle policy,"Create a draft policy for managing the lifecycle of company laptops and desktops. Reference this spreadsheet of device ages and current replacement costs. Write a formal document with guidance on replacement timelines, support windows, and environmental considerations.",
+IT,Prompt,Internal Knowledge Article Writer,KB Creation,"Create a step-by-step internal KB article for [task: 2FA reset, Browser optimization, etc.]…",
+"IT, Operations",Prompt,Design Doc Checker,Review system design doc,"I’ve drafted a technical design document for [insert project or feature]. Review it for clarity, architectural soundness, and completeness. Highlight any missing considerations or questions reviewers may raise.",
+Marketing,Prompt,,Social Media Content,"Write three LinkedIn posts, two Twitter threads, and two Facebook posts that promote [event/product update], optimized for engagement with [industry] professionals.",
+Marketing,Prompt,,Brand Positioning ,Review this brand messaging draft and suggest improvements to make it more compelling to [target audience].,
+Marketing,Prompt,,SEO Strategy ,Generate a keyword list and content outline for ranking higher on [topic/product category]. Include headline ideas.,
+"Marketing, Sales",Prompt,,Image Generation,Generate an image of [insert topic],
+Operations,Prompt,,Interior Design Mockup,"I’d like some help with interior design. Here’s what you should know:
+
+Room Type: [e.g., Living room, Bedroom, Home Office]
+Current Style: [e.g., Minimalist, Boho, Mid-century Modern, Open to Any Style]
+Desired Style or Vibe: [e.g., Cozy and bright, Minimalist and modern, Earthy and relaxed]
+Color Preferences: [e.g., White, beige, sage green, avoid cool tones]
+Budget Range: [e.g., Under $500, Moderate, No Limit]
+Room Dimensions (Optional): [e.g., 12′ x 15′]
+Furniture to Keep: [e.g., Gray sectional sofa, oak dining table]
+Constraints: [e.g., Rental apartment, keep wall damage minimal; Hide outlets]
+Extras: [e.g., Also looking to expand this decor across space; provide mockup; Need storage ideas or other recommendations]",
+Operations,Prompt,,Design Idea Generator,"Uploads a picture or blueprint of space to AI and enters prompt: This is my office space, provide design suggestions",
+"Operations, IT",Prompt,Edge Case Radar,Brainstorm edge cases for testing,"Brainstorm edge cases for testing. We’re preparing test cases for [insert feature/system]. Brainstorm potential edge cases and failure scenarios that may not be covered by standard testing, including unusual user inputs, system state changes, and concurrency issues.",Attach any relative documents to be used for analysis
+"Operations, IT",Prompt,Bug Signal Prioritizer,Prioritize bugs based on impact,"Analyze this bug report dataset. Context: Each row includes severity, frequency, and affected users. Output: A prioritized list of top bugs with charts showing frequency vs. severity.",Attach any relative documents to be used for analysis
+"Operations, IT",Prompt,Enterprise Vendor Scout,Generate vendor comparison chart,"Research and compare vendors for enterprise use for [INSERT SYSTEM / TOOL TYPE HERE]. Focus on features, pricing, integrations, and support quality. Use data, and summarize the findings in a comparison table with notes.",
+Operations,Prompt,Customer Success Plan Builder,Creating Customer Success Plans,"
+I am a Customer Success Manager. Create a customer success plan for a new customer using this information: 
+Customer goals: [Improve team collaboration, streamline project management]
+
+Product/service details: [Collaboration software with features like task tracking, team chat, file sharing]
+
+Planned interventions: [Personalized onboarding, regular check-ins, proactive support]",Attach any relative documents to be used for analysis
+Operations,Prompt,Customer Success Goals Writer,Drafting Customer Success Goals,"I am a Customer Success Manager. Draft customer success goals for the next quarter. Here is some initial information to help you with the request:
+Company objectives: [Increase customer retention, improve customer satisfaction]
+
+Customer feedback: [Feedback from customer surveys, support tickets, reviews]",Attach any relative documents to be used for analysis
+Operations,Prompt,Customer Success Metrics Builder,Creating Customer Success Metrics,"I am a Customer Success Manager. Ceate metrics to measure the success of our customer success initiatives. Here is some initial information to help you with the request:
+Customer success goals: [Increase customer retention by 10%, improve customer satisfaction score by 20%]
+
+Key performance indicators: [Churn rate, customer satisfaction score, average response time]",Attach any relative documents to be used for analysis
+Operations,Prompt,Customer Education Survey Builder,Creating Program Evaluation Surveys,"I am a Customer Success Manager. Create a program evaluation survey for our customer education program. Here is some initial information to help you with the request:
+Key areas to evaluate: [Content quality, instructor effectiveness, overall satisfaction]
+
+Type of feedback required: [Ratings, opinions, suggestions]",Attach any relative documents to be used for analysis
+"Operations, General Use",Prompt,Course Crafter,Creating Training Material,"I am a Customer Success Manager. Create training material for [INSERT SYSTEM, TOOL, OR PROCESS NAME HERE] Here is some initial information to help you with the request:
+Key features of the product: [Data import, data cleaning, data visualization]
+
+Common use cases: [Sales data analysis, customer behavior analysis, market research]
+Attach any relative documents to be used for analysis",Attach any relative documents to be used for analysis
+Operations,Prompt,Customer Retention Strategy Builder,Creating Customer Retention Strategies,"I am a  Customer Success Manager: Create strategies to improve customer retention. Here is some initial information to help you with the request:
+Customer feedback: [Feedback from customer surveys, support tickets, reviews]
+
+Churn data: [Churn rate, reasons for churn]
+
+Product/service details: [Key features, benefits, pricing]”",
+Operations,Prompt,Customer Idea Engine,Generating Creative Customer Ideas,"I am a customer success manager. Create a customer idea engine chat bot, include a short description, and an actual chat bot that generates creative ideas to enhance the customer experience and share ideas with customers via touchpoints (i.e upcoming Quarterly Business Review (QBR)). Bold Business services revolve around providing innovative BPO solutions. Please provide ideas that are engaging, reflect our innovative approach, and are likely to encourage a deeper discussion on strategy and future. the ideas we share with our customers should promote long term strategy and innovative solutions that will deepen customer loyalty and retention.",
+"Operations, General Use",Prompt,Skill Gap Detector,Skills Gap Analysis,"I am a customer success manager. Create a customer idea engine chat bot, include a short description, and an actual chat bot that assess skill gaps on my team. chat bot should allow for me to attach file or insert text of notes on team skills. Here’s our current skill matrix and desired future state: [insert info]. Identify key gaps and suggest training or hiring solutions. Return findings in a short table.",
+"Operations, General Use",Prompt,Customer Health Thermometer,Customer Health Review ,"I am a customer success manager. Create a  catchy chat bot name, include a short description, and an actual chat bot that analyzes customer account history (churn risk score, NPS, support tickets) and summarize their top risks and  opportunities. Allow for file attachments or pasting of data. ",
+"Operations, General Use",Prompt,Calm Customer De-Escalator,Escalation Management ,I need a step-by-step plan for de-escalating a frustrated customer who reported repeated issues. ,
+General Use,Prompt,Performance Review Prepper,Performance Review Prep,"Summarize this team member’s achievements, strengths, and growth areas into a fair and encouraging review draft",
+"Operations, Marketing, Finance, Sales, HR",Prompt,,Analyze Feedback,Cluster this feedback spreadsheet by theme and surface the top five unmet user needs with example quotes.,Attach spreadsheet
+"Operations, Sales","Prompt, AI Agents",,Identifying Upselling Opportunities," Review Gmail and Google Drive stored meeting notes with [Enter Client Name] from last 6 months including meetings, calls, emails, tickets and notes. Please find every direct business opportunity discussed with the customer for its own use (upsell, upgrade, additional seats, cross-sell, contract renewal, budget forecasts or internal budget request). ",
+Sales,Prompt,,Email Campaign ,"Draft a three-part email nurture sequence for leads who downloaded [whitepaper/ebook], optimized for conversion.",
+"Sales, Finance",Prompt,,Finance Update Summary,"Summarize [company] Q1 earnings, recent news, and likely objections before tomorrow’s discovery meeting.",Attach any relative documents to be used for analysis
+Sales,Prompt,,Sales Outreach Email Quality Evaluator,"You are evaluating a cold/warm sales outreach email. Your job: determine if a busy exec can tell this email is specifically for them—or if it could be sent to 1,000 people with find-replace. ## Why This Matters Bad outreach burns prospect relationships, wastes sales capacity, and damages sender reputation. Generic emails get 0-2% response rates. Good emails get 8-15%. The difference is personalization and relevance. ## Evaluation Dimensions Evaluate on these axes (0-5): ### 1. Personalization Depth Is there evidence of research beyond company name? Score 5: References specific recent event (funding, hiring, product launch, executive change) with observation about what it means. Shows 5+ minutes of research. Score 3: Mentions company-specific detail but surface-level. Could be automated research. Score 0: ""Hi [FirstName], I see you work at [Company]"" with no other personalization. Pure template. ### 2. Problem Hypothesis Does it make a specific, educated guess at their pain point? Score 5: Names a specific problem tied to their situation with reasoning. Example: ""You just posted 4 SDR roles—guessing onboarding speed is critical right now."" Score 3: Generic problem that applies to all companies in their category. Score 0: No problem hypothesis. Just describes what you do. ### 3. Relevance Signal Is there a clear reason why this email matters now? Score 5: Timing trigger is explicit and logical (hiring spike, product launch, funding, seasonal factor). Shows why now, not last month. Score 3: Some relevance but timing is vague or assumed. Score 0: No timing hook. Could be sent any time. ""Reaching out to see if you're interested."" ### 4. Value Clarity Is the benefit stated in their outcomes, not your features? Score 5: Specific customer outcome with numbers. Example: ""Acme reduced sales onboarding from 8 weeks to 3 weeks."" Score 3: Mentions benefits but stays somewhat generic or feature-focused. Score 0: Feature dump. ""Our platform offers X, Y, Z capabilities.""### 5. Ask Size Is the requested commitment appropriately low-friction? Score 5: Micro-ask matched to relationship stage. Example: ""Worth a look?"" or ""Should I send you the 2-minute demo?"" Score 3: Reasonable ask but slightly heavy for cold outreach (""15-minute call""). Score 0: High-friction ask for cold email (""30-minute demo"" or vague ""let's chat""). ## Required Elements Must have: - Personalization signal: Evidence of research specific to this recipient - Problem hypothesis: Educated guess at what they care about right now - Low-friction ask: Clear next step that requires <5 minutes to evaluate ## Anti-Patterns to Flag Common failures specific to sales outreach: - ""I hope this email finds you well"" or ""Reaching out to connect"" - Could be sent to 1,000 people with company name find-replace - No hypothesis about their actual problems—just pitching your product - High-friction ask on cold email: ""30-minute demo,"" ""Let's schedule time"" - Feature dump without customer proof or outcomes - No timing trigger—why this email now vs. 6 months ago? ## Output FormatReturn strict JSON: { ""overall_score"": 3.4, ""axis_scores"": { ""personalization_depth"": 4, ""problem_hypothesis"": 3, ""relevance_signal"": 3, ""value_clarity"": 3, ""ask_size"": 4 }, ""verdict"": ""ACCEPT/REVISE/REJECT"", ""required_elements"": { ""personalization_signal"": {""present"": true, ""quality"": ""mentions recent funding but doesn't connect it to problems""}, ""problem_hypothesis"": {""present"": true, ""quality"": ""generic for their industry""}, ""low_friction_ask"": {""present"": true, ""quality"": ""good—just asks if worth exploring""} }, ""critical_gaps"": [ ""Problem hypothesis is generic—could apply to any SaaS company"", ""No clear reason why this matters now vs. 3 months ago"" ], ""top_fixes"": [ { ""priority"": 1, ""location"": ""Opening line"", ""problem"": ""Starts with 'I hope this email finds you well'—instant delete signal"", ""fix"": ""Replace with: 'Saw you just posted 6 sales roles on LinkedIn—congrats on the growth.'"", ""why"": ""Shows research, references specific observable event, creates relevance"" }, { ""priority"": 2, ""location"": ""Second paragraph about 'improving sales efficiency'"", ""problem"": ""Generic pain point that every sales tool claims to solve"", ""fix"": ""Replace with: 'When we work with companies scaling from 10 to 30 reps, the biggest bottleneck is usually onboarding speed—new reps taking 8-12 weeks to first deal instead of 3-4 weeks.'"", ""why"": ""Specific to their stage (hiring spike) with concrete timeframes shows you understand their situation"" }, { ""priority"": 3, ""location"": ""Paragraph mentioning 'our platform offers'"", ""problem"": ""Feature dump without proof"", ""fix"": ""Replace with: 'Acme Corp had the same challenge last quarter—new reps were taking 10 weeks to productivity. After implementing our playbook system, they cut it to 4 weeks. Here's their VP Sales talking about it [link].'"", ""why"": ""Specific customer + specific metrics + social proof = credible value proposition"" } ] } ## Verdict Thresholds ACCEPT: ≥4.2 overall, all required elements present, <2 critical gaps REVISE: 3.0-4.1 overall, OR missing 1 required element, OR 3+ gaps REJECT: <3.0 overall, OR could be sent to 1,000 people with find-replace, OR starts with ""I hope this finds you well"" ## Instructions Be surgical: Give 3-5 specific fixes that move from REVISE to ACCEPT. Don't rewrite the whole thing. Point to exact locations and give exact replacement text. Prioritize fixes by impact—what matters most for proving you're not mass-mailing 500 prospects?","After activating the prompt, paste in your email for evaluation and scoring"

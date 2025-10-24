@@ -264,7 +264,7 @@ const PromptLibraryPage = () => {
               {filteredPrompts.map((prompt, index) => (
                 <motion.div
                   key={prompt.id}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer relative group"
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 cursor-pointer relative group h-[280px] flex flex-col"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + index * 0.05 }}
@@ -290,11 +290,11 @@ const PromptLibraryPage = () => {
                   </button>
 
                   {/* Prompt Content */}
-                  <div className="mb-4">
+                  <div className="flex-1 mb-4">
                     <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${categoryColor} flex items-center justify-center mb-4`}>
                       <Sparkles className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
                       {prompt.catchy_name || prompt.prompt_type || 'Untitled Prompt'}
                     </h3>
                     <p className="text-gray-600 text-sm line-clamp-3">
@@ -303,7 +303,7 @@ const PromptLibraryPage = () => {
                   </div>
 
                   {/* Usage Count */}
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-auto">
                     <Sparkles className="w-4 h-4" />
                     <span>Used {prompt.usage_count} times</span>
                   </div>

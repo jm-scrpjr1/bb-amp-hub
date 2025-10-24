@@ -5,6 +5,19 @@ import { ScrollEffects } from '../components/effects';
 import { Search, Heart, Sparkles, ArrowLeft, Loader, X, Upload, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Simple markdown to HTML converter for basic formatting
+const convertMarkdownToHTML = (text) => {
+  if (!text) return '';
+
+  return text
+    // Convert **bold** to <strong>
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Convert *italic* to <em>
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Convert line breaks to <br>
+    .replace(/\n/g, '<br/>');
+};
+
 const PromptLibraryPage = () => {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -435,9 +448,10 @@ const PromptLibraryPage = () => {
                       <Sparkles className="w-5 h-5 text-purple-600" />
                       ARIA's Response
                     </h3>
-                    <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                      {result}
-                    </div>
+                    <div
+                      className="prose prose-sm max-w-none text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(result) }}
+                    />
                   </motion.div>
                 )}
               </motion.div>

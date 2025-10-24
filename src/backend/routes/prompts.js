@@ -53,6 +53,9 @@ function cleanMarkdownResponse(text) {
   // Replace any 2023/2024 dates with current year (2025+)
   cleaned = replaceDatesWith2025(cleaned);
 
+  // Clean up excessive newlines (max 2 consecutive newlines)
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
   return cleaned;
 }
 
@@ -60,8 +63,8 @@ function cleanMarkdownResponse(text) {
 function convertMarkdownTablesToHTML(text) {
   if (!text) return text;
 
-  // Regex to match markdown tables
-  const tableRegex = /(\|.+\|[\r\n]+\|[-:\s|]+\|[\r\n]+(?:\|.+\|[\r\n]*)+)/g;
+  // Regex to match markdown tables (including preceding newlines)
+  const tableRegex = /([\r\n]*\|.+\|[\r\n]+\|[-:\s|]+\|[\r\n]+(?:\|.+\|[\r\n]*)+)/g;
 
   return text.replace(tableRegex, (match) => {
     const lines = match.trim().split(/[\r\n]+/);
@@ -78,8 +81,8 @@ function convertMarkdownTablesToHTML(text) {
       line.split('|').map(cell => cell.trim()).filter(cell => cell)
     );
 
-    // Build HTML table
-    let html = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">\n';
+    // Build HTML table with minimal spacing
+    let html = '\n<table style="width: 100%; border-collapse: collapse; margin: 8px 0 12px 0;">\n';
 
     // Header
     html += '  <thead>\n    <tr style="background-color: #f3f4f6; border-bottom: 2px solid #e5e7eb;">\n';
@@ -99,7 +102,7 @@ function convertMarkdownTablesToHTML(text) {
       html += '    </tr>\n';
     });
     html += '  </tbody>\n';
-    html += '</table>';
+    html += '</table>\n';
 
     return html;
   });

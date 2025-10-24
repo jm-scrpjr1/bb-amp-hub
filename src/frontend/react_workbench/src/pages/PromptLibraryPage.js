@@ -449,7 +449,7 @@ const PromptLibraryPage = () => {
                       ARIA's Response
                     </h3>
                     <div
-                      className="prose prose-sm max-w-none text-gray-700"
+                      className="prose prose-sm max-w-none text-gray-700 [&_table]:my-3 [&_table]:mt-2"
                       dangerouslySetInnerHTML={{ __html: convertMarkdownToHTML(result) }}
                     />
                   </motion.div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
@@ -9,10 +9,12 @@ import AnimatedRobot from '../components/ui/AnimatedRobot';
 const categories = [
   { id: 'all', name: 'All', active: true },
   { id: 'favorites', name: 'Favorites', active: false },
+  { id: 'general use', name: 'General Use', active: false },
   { id: 'sales', name: 'Sales', active: false },
   { id: 'finance', name: 'Finance', active: false },
   { id: 'human resources', name: 'Human Resources', active: false },
   { id: 'marketing', name: 'Marketing', active: false },
+  { id: 'operations', name: 'Operations', active: false },
   { id: 'coding', name: 'Coding', active: false },
   { id: 'it', name: 'IT', active: false },
   { id: 'recruiting', name: 'Recruiting', active: false },
@@ -79,6 +81,23 @@ const getAnimationVariants = (animation) => {
 const agents = [
   {
     id: 1,
+    name: 'General Use',
+    description: 'Versatile AI prompts for everyday work tasks and productivity',
+    image: '/images/AI AGENT 4.png',
+    bgColor: 'bg-indigo-500',
+    category: 'General Use',
+    animation: 'float',
+    liked: false,
+    wittyMessages: [
+      "Your all-purpose AI assistant! 🎯",
+      "Ready to tackle any task! ✨",
+      "Let's boost your productivity! 🚀",
+      "I'm here to help with anything! 💡",
+      "Versatility is my superpower! ⚡"
+    ]
+  },
+  {
+    id: 2,
     name: 'Sales',
     description: 'Boost your sales performance with AI-powered insights',
     image: '/images/PROMPT 3.png',
@@ -95,7 +114,7 @@ const agents = [
     ]
   },
   {
-    id: 2,
+    id: 3,
     name: 'Marketing',
     description: 'Create compelling campaigns and marketing strategies',
     image: '/images/AUTOMATION 2.png',
@@ -112,7 +131,7 @@ const agents = [
     ]
   },
   {
-    id: 3,
+    id: 4,
     name: 'Finance',
     description: 'Optimize your financial processes and analysis',
     image: '/images/PROMPT 2.png',
@@ -129,7 +148,24 @@ const agents = [
     ]
   },
   {
-    id: 4,
+    id: 5,
+    name: 'Operations',
+    description: 'Streamline operations and customer success workflows',
+    image: '/images/AUTOMATION 4.png',
+    bgColor: 'bg-orange-500',
+    category: 'Operations',
+    animation: 'circle',
+    liked: false,
+    wittyMessages: [
+      "Operations excellence starts here! ⚙️",
+      "Let's optimize your workflows! 🔄",
+      "Ready to streamline processes? 📋",
+      "Efficiency is my middle name! ⚡",
+      "Making operations smooth as silk! ✨"
+    ]
+  },
+  {
+    id: 6,
     name: 'HR',
     description: 'Streamline HR processes and employee management',
     image: '/images/PROMPT 1.png',
@@ -146,7 +182,7 @@ const agents = [
     ]
   },
   {
-    id: 5,
+    id: 7,
     name: 'IT',
     description: 'Enhance your IT operations and support',
     image: '/images/PROMPT 4.png',
@@ -163,7 +199,7 @@ const agents = [
     ]
   },
   {
-    id: 6,
+    id: 8,
     name: 'Coding',
     description: 'Accelerate your development with AI assistance',
     image: '/images/AI TRAINING 3.png',
@@ -180,7 +216,7 @@ const agents = [
     ]
   },
   {
-    id: 7,
+    id: 9,
     name: 'Recruiting',
     description: 'Find and attract top talent with AI-powered recruiting',
     image: '/images/AI TRAINING 1.png',
@@ -205,6 +241,36 @@ const PromptTutorPage = () => {
   const [likedAgents, setLikedAgents] = useState(new Set());
   const [hoveredAgent, setHoveredAgent] = useState(null);
   const [currentMessages, setCurrentMessages] = useState({});
+  const [promptCounts, setPromptCounts] = useState({});
+
+  // Fetch prompt counts on mount
+  useEffect(() => {
+    const fetchPromptCounts = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/prompts/categories`,
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        const data = await response.json();
+        if (data.success) {
+          const counts = {};
+          data.categories.forEach(cat => {
+            counts[cat.name] = cat.count;
+          });
+          setPromptCounts(counts);
+        }
+      } catch (error) {
+        console.error('Error fetching prompt counts:', error);
+      }
+    };
+
+    fetchPromptCounts();
+  }, []);
 
   const getRandomMessage = (messages) => {
     return messages[Math.floor(Math.random() * messages.length)];
@@ -223,11 +289,13 @@ const PromptTutorPage = () => {
   };
 
   const handleAgentClick = (agent) => {
-    // Navigate to Recruiting Prompts page if it's the Recruiting agent
+    // Navigate to Recruiting Prompts page if it's the Recruiting agent (special case)
     if (agent.category === 'Recruiting') {
       navigate('/recruiting-prompts');
+    } else {
+      // Navigate to generic Prompt Library page for all other categories
+      navigate(`/prompts/${encodeURIComponent(agent.category)}`);
     }
-    // Add other navigation logic here for other agents if needed
   };
 
   const toggleLike = (agentId) => {
@@ -362,6 +430,17 @@ const PromptTutorPage = () => {
                     <p className="text-gray-600 text-sm mb-4">
                       {agent.description}
                     </p>
+
+                    {/* Prompt Count Badge */}
+                    {promptCounts[agent.category] !== undefined && (
+                      <div className="flex items-center justify-center gap-2 mt-3">
+                        <div className={`px-3 py-1 rounded-full ${agent.bgColor} bg-opacity-10 border border-gray-200`}>
+                          <span className="text-sm font-semibold text-gray-700">
+                            {promptCounts[agent.category]} {promptCounts[agent.category] === 1 ? 'Prompt' : 'Prompts'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Color Bar at Bottom */}

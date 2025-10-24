@@ -21,6 +21,7 @@ import AIAgentsPage from './pages/AIAgentsPage';
 import AIAssessmentsPage from './pages/AIAssessmentsPage';
 import AutomationsPage from './pages/AutomationsPage';
 import PromptTutorPage from './pages/PromptTutorPage';
+import PromptLibraryPage from './pages/PromptLibraryPage';
 import RecruitingPromptsPage from './pages/RecruitingPromptsPage';
 import TrainingsPage from './pages/TrainingsPage';
 import ResourcesPage from './pages/ResourcesPage';
@@ -130,6 +131,18 @@ function App() {
             <Route path="/prompt-tutor" element={
               <ProtectedRoute>
                 <PromptTutorPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/prompts" element={
+              <ProtectedRoute>
+                <PromptTutorPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/prompts/:category" element={
+              <ProtectedRoute>
+                <PromptLibraryPage />
               </ProtectedRoute>
             } />
 

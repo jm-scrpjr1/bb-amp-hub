@@ -261,6 +261,36 @@ model user_question_responses {
   @@index([session_id], map: "idx_user_question_responses_session_id")
 }
 
+model prompt_library {
+  id                    String                  @id
+  category              String                  @db.VarChar(100)
+  designation           String?                 @db.VarChar(100)
+  catchy_name           String?                 @db.VarChar(200)
+  prompt_type           String?                 @db.VarChar(200)
+  description           String
+  refined_instructions  String
+  is_active             Boolean                 @default(true)
+  usage_count           Int                     @default(0)
+  created_at            DateTime                @default(now())
+  updated_at            DateTime                @updatedAt
+  user_prompt_favorites user_prompt_favorites[]
+
+  @@index([category])
+  @@index([is_active])
+}
+
+model user_prompt_favorites {
+  id             String         @id
+  user_id        String
+  prompt_id      String
+  created_at     DateTime       @default(now())
+  prompt_library prompt_library @relation(fields: [prompt_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, prompt_id])
+  @@index([user_id])
+  @@index([prompt_id])
+}
+
 model users {
   id                               String              @id
   email                            String              @unique

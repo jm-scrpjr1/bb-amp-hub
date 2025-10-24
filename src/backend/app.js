@@ -1760,6 +1760,10 @@ app.get('/api/assessment/session/:sessionId', authenticateUser, async (req, res)
   }
 });
 
+// Prompt Library API
+const promptsRouter = require('./routes/prompts');
+app.use('/api/prompts', promptsRouter);
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
   console.log(`🌟 Backend running on port ${PORT}`);

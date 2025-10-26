@@ -144,6 +144,8 @@ const ResourcesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategoryForModal, setSelectedCategoryForModal] = useState(null);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   // Load CSV data on component mount
   useEffect(() => {
@@ -179,6 +181,16 @@ const ResourcesPage = () => {
     setSelectedDocument(null);
   };
 
+  const openCategoryModal = (category) => {
+    setSelectedCategoryForModal(category);
+    setIsCategoryModalOpen(true);
+  };
+
+  const closeCategoryModal = () => {
+    setIsCategoryModalOpen(false);
+    setSelectedCategoryForModal(null);
+  };
+
   // Favorites management
   const toggleFavorite = (docId) => {
     const newFavorites = new Set(favorites);
@@ -194,8 +206,12 @@ const ResourcesPage = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape' && isModalOpen) {
-        closeDocumentModal();
+      if (event.key === 'Escape') {
+        if (isModalOpen) {
+          closeDocumentModal();
+        } else if (isCategoryModalOpen) {
+          closeCategoryModal();
+        }
       }
     };
 
@@ -203,7 +219,7 @@ const ResourcesPage = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, isCategoryModalOpen]);
 
   const filteredCategories = categories.filter(category => {
     const matchesSearch = searchTerm === '' ||
@@ -505,7 +521,10 @@ const ResourcesPage = () => {
 
                     {(category.filteredDocuments || category.documents).length > 3 && (
                       <div className="text-center pt-2">
-                        <button className={`text-sm ${colorClasses.text} hover:underline font-medium`}>
+                        <button
+                          onClick={() => openCategoryModal(category)}
+                          className={`text-sm ${colorClasses.text} hover:underline font-medium`}
+                        >
                           View {(category.filteredDocuments || category.documents).length - 3} more documents
                         </button>
                       </div>
@@ -560,6 +579,117 @@ const ResourcesPage = () => {
           onToggleFavorite={toggleFavorite}
           isFavorite={selectedDocument ? favorites.has(selectedDocument.id) : false}
         />
+
+        {/* Category Documents Modal */}
+        <AnimatePresence>
+          {isCategoryModalOpen && selectedCategoryForModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+              onClick={closeCategoryModal}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-3 ${getColorClasses(selectedCategoryForModal.color).bg} rounded-xl`}>
+                      {React.createElement(selectedCategoryForModal.icon, { className: 'w-6 h-6 text-white' })}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {selectedCategoryForModal.name}
+                      </h2>
+                      <p className="text-sm text-gray-500">
+                        {(selectedCategoryForModal.filteredDocuments || selectedCategoryForModal.documents).length} document{(selectedCategoryForModal.filteredDocuments || selectedCategoryForModal.documents).length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={closeCategoryModal}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6 text-gray-600" />
+                  </button>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6 space-y-3">
+                  {(selectedCategoryForModal.filteredDocuments || selectedCategoryForModal.documents).map((doc, docIndex) => {
+                    const colorClasses = getColorClasses(selectedCategoryForModal.color);
+                    return (
+                      <div
+                        key={doc.id || docIndex}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <div className="text-sm font-medium text-gray-900 truncate">
+                              {doc.name}
+                            </div>
+                            {favorites.has(doc.id) && (
+                              <Star className="w-4 h-4 text-yellow-500 fill-current flex-shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {doc.country === 'All Countries' ? 'Global' : doc.country} • {doc.owner || 'No owner'}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-3">
+                          <button
+                            onClick={() => toggleFavorite(doc.id)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              favorites.has(doc.id)
+                                ? 'text-yellow-500 hover:bg-yellow-100'
+                                : 'text-gray-400 hover:bg-gray-200'
+                            }`}
+                            title={favorites.has(doc.id) ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            <Star className={`w-4 h-4 ${favorites.has(doc.id) ? 'fill-current' : ''}`} />
+                          </button>
+                          {doc.link && (
+                            <button
+                              onClick={() => {
+                                openDocumentModal({...doc, category: selectedCategoryForModal.name});
+                                closeCategoryModal();
+                              }}
+                              className={`p-2 ${colorClasses.text} hover:bg-gray-200 rounded-lg transition-colors`}
+                              title="View document"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          )}
+                          {doc.link ? (
+                            <a
+                              href={doc.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`p-2 ${colorClasses.text} hover:bg-gray-200 rounded-lg transition-colors`}
+                              title="Open in new tab"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          ) : (
+                            <div className="p-2 text-gray-400 rounded-lg" title="No link available">
+                              <X className="w-4 h-4" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MainLayout>
   );

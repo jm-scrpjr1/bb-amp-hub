@@ -104,8 +104,7 @@ const EditUserModal = ({ user, onClose, onSave, viewMode = false }) => {
 
       // Add user to new groups
       for (const groupId of addedGroups) {
-        await adminService.addGroupMember(groupId, {
-          userId: user.id,
+        await adminService.addGroupMember(groupId, user.id, {
           role: 'MEMBER'
         });
       }

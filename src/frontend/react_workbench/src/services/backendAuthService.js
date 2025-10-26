@@ -3,7 +3,11 @@ import environmentConfig from '../config/environment.js';
 class BackendAuthService {
   constructor() {
     this.apiUrl = environmentConfig.apiUrl;
-    this.token = localStorage.getItem('auth_token');
+  }
+
+  getToken() {
+    // Always get fresh token from localStorage
+    return localStorage.getItem('auth_token');
   }
 
   async authenticateWithGoogle(googleCredential) {
@@ -49,8 +53,7 @@ class BackendAuthService {
       console.log('Backend auth result:', authResult);
 
       // Store the backend token
-      this.token = authResult.token;
-      localStorage.setItem('auth_token', this.token);
+      localStorage.setItem('auth_token', authResult.token);
 
       console.log('✅ Backend authentication successful');
       // Return user with token so AuthProvider can store it properly
@@ -67,14 +70,15 @@ class BackendAuthService {
 
   async getUserProfile() {
     try {
-      if (!this.token) {
+      const token = this.getToken();
+      if (!token) {
         throw new Error('No authentication token');
       }
 
       const response = await fetch(`${this.apiUrl}/user/profile`, {
         credentials: 'include', // Enable CORS credentials
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -97,17 +101,18 @@ class BackendAuthService {
 
   async syncUsersFromWorkspace() {
     try {
-      if (!this.token) {
+      const token = this.getToken();
+      if (!token) {
         throw new Error('No authentication token');
       }
 
       console.log('🔄 Syncing users from Google Workspace...');
-      
+
       const response = await fetch(`${this.apiUrl}/admin/sync-users`, {
         method: 'POST',
         credentials: 'include', // Enable CORS credentials
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -127,17 +132,18 @@ class BackendAuthService {
 
   async syncGroupsFromWorkspace() {
     try {
-      if (!this.token) {
+      const token = this.getToken();
+      if (!token) {
         throw new Error('No authentication token');
       }
 
       console.log('🔄 Syncing groups from Google Workspace...');
-      
+
       const response = await fetch(`${this.apiUrl}/admin/sync-groups`, {
         method: 'POST',
         credentials: 'include', // Enable CORS credentials
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -157,7 +163,8 @@ class BackendAuthService {
 
   async makeAuthenticatedRequest(endpoint, options = {}) {
     try {
-      if (!this.token) {
+      const token = this.getToken();
+      if (!token) {
         console.error('❌ No authentication token available');
         console.log('Checking localStorage:', localStorage.getItem('auth_token'));
         throw new Error('No authentication token');
@@ -167,15 +174,15 @@ class BackendAuthService {
         endpoint,
         apiUrl: this.apiUrl,
         fullUrl: `${this.apiUrl}${endpoint}`,
-        hasToken: !!this.token,
-        tokenPreview: this.token?.substring(0, 20) + '...'
+        hasToken: !!token,
+        tokenPreview: token?.substring(0, 20) + '...'
       });
 
       const response = await fetch(`${this.apiUrl}${endpoint}`, {
         ...options,
         credentials: 'include', // Enable CORS credentials
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
           ...options.headers,
         },
@@ -235,17 +242,12 @@ class BackendAuthService {
   }
 
   isAuthenticated() {
-    return !!this.token;
+    return !!this.getToken();
   }
 
   logout() {
-    this.token = null;
     localStorage.removeItem('auth_token');
     console.log('🔓 Logged out from backend');
-  }
-
-  getToken() {
-    return this.token;
   }
 }
 

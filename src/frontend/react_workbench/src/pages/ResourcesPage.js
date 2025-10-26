@@ -5,22 +5,42 @@ import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Buildin
 import { motion, AnimatePresence } from 'framer-motion';
 import DocumentViewerModal from '../components/modals/DocumentViewerModal';
 
-// CSV Data Loading Function
+// CSV Data Loading Function with proper parsing for URLs with commas
 const loadCSVData = async () => {
   try {
-    const response = await fetch('/documents/AI_Workbench_Documents_Repo.csv');
+    // Add cache-busting parameter to force fresh CSV load
+    const response = await fetch(`/documents/AI_Workbench_Documents_Repo.csv?t=${Date.now()}`);
     const csvText = await response.text();
 
     const lines = csvText.split('\n');
-    const headers = lines[0].split(',');
+    const headers = lines[0].split(',').map(h => h.trim());
 
     const documents = lines.slice(1)
       .filter(line => line.trim())
       .map(line => {
-        const values = line.split(',');
+        // Parse CSV line properly, handling quoted fields
+        const values = [];
+        let current = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          const nextChar = line[i + 1];
+
+          if (char === '"') {
+            insideQuotes = !insideQuotes;
+          } else if (char === ',' && !insideQuotes) {
+            values.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim());
+
         const doc = {};
         headers.forEach((header, index) => {
-          doc[header.trim()] = values[index]?.trim() || '';
+          doc[header] = values[index]?.trim().replace(/^"|"$/g, '') || '';
         });
         return doc;
       });

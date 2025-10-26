@@ -9,7 +9,7 @@ import DocumentViewerModal from '../components/modals/DocumentViewerModal';
 const loadCSVData = async () => {
   try {
     // Add cache-busting parameter to force fresh CSV load
-    const response = await fetch(`/documents/AI_Workbench_Documents_Repo.csv?t=${Date.now()}`);
+    const response = await fetch(`/documents/AI%20Workbench%20Documents%20Repo.csv?t=${Date.now()}`);
     const csvText = await response.text();
 
     const lines = csvText.split('\n');

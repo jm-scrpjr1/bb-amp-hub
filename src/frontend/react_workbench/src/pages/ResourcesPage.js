@@ -5,35 +5,6 @@ import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Buildin
 import { motion, AnimatePresence } from 'framer-motion';
 import DocumentViewerModal from '../components/modals/DocumentViewerModal';
 
-// CSV Parser - handles quoted fields properly
-const parseCSVLine = (line) => {
-  const result = [];
-  let current = '';
-  let insideQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-
-    if (char === '"') {
-      if (insideQuotes && nextChar === '"') {
-        current += '"';
-        i++;
-      } else {
-        insideQuotes = !insideQuotes;
-      }
-    } else if (char === ',' && !insideQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-
-  result.push(current.trim());
-  return result;
-};
-
 // CSV Data Loading Function
 const loadCSVData = async () => {
   try {
@@ -41,12 +12,12 @@ const loadCSVData = async () => {
     const csvText = await response.text();
 
     const lines = csvText.split('\n');
-    const headers = parseCSVLine(lines[0]);
+    const headers = lines[0].split(',');
 
     const documents = lines.slice(1)
       .filter(line => line.trim())
       .map(line => {
-        const values = parseCSVLine(line);
+        const values = line.split(',');
         const doc = {};
         headers.forEach((header, index) => {
           doc[header.trim()] = values[index]?.trim() || '';
@@ -66,28 +37,26 @@ const getDocumentCategories = (documents) => {
   const categoryMap = new Map();
 
   documents.forEach(doc => {
-    // Map CSV headers to expected field names
-    const category = doc['Category '] || doc.Category || '';
-    const categoryKey = category.toLowerCase().replace(/\s+/g, '-');
+    const categoryKey = doc.category.toLowerCase().replace(/\s+/g, '-');
 
     if (!categoryMap.has(categoryKey)) {
       categoryMap.set(categoryKey, {
         id: categoryKey,
-        name: category,
-        icon: getCategoryIcon(category),
-        color: getCategoryColor(category),
-        stakeholder: doc.Stakeholder || '',
+        name: doc.category,
+        icon: getCategoryIcon(doc.category),
+        color: getCategoryColor(doc.category),
+        stakeholder: doc.stakeholder,
         documents: []
       });
     }
 
     categoryMap.get(categoryKey).documents.push({
       id: `${categoryKey}-${categoryMap.get(categoryKey).documents.length}`,
-      name: doc['Document Name'] || '',
-      country: doc['Country '] || doc.Country || '',
-      owner: doc['Owner '] || doc.Owner || '',
-      link: doc.Link || '',
-      stakeholder: doc.Stakeholder || ''
+      name: doc.name,
+      country: doc.country,
+      owner: doc.owner,
+      link: doc.link,
+      stakeholder: doc.stakeholder
     });
   });
 
@@ -105,11 +74,7 @@ const getCategoryIcon = (category) => {
     'IT': FileText,
     'Supervisor Tool kit': Globe,
     'General': Building,
-    'Employee Perks / Benefits': Heart,
-    'Recruiting': Users,
-    'Service Orders': FileText,
-    'Supervisor Onboarding': Users,
-    'Expense & Travel': Globe
+    'Employee Perks / Benefits': Heart
   };
   return iconMap[category] || FileText;
 };
@@ -125,11 +90,7 @@ const getCategoryColor = (category) => {
     'IT': 'indigo',
     'Supervisor Tool kit': 'orange',
     'General': 'gray',
-    'Employee Perks / Benefits': 'emerald',
-    'Recruiting': 'blue',
-    'Service Orders': 'indigo',
-    'Supervisor Onboarding': 'yellow',
-    'Expense & Travel': 'green'
+    'Employee Perks / Benefits': 'emerald'
   };
   return colorMap[category] || 'gray';
 };

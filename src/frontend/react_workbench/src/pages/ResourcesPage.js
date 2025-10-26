@@ -13,7 +13,7 @@ const loadCSVData = async () => {
     const csvText = await response.text();
 
     const lines = csvText.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
 
     const documents = lines.slice(1)
       .filter(line => line.trim())
@@ -40,7 +40,16 @@ const loadCSVData = async () => {
 
         const doc = {};
         headers.forEach((header, index) => {
-          doc[header] = values[index]?.trim().replace(/^"|"$/g, '') || '';
+          // Normalize field names to match expected format
+          let normalizedHeader = header;
+          if (header.includes('document name')) normalizedHeader = 'name';
+          if (header.includes('stakeholder')) normalizedHeader = 'stakeholder';
+          if (header.includes('category')) normalizedHeader = 'category';
+          if (header.includes('country')) normalizedHeader = 'country';
+          if (header.includes('owner')) normalizedHeader = 'owner';
+          if (header.includes('link')) normalizedHeader = 'link';
+
+          doc[normalizedHeader] = values[index]?.trim().replace(/^"|"$/g, '') || '';
         });
         return doc;
       });

@@ -131,6 +131,16 @@ class GoogleWorkspaceService {
     // Determine role based on email or organizational unit (returns roleId)
     const roleId = this.determineUserRole(workspaceUser);
 
+    // Extract country from Google Workspace locations
+    let country = 'US'; // Default fallback
+    if (workspaceUser.locations && workspaceUser.locations.length > 0) {
+      // Get the first location's country code
+      const primaryLocation = workspaceUser.locations[0];
+      country = primaryLocation.countryCode || 'US';
+    }
+
+    console.log(`📍 User ${email} country: ${country}`);
+
     // Upsert user in database
     const user = await prisma.users.upsert({
       where: { email },
@@ -138,6 +148,7 @@ class GoogleWorkspaceService {
         name,
         status: isActive ? 'ACTIVE' : 'INACTIVE',
         roleId,
+        country,
         updatedAt: new Date(),
       },
       create: {
@@ -145,6 +156,7 @@ class GoogleWorkspaceService {
         name,
         roleId,
         status: isActive ? 'ACTIVE' : 'INACTIVE',
+        country,
         loginCount: 0,
       },
       include: { roles: true }, // Include role relation

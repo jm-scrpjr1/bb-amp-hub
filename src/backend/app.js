@@ -1426,11 +1426,11 @@ app.get('/api/users/:userId/groups', authenticateUser, async (req, res) => {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
-    const groups = await GroupService.getUserGroups(userId);
+    const result = await GroupService.getUserGroups(userId);
 
     res.json({
       success: true,
-      groups
+      groups: result.groups
     });
   } catch (error) {
     console.error('Error fetching user groups:', error);
@@ -1759,10 +1759,6 @@ app.get('/api/assessment/session/:sessionId', authenticateUser, async (req, res)
     });
   }
 });
-
-// Prompt Library API
-const promptsRouter = require('./routes/prompts');
-app.use('/api/prompts', promptsRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {

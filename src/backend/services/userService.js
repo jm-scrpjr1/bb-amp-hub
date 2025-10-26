@@ -98,6 +98,23 @@ class UserService {
       console.log(`📸 Existing user has custom image: ${hasCustomImage}`);
       console.log(`📸 Should update image: ${shouldUpdateImage}`);
 
+      // Fetch country from Google Workspace
+      let country = 'US'; // Default fallback
+      try {
+        const googleWorkspace = new GoogleWorkspaceService();
+        await googleWorkspace.initialize();
+        const workspaceUser = await googleWorkspace.getUserFromWorkspace(email);
+
+        if (workspaceUser && workspaceUser.locations && workspaceUser.locations.length > 0) {
+          const primaryLocation = workspaceUser.locations[0];
+          country = primaryLocation.countryCode || 'US';
+          console.log(`📍 User ${email} country from Google Workspace: ${country}`);
+        }
+      } catch (error) {
+        console.log(`⚠️  Could not fetch country from Google Workspace: ${error.message}`);
+        // Continue with default country
+      }
+
       // Try to upsert in database first
       try {
         const updateData = {
@@ -105,7 +122,8 @@ class UserService {
           lastLoginAt: new Date(),
           loginCount: {
             increment: 1
-          }
+          },
+          country // Update country from Google Workspace
         };
 
         // Only update image if user doesn't have a custom uploaded one
@@ -123,7 +141,7 @@ class UserService {
             image: authUser.image,
             roleId,
             status: UserStatus.ACTIVE,
-            country: 'US', // Default country for new users
+            country, // Use country from Google Workspace
             lastLoginAt: new Date(),
             loginCount: 1,
             updatedAt: new Date(), // Required field

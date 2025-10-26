@@ -5,39 +5,75 @@ import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Buildin
 import { motion, AnimatePresence } from 'framer-motion';
 import DocumentViewerModal from '../components/modals/DocumentViewerModal';
 
-// CSV Data Loading Function with proper parsing for URLs with commas
+// CSV Data Loading Function with proper parsing for URLs with commas and quoted fields
 const loadCSVData = async () => {
   try {
     // Add cache-busting parameter to force fresh CSV load
     const response = await fetch(`/documents/AI%20Workbench%20Documents%20Repo.csv?t=${Date.now()}`);
     const csvText = await response.text();
 
-    const lines = csvText.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    // Parse CSV properly, handling quoted fields with commas and newlines
+    const parseCSV = (text) => {
+      const rows = [];
+      let currentRow = [];
+      let currentField = '';
+      let insideQuotes = false;
 
-    const documents = lines.slice(1)
-      .filter(line => line.trim())
-      .map(line => {
-        // Parse CSV line properly, handling quoted fields
-        const values = [];
-        let current = '';
-        let insideQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
 
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          const nextChar = line[i + 1];
-
-          if (char === '"') {
-            insideQuotes = !insideQuotes;
-          } else if (char === ',' && !insideQuotes) {
-            values.push(current.trim());
-            current = '';
+        if (char === '"') {
+          if (insideQuotes && nextChar === '"') {
+            // Escaped quote
+            currentField += '"';
+            i++;
           } else {
-            current += char;
+            // Toggle quote state
+            insideQuotes = !insideQuotes;
           }
+        } else if (char === ',' && !insideQuotes) {
+          // End of field
+          currentRow.push(currentField.trim());
+          currentField = '';
+        } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+          // End of row
+          if (currentField || currentRow.length > 0) {
+            currentRow.push(currentField.trim());
+            if (currentRow.some(field => field)) {
+              rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = '';
+          }
+          // Skip \r\n
+          if (char === '\r' && nextChar === '\n') {
+            i++;
+          }
+        } else {
+          currentField += char;
         }
-        values.push(current.trim());
+      }
 
+      // Add last field and row
+      if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        if (currentRow.some(field => field)) {
+          rows.push(currentRow);
+        }
+      }
+
+      return rows;
+    };
+
+    const rows = parseCSV(csvText);
+    if (rows.length === 0) return [];
+
+    const headers = rows[0].map(h => h.toLowerCase().replace(/^"|"$/g, ''));
+
+    const documents = rows.slice(1)
+      .filter(row => row.some(field => field)) // Filter out empty rows
+      .map(row => {
         const doc = {};
         headers.forEach((header, index) => {
           // Normalize field names to match expected format
@@ -49,11 +85,13 @@ const loadCSVData = async () => {
           if (header.includes('owner')) normalizedHeader = 'owner';
           if (header.includes('link')) normalizedHeader = 'link';
 
-          doc[normalizedHeader] = values[index]?.trim().replace(/^"|"$/g, '') || '';
+          const value = row[index] || '';
+          doc[normalizedHeader] = value.replace(/^"|"$/g, '').trim();
         });
         return doc;
       });
 
+    console.log(`Loaded ${documents.length} documents from CSV`);
     return documents;
   } catch (error) {
     console.error('Error loading CSV data:', error);

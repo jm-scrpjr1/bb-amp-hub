@@ -74,7 +74,11 @@ const getCategoryIcon = (category) => {
     'IT': FileText,
     'Supervisor Tool kit': Globe,
     'General': Building,
-    'Employee Perks / Benefits': Heart
+    'Employee Perks / Benefits': Heart,
+    'Recruiting': Users,
+    'Service Orders': FileText,
+    'Supervisor Onboarding': Users,
+    'Expense & Travel': Globe
   };
   return iconMap[category] || FileText;
 };
@@ -90,7 +94,11 @@ const getCategoryColor = (category) => {
     'IT': 'indigo',
     'Supervisor Tool kit': 'orange',
     'General': 'gray',
-    'Employee Perks / Benefits': 'emerald'
+    'Employee Perks / Benefits': 'emerald',
+    'Recruiting': 'blue',
+    'Service Orders': 'indigo',
+    'Supervisor Onboarding': 'yellow',
+    'Expense & Travel': 'green'
   };
   return colorMap[category] || 'gray';
 };

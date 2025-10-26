@@ -301,27 +301,47 @@ const EditUserModal = ({ user, onClose, onSave, viewMode = false }) => {
                 Group Memberships
               </label>
               <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
-                {groups.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No groups available</p>
+                {viewMode ? (
+                  // VIEW MODE: Show only user's current groups
+                  userGroups.length === 0 ? (
+                    <p className="text-gray-500 text-sm">User is not a member of any groups</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {userGroups.map((group) => (
+                        <div
+                          key={group.id}
+                          className="flex items-center p-3 rounded-lg bg-gray-50"
+                        >
+                          <CheckCircle className="h-5 w-5 text-green-600 mr-3" />
+                          <span className="text-sm font-medium text-gray-900">{group.name}</span>
+                          <span className="ml-auto text-xs text-gray-500">{group.type}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
                 ) : (
-                  <div className="space-y-2">
-                    {groups.map((group) => (
-                      <label
-                        key={group.id}
-                        className={`flex items-center p-3 rounded-lg transition-colors ${viewMode ? 'cursor-default' : 'hover:bg-gray-50 cursor-pointer'}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedGroups.includes(group.id)}
-                          onChange={() => toggleGroup(group.id)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
-                          disabled={viewMode}
-                        />
-                        <span className="ml-3 text-sm font-medium text-gray-900">{group.name}</span>
-                        <span className="ml-auto text-xs text-gray-500">{group.type}</span>
-                      </label>
-                    ))}
-                  </div>
+                  // EDIT MODE: Show all groups with user's groups pre-checked
+                  groups.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No groups available</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {groups.map((group) => (
+                        <label
+                          key={group.id}
+                          className="flex items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedGroups.includes(group.id)}
+                            onChange={() => toggleGroup(group.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <span className="ml-3 text-sm font-medium text-gray-900">{group.name}</span>
+                          <span className="ml-auto text-xs text-gray-500">{group.type}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )
                 )}
               </div>
             </div>

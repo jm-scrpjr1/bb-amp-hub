@@ -2,9 +2,9 @@ Stakeholder,Category ,Country ,Document Name,Owner ,Link
 All Employees,Important Tools,All countries,Quickbooks Timesheets manual (employee user),IT,https://docs.google.com/document/d/1Xg6LR5qFIK_MpAuqbKyutjcyrgmARUJjR6FqNSVWHkM/edit
 All Employees,Policies,All countries,Acceptable Use Policy (AUP),IT,https://docs.google.com/document/d/1TdwZvk-WM7yMfZnO2qf-zYq0M2sX_72L/edit
 All Employees,Time Keeping,PH,Payroll Sprout,HR,https://sso.sprout.ph/realms/boldbusiness/protocol/openid-connect/auth?client_id=SproutSSO&redirect_uri=https%3A%2F%2Fboldbusiness.hrhub.ph%2F&response_type=code%20id_token&scope=openid%20profile&state=OpenIdConnect.AuthenticationProperties%3DxyHkJwBNCPVeyLt90QUQ8cestKkk1ZQRrUBbEAb0LATdzs5HF1jrsb1JVq9k29tzVg60mxmyJGpCVUoUURAMgd5JnEeJR59vYxRTEix9JvVnsEBvpS415RbtaFvjoFo4Exsy9nO8SKFidScjalAWgc29Oo0LwMHV5c2QauXgWU1Uk02WMdAMeKyd_wlVBSir17aNCA&response_mode=form_post&nonce=638932224909690080.NzliY2QwOGItZjM4OS00MmIxLWJkZGItYTY3MDRhZjQyNmI1YTlhNDZmOTAtYmJjOS00NGFjLTkxMDItMzA3ZjdjOTAzMDA5&x-client-SKU=ID_NET461&x-client-ver=5.3.0.0
-All Employees,Training,PH,Sprout Employee Training Module,,https://sprout-academy.thinkific.com/courses/sprout-hr-employee-training
+All Employees,Training,PH,Sprout Employee Training Module,HR,https://sprout-academy.thinkific.com/courses/sprout-hr-employee-training
 All Employees,Time Keeping,COL,Payroll Aleluya,HR,https://tranqui.aleluya.com/novelties_request_history
-All Employees,HR,US,Rippling Account,,https://app.rippling.com/sign-in/id?next=%2Flo
+All Employees,HR,US,Rippling Account,HR,https://app.rippling.com/sign-in/id?next=%2Flo
 All Employees,HR,All countries,HR Service Desk (Monday.com),HR,https://wkf.ms/3HK6bac
 All Employees,IT,All countries,IT Service Desk (JIRA),IT,https://boldbusiness.atlassian.net/servicedesk/customer/portals
 All Employees,Policies,PH,Leave Application Policy,HR,https://drive.google.com/file/d/13cFY_LaLtD3Xay-OwSMtnrHpisZBEo64/view?ts=63bdb124
@@ -20,7 +20,7 @@ All Employees,HR,PH,Bank Information Update form,HR,https://forms.gle/AxoacZb8h6
 All Employees,HR,PH,HMO form,HR,https://docs.google.com/forms/d/e/1FAIpQLSePDb7Ap-Q6OLjUyXXvBir7b9SceG1C44klyDZi1FyGazUmsw/viewform?vc=0&c=0&w=1&flr=0&pli=1
 All Employees,HR,PH,GLI form,HR,https://drive.google.com/file/d/11yYMKupr_5cGrcCBqeHtQjEGoV2Y3rFc/view
 All Employees,HR,PH,SSS/HDMF Loan Form (Existing/Active Loans),HR,https://docs.google.com/forms/d/e/1FAIpQLSc-eTrsdK2iPSzATG6xNrmvcOAUpNm0rQyOrHNL14i5wjzoWQ/viewform
-All Employees,Employee Perks / Benefits,PH,Laptop Reselling Program,,https://forms.gle/9aFhtmwgGwadbchy6
+All Employees,Employee Perks / Benefits,PH,Laptop Reselling Program,HR,https://forms.gle/9aFhtmwgGwadbchy6
 All Employees,HR,PH,Sprout HR Basics,HR,https://drive.google.com/file/d/1B21YcvV18GZ85kyl5omoYfgaVYevvjPL/view?usp=sharing
 Leaders,Training,PH,Sprout Manager Training Module,HR,https://sprout-academy.thinkific.com/courses/sprout-hr-manager-training
 Leaders,Supervisor Tool kit,All countries,Coaching Log form,HR,https://docs.google.com/document/d/1TvySizTdxWsCM0XO7t3TSrrAVrX6zNU03dONEufnQvY/edit?usp=sharing
@@ -38,8 +38,8 @@ Leaders,Supervisor Onboarding,All countries,Supervisor's Onboarding Deck,HR,http
 New Hires,Pre-employment Requirements,PH,Employee Information Form,HR,https://forms.gle/7RAEPUtUd9qNESeG7
 New Hires,Pre-employment Requirements,COL,Employee Information Form,HR,https://forms.gle/CiXUGzp9qFe7uh9f7
 New Hires,Pre-employment Requirements,IN,Employee Information Form,HR,https://docs.google.com/forms/d/e/1FAIpQLSdqwLA9wEyOW12l84p7RSdFecDjdtnL3Vzj3k8CAsQAOG74UQ/viewform?usp=dialog
-Leaders,Expense & Travel,,Ramp Expense & Travel,,https://app.ramp.com/home
+Leaders,Expense & Travel,,Ramp Expense & Travel,HR,https://app.ramp.com/home
 "Recruiting
 HR
 IT
-Operations",Training,All countries,Monday.com Onboarding Tracker Training,,https://docs.google.com/document/d/1pL1PXR6adJ5DGl1cQnc_h0qlr7Jin7bImFBSEnlRBiw/edit?usp=sharing
+Operations",Training,All countries,Monday.com Onboarding Tracker Training,HR,https://docs.google.com/document/d/1pL1PXR6adJ5DGl1cQnc_h0qlr7Jin7bImFBSEnlRBiw/edit?usp=sharing

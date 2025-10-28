@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
-import { Upload, Download, Loader, FileText, Sparkles, CheckCircle, TrendingUp, X } from 'lucide-react';
+import { Upload, Download, Loader, FileText, Sparkles, CheckCircle, TrendingUp, X, Users, Award } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const prompts = [
@@ -14,6 +14,16 @@ const prompts = [
     icon: FileText,
     color: 'from-purple-600 to-blue-600',
     placeholder: 'Upload your resume (PDF or DOCX) to get started...'
+  },
+  {
+    id: 'resume-analyzer',
+    name: 'Resume Analyzer & Ranking',
+    description: 'Intelligently rank candidates against job requirements and client fit',
+    status: 'live',
+    assistantId: 'asst_R5RXI0LcyRxsgR80xb05oNQb',
+    icon: Award,
+    color: 'from-emerald-600 to-teal-600',
+    placeholder: 'Analyze and rank resumes...'
   },
   {
     id: 'ad-headline-refiner',
@@ -55,10 +65,21 @@ const RecruitingPromptsPage = () => {
   const [showComparison, setShowComparison] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Resume Analyzer state
+  const [jobDescription, setJobDescription] = useState('');
+  const [clientWords, setClientWords] = useState('');
+  const [uploadedResumes, setUploadedResumes] = useState([]);
+  const [analyzerResult, setAnalyzerResult] = useState(null);
+  const resumeInputRef = useRef(null);
+
   useEffect(() => {
     setUploadedFile(null);
     setEnhancedResult(null);
     setShowComparison(false);
+    setJobDescription('');
+    setClientWords('');
+    setUploadedResumes([]);
+    setAnalyzerResult(null);
   }, [selectedPrompt]);
 
   const handleFileUpload = (event) => {
@@ -138,6 +159,71 @@ const RecruitingPromptsPage = () => {
     setShowComparison(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Resume Analyzer handlers
+  const handleAddResume = (e) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedResumes([...uploadedResumes, ...files]);
+    if (resumeInputRef.current) {
+      resumeInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveResume = (index) => {
+    setUploadedResumes(uploadedResumes.filter((_, i) => i !== index));
+  };
+
+  const handleAnalyzeResumes = async () => {
+    if (!jobDescription.trim() || !clientWords.trim() || uploadedResumes.length === 0) {
+      alert('Please fill in all fields and upload at least one resume');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+
+      const formData = new FormData();
+      formData.append('jobDescription', jobDescription);
+      formData.append('clientWords', clientWords);
+      formData.append('userId', user?.email || 'anonymous');
+
+      uploadedResumes.forEach((file, index) => {
+        formData.append(`resumes`, file);
+      });
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/resume-analyzer`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to analyze resumes');
+      }
+
+      setAnalyzerResult(data.analysis);
+      setIsProcessing(false);
+
+    } catch (error) {
+      console.error('Error analyzing resumes:', error);
+      alert(`Error: ${error.message}`);
+      setIsProcessing(false);
+    }
+  };
+
+  const handleResetAnalyzer = () => {
+    setJobDescription('');
+    setClientWords('');
+    setUploadedResumes([]);
+    setAnalyzerResult(null);
+    if (resumeInputRef.current) {
+      resumeInputRef.current.value = '';
     }
   };
 
@@ -230,9 +316,9 @@ const RecruitingPromptsPage = () => {
                       <p className="text-sm text-gray-600">{selectedPrompt.description}</p>
                     </div>
                   </div>
-                  {enhancedResult && (
+                  {(enhancedResult || analyzerResult) && (
                     <button
-                      onClick={handleReset}
+                      onClick={selectedPrompt.id === 'resume-analyzer' ? handleResetAnalyzer : handleReset}
                       className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       Start New
@@ -243,7 +329,203 @@ const RecruitingPromptsPage = () => {
 
               {/* Main Content Area */}
               <div className="flex-1 overflow-y-auto p-6">
-                {!uploadedFile && !enhancedResult ? (
+                {selectedPrompt.id === 'resume-analyzer' ? (
+                  // Resume Analyzer Interface
+                  <div className="max-w-4xl mx-auto">
+                    {!analyzerResult ? (
+                      <div className="space-y-6">
+                        {/* Job Description Input */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-3">
+                            📋 Job Description & Requirements
+                          </label>
+                          <textarea
+                            value={jobDescription}
+                            onChange={(e) => setJobDescription(e.target.value)}
+                            placeholder="Paste the complete job description including required skills, experience, and qualifications..."
+                            className="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                          />
+                        </div>
+
+                        {/* Client Words Input */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-3">
+                            🎤 Client's Own Words (Interview Transcripts)
+                          </label>
+                          <textarea
+                            value={clientWords}
+                            onChange={(e) => setClientWords(e.target.value)}
+                            placeholder="Paste client preferences, interview notes, or call transcripts to understand what they're really looking for..."
+                            className="w-full h-32 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+                          />
+                        </div>
+
+                        {/* Resume Upload */}
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-900 mb-3">
+                            👥 Candidate Resumes ({uploadedResumes.length})
+                          </label>
+                          <div className="border-2 border-dashed border-emerald-300 rounded-xl p-6 text-center bg-emerald-50">
+                            <input
+                              ref={resumeInputRef}
+                              type="file"
+                              multiple
+                              accept=".pdf,.docx"
+                              onChange={handleAddResume}
+                              className="hidden"
+                            />
+                            <button
+                              onClick={() => resumeInputRef.current?.click()}
+                              className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                            >
+                              <Upload className="w-5 h-5" />
+                              Add Resumes
+                            </button>
+                            <p className="text-sm text-gray-600 mt-3">
+                              Upload multiple resumes (PDF or DOCX)
+                            </p>
+                          </div>
+
+                          {/* Uploaded Resumes List */}
+                          {uploadedResumes.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                              {uploadedResumes.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-emerald-600" />
+                                    <span className="text-sm text-gray-700">{file.name}</span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleRemoveResume(index)}
+                                    className="text-red-600 hover:text-red-700 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Analyze Button */}
+                        <button
+                          onClick={handleAnalyzeResumes}
+                          disabled={isProcessing || !jobDescription.trim() || !clientWords.trim() || uploadedResumes.length === 0}
+                          className="w-full px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader className="w-5 h-5 animate-spin" />
+                              Analyzing Candidates...
+                            </>
+                          ) : (
+                            <>
+                              <Award className="w-5 h-5" />
+                              Analyze & Rank Candidates
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      // Results View
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="text-2xl font-bold text-gray-900">Analysis Results</h3>
+                          <button
+                            onClick={handleResetAnalyzer}
+                            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            Analyze New
+                          </button>
+                        </div>
+
+                        {/* Top Candidate */}
+                        {analyzerResult?.topCandidate && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-xl p-6"
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <Award className="w-6 h-6 text-emerald-600" />
+                              <h4 className="text-lg font-bold text-emerald-900">Top Candidate</h4>
+                            </div>
+                            <p className="text-2xl font-bold text-emerald-700">{analyzerResult.topCandidate}</p>
+                          </motion.div>
+                        )}
+
+                        {/* Candidates List */}
+                        <div className="space-y-4">
+                          {analyzerResult?.candidates?.map((candidate, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+                            >
+                              <div className="flex items-start justify-between mb-4">
+                                <div>
+                                  <h4 className="text-lg font-bold text-gray-900">{candidate.name}</h4>
+                                  <p className="text-sm text-gray-600">{candidate.summary}</p>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-3xl font-bold text-emerald-600">{candidate.matchScore}%</div>
+                                  <div className={`text-sm font-semibold ${
+                                    candidate.recommendation === 'Strong fit' ? 'text-emerald-600' :
+                                    candidate.recommendation === 'Good fit' ? 'text-blue-600' :
+                                    candidate.recommendation === 'Moderate fit' ? 'text-yellow-600' :
+                                    'text-red-600'
+                                  }`}>
+                                    {candidate.recommendation}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Strengths */}
+                              {candidate.strengths?.length > 0 && (
+                                <div className="mb-4">
+                                  <h5 className="text-sm font-semibold text-gray-900 mb-2">✅ Strengths</h5>
+                                  <div className="space-y-1">
+                                    {candidate.strengths.map((strength, idx) => (
+                                      <div key={idx} className="flex items-start gap-2">
+                                        <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                                        <p className="text-sm text-gray-700">{strength}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Concerns */}
+                              {candidate.concerns?.length > 0 && (
+                                <div>
+                                  <h5 className="text-sm font-semibold text-gray-900 mb-2">⚠️ Concerns</h5>
+                                  <div className="space-y-1">
+                                    {candidate.concerns.map((concern, idx) => (
+                                      <div key={idx} className="flex items-start gap-2">
+                                        <X className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                                        <p className="text-sm text-gray-700">{concern}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+
+                        {/* Overall Analysis */}
+                        {analyzerResult?.analysis && (
+                          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                            <h4 className="text-lg font-bold text-gray-900 mb-3">📊 Overall Analysis</h4>
+                            <p className="text-gray-700 whitespace-pre-wrap">{analyzerResult.analysis}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : !uploadedFile && !enhancedResult ? (
                   /* Empty State - Upload Prompt */
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center max-w-md">

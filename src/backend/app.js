@@ -7,6 +7,7 @@ const cors = require("cors");
 const path = require("path");
 const openaiService = require('./services/openaiService');
 const resumeBuilderService = require('./services/resumeBuilderService');
+const ResumeAnalyzerService = require('./services/resumeAnalyzerService');
 const { testConnection, prisma } = require('./lib/db');
 const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
 const app = express();
@@ -994,6 +995,63 @@ app.get('/api/download-resume/:filename', (req, res) => {
   } catch (error) {
     console.error('❌ Download error:', error);
     res.status(500).json({ error: 'Download failed' });
+  }
+});
+
+// Resume Analyzer API with multiple file upload support
+app.post('/api/resume-analyzer', upload.array('resumes', 20), async (req, res) => {
+  try {
+    const { jobDescription, clientWords, userId } = req.body;
+    const files = req.files || [];
+
+    console.log('🔍 Resume Analyzer request received');
+    console.log('📋 Job Description length:', jobDescription?.length || 0);
+    console.log('🎤 Client Words length:', clientWords?.length || 0);
+    console.log('📄 Number of resumes:', files.length);
+    console.log('👤 User ID:', userId || 'anonymous');
+
+    // Validate inputs
+    if (!jobDescription || !clientWords || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: jobDescription, clientWords, and at least one resume file'
+      });
+    }
+
+    // Initialize Resume Analyzer Service
+    const analyzerService = new ResumeAnalyzerService();
+
+    // Analyze resumes
+    const result = await analyzerService.analyzeResumes(
+      jobDescription,
+      clientWords,
+      files,
+      userId
+    );
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Resume analysis failed',
+        message: result.error
+      });
+    }
+
+    // Return analysis results
+    res.json({
+      success: true,
+      analysis: result.analysis,
+      threadId: result.threadId,
+      assistantId: 'asst_R5RXI0LcyRxsgR80xb05oNQb'
+    });
+
+  } catch (error) {
+    console.error('❌ Resume Analyzer error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Resume Analyzer request failed',
+      message: error.message
+    });
   }
 });
 

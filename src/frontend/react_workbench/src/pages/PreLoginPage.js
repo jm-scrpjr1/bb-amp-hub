@@ -259,8 +259,7 @@ const PreLoginPage = () => {
         className="relative w-full h-screen bg-cover bg-center flex flex-col items-center justify-center overflow-hidden"
         style={{
           backgroundImage: 'url(/images/Iconic.png)',
-          backgroundAttachment: 'fixed',
-          opacity: 1 - scrollProgress * 1.5
+          backgroundAttachment: 'fixed'
         }}
       >
         {/* Dark overlay for better text readability */}

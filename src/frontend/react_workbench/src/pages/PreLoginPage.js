@@ -481,36 +481,54 @@ const PreLoginPage = () => {
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`prompt-${num}`}
-                    className="group relative bg-white/10 backdrop-blur-md border border-cyan-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-cyan-400/80 transition-all duration-300 hover:bg-white/15"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    whileHover={{ scale: 1.08, y: -8 }}
+                    transition={{ duration: 0.4 }}
                   >
+                    {/* Animated Glow Background on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: 'radial-gradient(circle at center, rgba(6, 229, 236, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(20px)'
+                      }}></div>
+
+                    {/* Border Glow Effect */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        boxShadow: 'inset 0 0 30px rgba(6, 229, 236, 0.3), 0 0 40px rgba(6, 229, 236, 0.4)'
+                      }}></div>
+
                     {/* Neon Chat Bubble */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileHover={{ opacity: 1, scale: 1 }}
-                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      whileHover={{ opacity: 1, scale: 1, y: 0 }}
+                      className="absolute -top-14 -right-6 z-50 pointer-events-none"
                     >
                       <div className="relative">
-                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-cyan-400/60 shadow-2xl w-32"
+                        <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-3xl px-6 py-3 border-2 border-cyan-400/70 shadow-2xl w-40"
                           style={{
-                            boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(6, 229, 236, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
+                            boxShadow: '0 0 30px rgba(6, 229, 236, 0.8), 0 0 60px rgba(6, 229, 236, 0.4), inset 0 0 30px rgba(6, 229, 236, 0.2)'
                           }}>
-                          <p className="text-xs font-semibold text-cyan-100 text-center">Explore</p>
-                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
+                          <p className="text-sm font-bold text-cyan-100 text-center leading-tight">78 prompts ready to supercharge your work! 🚀</p>
+                          <div className="absolute -bottom-3 left-6 w-4 h-4 bg-slate-900/90 border-r-2 border-b-2 border-cyan-400/70 rotate-45"
                             style={{
-                              filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
+                              filter: 'drop-shadow(0 0 12px rgba(6, 229, 236, 0.8))'
                             }}></div>
                         </div>
                       </div>
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-lg font-bold text-cyan-300">
+                    <div className="relative z-10">
+                      <div className="text-lg font-bold text-cyan-300 mb-2">
                         Prompt #{num}
                       </div>
-                      <p className="text-gray-300 text-xs">Insert Name</p>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Shine Effect on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </motion.div>
                 ))}
@@ -521,36 +539,54 @@ const PreLoginPage = () => {
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`automation-${num}`}
-                    className="group relative bg-white/10 backdrop-blur-md border border-green-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-green-400/80 transition-all duration-300 hover:bg-white/15"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    whileHover={{ scale: 1.08, y: -8 }}
+                    transition={{ duration: 0.4 }}
                   >
+                    {/* Animated Glow Background on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: 'radial-gradient(circle at center, rgba(34, 197, 94, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(20px)'
+                      }}></div>
+
+                    {/* Border Glow Effect */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        boxShadow: 'inset 0 0 30px rgba(34, 197, 94, 0.3), 0 0 40px rgba(34, 197, 94, 0.4)'
+                      }}></div>
+
                     {/* Neon Chat Bubble */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileHover={{ opacity: 1, scale: 1 }}
-                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      whileHover={{ opacity: 1, scale: 1, y: 0 }}
+                      className="absolute -top-14 -right-6 z-50 pointer-events-none"
                     >
                       <div className="relative">
-                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-green-400/60 shadow-2xl w-32"
+                        <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-3xl px-6 py-3 border-2 border-green-400/70 shadow-2xl w-40"
                           style={{
-                            boxShadow: '0 0 20px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.3), inset 0 0 20px rgba(34, 197, 94, 0.1)'
+                            boxShadow: '0 0 30px rgba(34, 197, 94, 0.8), 0 0 60px rgba(34, 197, 94, 0.4), inset 0 0 30px rgba(34, 197, 94, 0.2)'
                           }}>
-                          <p className="text-xs font-semibold text-green-100 text-center">Explore</p>
-                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-green-400/60 rotate-45"
+                          <p className="text-sm font-bold text-green-100 text-center leading-tight">Automate your workflows in seconds! ⚡</p>
+                          <div className="absolute -bottom-3 left-6 w-4 h-4 bg-slate-900/90 border-r-2 border-b-2 border-green-400/70 rotate-45"
                             style={{
-                              filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))'
+                              filter: 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))'
                             }}></div>
                         </div>
                       </div>
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-lg font-bold text-green-300">
+                    <div className="relative z-10">
+                      <div className="text-lg font-bold text-green-300 mb-2">
                         Automation #{num}
                       </div>
-                      <p className="text-gray-300 text-xs">Insert Name</p>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Shine Effect on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-green-400/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </motion.div>
                 ))}
@@ -561,36 +597,54 @@ const PreLoginPage = () => {
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`ai-agent-${num}`}
-                    className="group relative bg-white/10 backdrop-blur-md border border-purple-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-purple-400/80 transition-all duration-300 hover:bg-white/15"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    whileHover={{ scale: 1.08, y: -8 }}
+                    transition={{ duration: 0.4 }}
                   >
+                    {/* Animated Glow Background on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: 'radial-gradient(circle at center, rgba(168, 85, 247, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(20px)'
+                      }}></div>
+
+                    {/* Border Glow Effect */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        boxShadow: 'inset 0 0 30px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.4)'
+                      }}></div>
+
                     {/* Neon Chat Bubble */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileHover={{ opacity: 1, scale: 1 }}
-                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      whileHover={{ opacity: 1, scale: 1, y: 0 }}
+                      className="absolute -top-14 -right-6 z-50 pointer-events-none"
                     >
                       <div className="relative">
-                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-purple-400/60 shadow-2xl w-32"
+                        <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-3xl px-6 py-3 border-2 border-purple-400/70 shadow-2xl w-40"
                           style={{
-                            boxShadow: '0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1)'
+                            boxShadow: '0 0 30px rgba(168, 85, 247, 0.8), 0 0 60px rgba(168, 85, 247, 0.4), inset 0 0 30px rgba(168, 85, 247, 0.2)'
                           }}>
-                          <p className="text-xs font-semibold text-purple-100 text-center">Explore</p>
-                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-purple-400/60 rotate-45"
+                          <p className="text-sm font-bold text-purple-100 text-center leading-tight">Intelligent agents working for you! 🧠</p>
+                          <div className="absolute -bottom-3 left-6 w-4 h-4 bg-slate-900/90 border-r-2 border-b-2 border-purple-400/70 rotate-45"
                             style={{
-                              filter: 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.6))'
+                              filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.8))'
                             }}></div>
                         </div>
                       </div>
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-lg font-bold text-purple-300">
+                    <div className="relative z-10">
+                      <div className="text-lg font-bold text-purple-300 mb-2">
                         AI Agent #{num}
                       </div>
-                      <p className="text-gray-300 text-xs">Insert Name</p>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Shine Effect on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-purple-400/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </motion.div>
                 ))}
@@ -601,36 +655,54 @@ const PreLoginPage = () => {
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`training-${num}`}
-                    className="group relative bg-white/10 backdrop-blur-md border border-pink-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-pink-400/80 transition-all duration-300 hover:bg-white/15"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.3 }}
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    whileHover={{ scale: 1.08, y: -8 }}
+                    transition={{ duration: 0.4 }}
                   >
+                    {/* Animated Glow Background on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        background: 'radial-gradient(circle at center, rgba(236, 72, 153, 0.2) 0%, transparent 70%)',
+                        filter: 'blur(20px)'
+                      }}></div>
+
+                    {/* Border Glow Effect */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{
+                        boxShadow: 'inset 0 0 30px rgba(236, 72, 153, 0.3), 0 0 40px rgba(236, 72, 153, 0.4)'
+                      }}></div>
+
                     {/* Neon Chat Bubble */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileHover={{ opacity: 1, scale: 1 }}
-                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                      whileHover={{ opacity: 1, scale: 1, y: 0 }}
+                      className="absolute -top-14 -right-6 z-50 pointer-events-none"
                     >
                       <div className="relative">
-                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-pink-400/60 shadow-2xl w-32"
+                        <div className="relative bg-slate-900/90 backdrop-blur-xl rounded-3xl px-6 py-3 border-2 border-pink-400/70 shadow-2xl w-40"
                           style={{
-                            boxShadow: '0 0 20px rgba(236, 72, 153, 0.6), 0 0 40px rgba(236, 72, 153, 0.3), inset 0 0 20px rgba(236, 72, 153, 0.1)'
+                            boxShadow: '0 0 30px rgba(236, 72, 153, 0.8), 0 0 60px rgba(236, 72, 153, 0.4), inset 0 0 30px rgba(236, 72, 153, 0.2)'
                           }}>
-                          <p className="text-xs font-semibold text-pink-100 text-center">Explore</p>
-                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-pink-400/60 rotate-45"
+                          <p className="text-sm font-bold text-pink-100 text-center leading-tight">Master AI with expert training! 🎓</p>
+                          <div className="absolute -bottom-3 left-6 w-4 h-4 bg-slate-900/90 border-r-2 border-b-2 border-pink-400/70 rotate-45"
                             style={{
-                              filter: 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))'
+                              filter: 'drop-shadow(0 0 12px rgba(236, 72, 153, 0.8))'
                             }}></div>
                         </div>
                       </div>
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-lg font-bold text-pink-300">
+                    <div className="relative z-10">
+                      <div className="text-lg font-bold text-pink-300 mb-2">
                         Training #{num}
                       </div>
-                      <p className="text-gray-300 text-xs">Insert Name</p>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Shine Effect on Hover */}
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-pink-400/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000" />
                     </div>
                   </motion.div>
                 ))}

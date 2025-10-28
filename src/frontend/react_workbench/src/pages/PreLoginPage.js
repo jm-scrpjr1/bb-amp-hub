@@ -70,19 +70,15 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud - Neon Glow Style - Top Right Corner */}
+      {/* Floating Message Cloud - Neon Glow Style - Centered Above */}
       {showMessage && (
         <motion.div
-          initial={{ opacity: 0, scale: 0, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0, x: 20 }}
-          className="absolute -top-12 -right-24 z-50 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 20 }}
+          className="absolute -top-16 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
         >
-          {/* Neon Glow Background */}
-          <div className="relative w-48">
-            {/* Outer glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded-3xl blur-xl"></div>
-
+          <div className="relative">
             {/* Main bubble with neon border */}
             <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-6 py-4 border-2 border-cyan-400/60 shadow-2xl"
               style={{
@@ -90,8 +86,8 @@ const BasketballBounceRobot = ({
               }}>
               <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{message}</p>
 
-              {/* Neon tail pointing to robot - left side */}
-              <div className="absolute top-1/2 -left-3 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-cyan-400/60"
+              {/* Neon tail pointing down to robot */}
+              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
                 style={{
                   filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
                 }}></div>

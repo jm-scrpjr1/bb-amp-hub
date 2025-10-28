@@ -34,21 +34,8 @@ const DissolveParticle = ({ x, y, delay, size = 3 }) => {
 const BasketballBounceRobot = ({
   src,
   alt,
-  message,
   delay = 0
 }) => {
-  const [showMessage, setShowMessage] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowMessage(true);
-      const messageInterval = setInterval(() => {
-        setShowMessage(prev => !prev);
-      }, 4000);
-      return () => clearInterval(messageInterval);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
 
   // Basketball bounce: high bounce, then progressively lower bounces
   const bounceVariants = {
@@ -70,37 +57,6 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud - Neon Glow Style - Right Positioned */}
-      {showMessage && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0, x: 20 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          exit={{ opacity: 0, scale: 0, x: 20 }}
-          className="absolute -top-20 -right-40 z-50 pointer-events-none"
-          style={{ transform: 'translateY(-100%)' }}
-        >
-          {/* Neon Glow Background */}
-          <div className="relative w-48">
-            {/* Outer glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded-3xl blur-xl"></div>
-
-            {/* Main bubble with neon border */}
-            <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-6 py-4 border-2 border-cyan-400/60 shadow-2xl"
-              style={{
-                boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
-              }}>
-              <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{message}</p>
-
-              {/* Neon tail pointing to robot - left side */}
-              <div className="absolute top-1/2 -left-3 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-cyan-400/60"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
-                }}></div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
       {/* Robot Image with Basketball Bounce */}
       <motion.div
         className="w-40 h-40 relative"
@@ -154,6 +110,40 @@ const BasketballBounceRobot = ({
   );
 };
 
+// Chat Bubble Component - Rendered separately on top
+const ChatBubble = ({ message, show }) => {
+  if (!show) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0, x: 20 }}
+      animate={{ opacity: 1, scale: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0, x: 20 }}
+      className="pointer-events-none"
+    >
+      {/* Neon Glow Background */}
+      <div className="relative w-48">
+        {/* Outer glow effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded-3xl blur-xl"></div>
+
+        {/* Main bubble with neon border */}
+        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-6 py-4 border-2 border-cyan-400/60 shadow-2xl"
+          style={{
+            boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
+          }}>
+          <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{message}</p>
+
+          {/* Neon tail pointing to robot - left side */}
+          <div className="absolute top-1/2 -left-3 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-cyan-400/60"
+            style={{
+              filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
+            }}></div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 
 
 const PreLoginPage = () => {
@@ -165,6 +155,12 @@ const PreLoginPage = () => {
     automations: 0,
     'ai-agents': 0,
     training: 0
+  });
+  const [showBubbles, setShowBubbles] = useState({
+    prompts: false,
+    automations: false,
+    'ai-agents': false,
+    training: false
   });
 
   useEffect(() => {
@@ -193,8 +189,18 @@ const PreLoginPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Rotate messages every 4 seconds
+  // Rotate messages and toggle bubbles every 4 seconds
   useEffect(() => {
+    // Show bubbles initially after delay
+    const showTimer = setTimeout(() => {
+      setShowBubbles({
+        prompts: true,
+        automations: true,
+        'ai-agents': true,
+        training: true
+      });
+    }, 500);
+
     const interval = setInterval(() => {
       setCurrentMessageIndex(prev => ({
         prompts: (prev.prompts + 1) % 4,
@@ -202,8 +208,29 @@ const PreLoginPage = () => {
         'ai-agents': (prev['ai-agents'] + 1) % 4,
         training: (prev.training + 1) % 4
       }));
+
+      // Toggle bubbles off and on for animation
+      setShowBubbles({
+        prompts: false,
+        automations: false,
+        'ai-agents': false,
+        training: false
+      });
+
+      setTimeout(() => {
+        setShowBubbles({
+          prompts: true,
+          automations: true,
+          'ai-agents': true,
+          training: true
+        });
+      }, 100);
     }, 4000);
-    return () => clearInterval(interval);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearInterval(interval);
+    };
   }, []);
 
   const toolCategories = [
@@ -441,13 +468,12 @@ const PreLoginPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
                 {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15">
                   {/* Robot Display */}
-                  <div className="w-full h-48 mb-6 flex items-center justify-center relative">
+                  <div className="w-full h-48 mb-6 flex items-center justify-center">
                     <BasketballBounceRobot
                       src={tool.image}
                       alt={tool.title}
-                      message={tool.messages[currentMessageIndex[tool.id]]}
                       delay={index * 200}
                     />
                   </div>
@@ -459,6 +485,27 @@ const PreLoginPage = () => {
                 </div>
               </motion.div>
             ))}
+          </div>
+
+          {/* Chat Bubbles - Rendered on top of all tiles */}
+          <div className="fixed inset-0 pointer-events-none z-50 flex items-start justify-start">
+            {toolCategories.map((tool, index) => {
+              const positions = [
+                'top-[35%] left-[8%]',      // Prompts
+                'top-[35%] left-[32%]',     // Automations
+                'top-[35%] left-[56%]',     // AI Agents
+                'top-[35%] right-[8%]'      // Training
+              ];
+
+              return (
+                <div key={`bubble-${tool.id}`} className={`absolute ${positions[index]}`}>
+                  <ChatBubble
+                    message={tool.messages[currentMessageIndex[tool.id]]}
+                    show={showBubbles[tool.id]}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {/* CTA Section */}

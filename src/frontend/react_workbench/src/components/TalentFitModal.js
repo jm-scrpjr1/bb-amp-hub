@@ -75,6 +75,37 @@ const TalentFitModal = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
+      {/* Custom Scrollbar Styles */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 12px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+          border: 1px solid rgba(96, 165, 250, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, rgba(96, 165, 250, 0.6) 0%, rgba(59, 130, 246, 0.6) 100%);
+          border-radius: 10px;
+          border: 2px solid rgba(15, 23, 42, 0.5);
+          box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, rgba(96, 165, 250, 0.8) 0%, rgba(59, 130, 246, 0.8) 100%);
+          box-shadow: 0 0 20px rgba(96, 165, 250, 0.8);
+        }
+
+        /* Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(96, 165, 250, 0.6) rgba(15, 23, 42, 0.5);
+        }
+      `}</style>
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -87,7 +118,7 @@ const TalentFitModal = ({ isOpen, onClose }) => {
           {[...Array(30)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
+              className="absolute w-1 h-1 bg-blue-400/30 rounded-full"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
@@ -111,9 +142,9 @@ const TalentFitModal = ({ isOpen, onClose }) => {
           animate={{ scale: 1, y: 0 }}
           exit={{ scale: 0.9, y: 20 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-cyan-400/30"
+          className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl shadow-2xl border border-blue-400/30 custom-scrollbar"
           style={{
-            boxShadow: '0 0 60px rgba(6, 229, 236, 0.3), inset 0 0 60px rgba(6, 229, 236, 0.1)'
+            boxShadow: '0 0 60px rgba(96, 165, 250, 0.3), inset 0 0 60px rgba(96, 165, 250, 0.1)'
           }}
         >
           {/* Animated Border Glow */}
@@ -122,9 +153,9 @@ const TalentFitModal = ({ isOpen, onClose }) => {
               className="absolute inset-0 rounded-3xl"
               animate={{
                 boxShadow: [
-                  '0 0 20px rgba(6, 229, 236, 0.3)',
-                  '0 0 40px rgba(6, 229, 236, 0.6)',
-                  '0 0 20px rgba(6, 229, 236, 0.3)',
+                  '0 0 20px rgba(96, 165, 250, 0.3)',
+                  '0 0 40px rgba(96, 165, 250, 0.6)',
+                  '0 0 20px rgba(96, 165, 250, 0.3)',
                 ],
               }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -134,12 +165,12 @@ const TalentFitModal = ({ isOpen, onClose }) => {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full transition-all duration-300 border border-cyan-400/30 hover:border-cyan-400/60 group"
+            className="absolute top-6 right-6 z-10 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-full transition-all duration-300 border border-blue-400/30 hover:border-blue-400/60 group"
             style={{
-              boxShadow: '0 0 20px rgba(6, 229, 236, 0.3)'
+              boxShadow: '0 0 20px rgba(96, 165, 250, 0.3)'
             }}
           >
-            <X className="w-6 h-6 text-cyan-300 group-hover:text-cyan-100 transition-colors" />
+            <X className="w-6 h-6 text-blue-300 group-hover:text-blue-100 transition-colors" />
           </button>
 
           {/* Content */}
@@ -147,12 +178,12 @@ const TalentFitModal = ({ isOpen, onClose }) => {
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
               <motion.div
-                className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-emerald-500 rounded-2xl flex items-center justify-center"
+                className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center"
                 animate={{
                   boxShadow: [
-                    '0 0 20px rgba(6, 229, 236, 0.5)',
-                    '0 0 40px rgba(6, 229, 236, 0.8)',
-                    '0 0 20px rgba(6, 229, 236, 0.5)',
+                    '0 0 20px rgba(96, 165, 250, 0.5)',
+                    '0 0 40px rgba(96, 165, 250, 0.8)',
+                    '0 0 20px rgba(96, 165, 250, 0.5)',
                   ],
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
@@ -160,10 +191,10 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                 <Sparkles className="w-8 h-8 text-white" />
               </motion.div>
               <div>
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300">
+                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-400">
                   TalentFit
                 </h2>
-                <p className="text-cyan-100/70 text-sm mt-1">
+                <p className="text-blue-100/70 text-sm mt-1">
                   Intelligently rank candidates against job requirements and client fit
                 </p>
               </div>
@@ -173,7 +204,7 @@ const TalentFitModal = ({ isOpen, onClose }) => {
               <div className="space-y-6">
                 {/* Job Description */}
                 <div>
-                  <label className="flex items-center gap-2 text-lg font-semibold text-cyan-300 mb-3">
+                  <label className="flex items-center gap-2 text-lg font-semibold text-blue-300 mb-3">
                     <FileText className="w-5 h-5" />
                     Job Description & Requirements
                   </label>
@@ -181,16 +212,16 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                     value={jobDescription}
                     onChange={(e) => setJobDescription(e.target.value)}
                     placeholder="Paste the complete job description including required skills, experience, and qualifications..."
-                    className="w-full h-32 px-4 py-3 bg-slate-800/50 border-2 border-cyan-400/30 rounded-xl text-cyan-100 placeholder-cyan-100/30 focus:outline-none focus:border-cyan-400/60 transition-all duration-300 backdrop-blur-sm resize-none"
+                    className="w-full h-32 px-4 py-3 bg-slate-800/50 border-2 border-blue-400/30 rounded-xl text-blue-100 placeholder-blue-100/30 focus:outline-none focus:border-blue-400/60 transition-all duration-300 backdrop-blur-sm resize-none"
                     style={{
-                      boxShadow: '0 0 20px rgba(6, 229, 236, 0.1)'
+                      boxShadow: '0 0 20px rgba(96, 165, 250, 0.1)'
                     }}
                   />
                 </div>
 
                 {/* Client's Own Words */}
                 <div>
-                  <label className="flex items-center gap-2 text-lg font-semibold text-cyan-300 mb-3">
+                  <label className="flex items-center gap-2 text-lg font-semibold text-blue-300 mb-3">
                     <Sparkles className="w-5 h-5" />
                     Client's Own Words (Interview Transcripts)
                   </label>
@@ -198,22 +229,22 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                     value={clientWords}
                     onChange={(e) => setClientWords(e.target.value)}
                     placeholder="Paste client preferences, interview notes, or call transcripts to understand what they're really looking for..."
-                    className="w-full h-32 px-4 py-3 bg-slate-800/50 border-2 border-cyan-400/30 rounded-xl text-cyan-100 placeholder-cyan-100/30 focus:outline-none focus:border-cyan-400/60 transition-all duration-300 backdrop-blur-sm resize-none"
+                    className="w-full h-32 px-4 py-3 bg-slate-800/50 border-2 border-blue-400/30 rounded-xl text-blue-100 placeholder-blue-100/30 focus:outline-none focus:border-blue-400/60 transition-all duration-300 backdrop-blur-sm resize-none"
                     style={{
-                      boxShadow: '0 0 20px rgba(6, 229, 236, 0.1)'
+                      boxShadow: '0 0 20px rgba(96, 165, 250, 0.1)'
                     }}
                   />
                 </div>
 
                 {/* Resume Upload */}
                 <div>
-                  <label className="flex items-center gap-2 text-lg font-semibold text-cyan-300 mb-3">
+                  <label className="flex items-center gap-2 text-lg font-semibold text-blue-300 mb-3">
                     <Upload className="w-5 h-5" />
                     Candidate Resumes ({uploadedResumes.length})
                   </label>
-                  <div className="border-2 border-dashed border-cyan-400/30 rounded-xl p-8 text-center bg-slate-800/30 backdrop-blur-sm hover:border-cyan-400/60 transition-all duration-300"
+                  <div className="border-2 border-dashed border-blue-400/30 rounded-xl p-8 text-center bg-slate-800/30 backdrop-blur-sm hover:border-blue-400/60 transition-all duration-300"
                     style={{
-                      boxShadow: '0 0 20px rgba(6, 229, 236, 0.1)'
+                      boxShadow: '0 0 20px rgba(96, 165, 250, 0.1)'
                     }}
                   >
                     <input
@@ -226,17 +257,17 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                     />
                     <motion.button
                       onClick={() => resumeInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-cyan-400 hover:to-emerald-400 transition-all duration-300"
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-400 hover:to-blue-500 transition-all duration-300"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       style={{
-                        boxShadow: '0 0 30px rgba(6, 229, 236, 0.5)'
+                        boxShadow: '0 0 30px rgba(96, 165, 250, 0.5)'
                       }}
                     >
                       <Upload className="w-5 h-5" />
                       Add Resumes
                     </motion.button>
-                    <p className="text-sm text-cyan-100/50 mt-3">
+                    <p className="text-sm text-blue-100/50 mt-3">
                       Upload multiple resumes (PDF or DOCX)
                     </p>
                   </div>
@@ -249,14 +280,14 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                           key={index}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center justify-between bg-slate-800/50 p-4 rounded-xl border border-cyan-400/20 backdrop-blur-sm"
+                          className="flex items-center justify-between bg-slate-800/50 p-4 rounded-xl border border-blue-400/20 backdrop-blur-sm"
                           style={{
-                            boxShadow: '0 0 15px rgba(6, 229, 236, 0.1)'
+                            boxShadow: '0 0 15px rgba(96, 165, 250, 0.1)'
                           }}
                         >
                           <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-cyan-400" />
-                            <span className="text-sm text-cyan-100">{file.name}</span>
+                            <FileText className="w-5 h-5 text-blue-400" />
+                            <span className="text-sm text-blue-100">{file.name}</span>
                           </div>
                           <button
                             onClick={() => handleRemoveResume(index)}
@@ -274,11 +305,11 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                 <motion.button
                   onClick={handleAnalyze}
                   disabled={isAnalyzing}
-                  className="w-full py-5 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-xl font-bold text-lg hover:from-cyan-400 hover:to-emerald-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                  className="w-full py-5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-bold text-lg hover:from-blue-400 hover:to-blue-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                   whileHover={{ scale: isAnalyzing ? 1 : 1.02 }}
                   whileTap={{ scale: isAnalyzing ? 1 : 0.98 }}
                   style={{
-                    boxShadow: '0 0 40px rgba(6, 229, 236, 0.6)'
+                    boxShadow: '0 0 40px rgba(96, 165, 250, 0.6)'
                   }}
                 >
                   {isAnalyzing ? (
@@ -306,16 +337,16 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                   <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-2 border-emerald-400/50 rounded-2xl p-6 backdrop-blur-sm"
+                    className="bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-2 border-blue-400/50 rounded-2xl p-6 backdrop-blur-sm"
                     style={{
-                      boxShadow: '0 0 40px rgba(16, 185, 129, 0.3)'
+                      boxShadow: '0 0 40px rgba(96, 165, 250, 0.3)'
                     }}
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <Award className="w-8 h-8 text-emerald-300" />
-                      <h3 className="text-2xl font-bold text-emerald-300">Top Candidate</h3>
+                      <Award className="w-8 h-8 text-blue-300" />
+                      <h3 className="text-2xl font-bold text-blue-300">Top Candidate</h3>
                     </div>
-                    <p className="text-cyan-100 text-lg">{analysisResult.topCandidate}</p>
+                    <p className="text-blue-100 text-lg">{analysisResult.topCandidate}</p>
                   </motion.div>
                 )}
 
@@ -325,22 +356,22 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-slate-800/50 border border-cyan-400/30 rounded-2xl p-6 backdrop-blur-sm"
+                    className="bg-slate-800/50 border border-blue-400/30 rounded-2xl p-6 backdrop-blur-sm"
                     style={{
-                      boxShadow: '0 0 20px rgba(6, 229, 236, 0.2)'
+                      boxShadow: '0 0 20px rgba(96, 165, 250, 0.2)'
                     }}
                   >
-                    <h3 className="text-xl font-bold text-cyan-300 mb-3 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-blue-300 mb-3 flex items-center gap-2">
                       <TrendingUp className="w-6 h-6" />
                       Overall Analysis
                     </h3>
-                    <p className="text-cyan-100/80 leading-relaxed">{analysisResult.analysis}</p>
+                    <p className="text-blue-100/80 leading-relaxed">{analysisResult.analysis}</p>
                   </motion.div>
                 )}
 
                 {/* Candidates List */}
                 <div className="space-y-4">
-                  <h3 className="text-xl font-bold text-cyan-300 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-blue-300 flex items-center gap-2">
                     <Sparkles className="w-6 h-6" />
                     Ranked Candidates
                   </h3>
@@ -350,27 +381,27 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.2 + index * 0.1 }}
-                      className="bg-slate-800/50 border border-cyan-400/30 rounded-2xl p-6 hover:border-cyan-400/60 transition-all duration-300 backdrop-blur-sm"
+                      className="bg-slate-800/50 border border-blue-400/30 rounded-2xl p-6 hover:border-blue-400/60 transition-all duration-300 backdrop-blur-sm"
                       style={{
-                        boxShadow: '0 0 20px rgba(6, 229, 236, 0.1)'
+                        boxShadow: '0 0 20px rgba(96, 165, 250, 0.1)'
                       }}
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl font-bold text-cyan-300">#{index + 1}</span>
-                            <h4 className="text-xl font-bold text-cyan-100">{candidate.name}</h4>
+                            <span className="text-2xl font-bold text-blue-300">#{index + 1}</span>
+                            <h4 className="text-xl font-bold text-blue-100">{candidate.name}</h4>
                           </div>
-                          <p className="text-cyan-100/70 text-sm">{candidate.summary}</p>
+                          <p className="text-blue-100/70 text-sm">{candidate.summary}</p>
                         </div>
                         <div className="text-right ml-4">
                           <motion.div
-                            className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-emerald-300"
+                            className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-400"
                             animate={{
                               textShadow: [
-                                '0 0 10px rgba(6, 229, 236, 0.5)',
-                                '0 0 20px rgba(6, 229, 236, 0.8)',
-                                '0 0 10px rgba(6, 229, 236, 0.5)',
+                                '0 0 10px rgba(96, 165, 250, 0.5)',
+                                '0 0 20px rgba(96, 165, 250, 0.8)',
+                                '0 0 10px rgba(96, 165, 250, 0.5)',
                               ],
                             }}
                             transition={{ duration: 2, repeat: Infinity }}
@@ -378,8 +409,8 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                             {candidate.matchScore}%
                           </motion.div>
                           <div className={`text-sm font-semibold mt-1 ${
-                            candidate.recommendation === 'Strong fit' ? 'text-emerald-400' :
-                            candidate.recommendation === 'Good fit' ? 'text-cyan-400' :
+                            candidate.recommendation === 'Strong fit' ? 'text-blue-400' :
+                            candidate.recommendation === 'Good fit' ? 'text-blue-300' :
                             candidate.recommendation === 'Moderate fit' ? 'text-yellow-400' :
                             'text-orange-400'
                           }`}>
@@ -391,14 +422,14 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                       {/* Strengths */}
                       {candidate.strengths && candidate.strengths.length > 0 && (
                         <div className="mb-4">
-                          <h5 className="text-sm font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+                          <h5 className="text-sm font-semibold text-blue-300 mb-2 flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
                             Key Strengths
                           </h5>
                           <ul className="space-y-1">
                             {candidate.strengths.map((strength, idx) => (
-                              <li key={idx} className="text-sm text-cyan-100/70 flex items-start gap-2">
-                                <span className="text-emerald-400 mt-1">✓</span>
+                              <li key={idx} className="text-sm text-blue-100/70 flex items-start gap-2">
+                                <span className="text-blue-400 mt-1">✓</span>
                                 <span>{strength}</span>
                               </li>
                             ))}
@@ -415,7 +446,7 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                           </h5>
                           <ul className="space-y-1">
                             {candidate.concerns.map((concern, idx) => (
-                              <li key={idx} className="text-sm text-cyan-100/70 flex items-start gap-2">
+                              <li key={idx} className="text-sm text-blue-100/70 flex items-start gap-2">
                                 <span className="text-orange-400 mt-1">!</span>
                                 <span>{concern}</span>
                               </li>
@@ -431,7 +462,7 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                 <div className="flex gap-4 pt-4">
                   <motion.button
                     onClick={handleReset}
-                    className="flex-1 py-4 bg-slate-700/50 border border-cyan-400/30 text-cyan-300 rounded-xl font-semibold hover:bg-slate-700 hover:border-cyan-400/60 transition-all duration-300"
+                    className="flex-1 py-4 bg-slate-700/50 border border-blue-400/30 text-blue-300 rounded-xl font-semibold hover:bg-slate-700 hover:border-blue-400/60 transition-all duration-300"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -439,11 +470,11 @@ const TalentFitModal = ({ isOpen, onClose }) => {
                   </motion.button>
                   <motion.button
                     onClick={onClose}
-                    className="flex-1 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-cyan-400 hover:to-emerald-400 transition-all duration-300"
+                    className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:from-blue-400 hover:to-blue-500 transition-all duration-300"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     style={{
-                      boxShadow: '0 0 30px rgba(6, 229, 236, 0.5)'
+                      boxShadow: '0 0 30px rgba(96, 165, 250, 0.5)'
                     }}
                   >
                     Close

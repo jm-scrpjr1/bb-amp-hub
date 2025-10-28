@@ -76,7 +76,7 @@ const BasketballBounceRobot = ({
           initial={{ opacity: 0, scale: 0, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0, x: 20 }}
-          className="absolute -top-16 -right-32 z-10"
+          className="absolute -top-16 -right-32 z-50"
         >
           {/* Neon Glow Background */}
           <div className="relative w-48">

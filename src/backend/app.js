@@ -61,7 +61,9 @@ const AIAssessmentService = require('./services/aiAssessmentService');
 const { ResourceService } = require('./services/resourceService');
 
 // Import routes
+console.log('📚 About to import prompts router...');
 const promptsRouter = require('./routes/prompts');
+console.log('✅ Prompts router imported successfully');
 
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {

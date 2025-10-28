@@ -137,6 +137,12 @@ const PreLoginPage = () => {
     'ai-agents': 0,
     training: 0
   });
+  const [showBubble, setShowBubble] = useState({
+    prompts: true,
+    automations: true,
+    'ai-agents': true,
+    training: true
+  });
 
   useEffect(() => {
     const handleScroll = (e) => {
@@ -164,7 +170,7 @@ const PreLoginPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Rotate messages every 4 seconds
+  // Rotate messages every 4 seconds and toggle bubble visibility
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentMessageIndex(prev => ({
@@ -172,6 +178,12 @@ const PreLoginPage = () => {
         automations: (prev.automations + 1) % 4,
         'ai-agents': (prev['ai-agents'] + 1) % 4,
         training: (prev.training + 1) % 4
+      }));
+      setShowBubble(prev => ({
+        prompts: !prev.prompts,
+        automations: !prev.automations,
+        'ai-agents': !prev['ai-agents'],
+        training: !prev.training
       }));
     }, 4000);
     return () => clearInterval(interval);
@@ -414,7 +426,7 @@ const PreLoginPage = () => {
                 {/* Card */}
                 <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
                   {/* Chat Bubble - positioned outside card */}
-                  {currentMessageIndex[tool.id] !== undefined && (
+                  {showBubble[tool.id] && (
                     <motion.div
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}

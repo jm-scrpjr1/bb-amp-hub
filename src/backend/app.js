@@ -492,7 +492,9 @@ const authenticateUser = async (req, res, next) => {
 };
 
 // Mount prompts router with authentication
+console.log('📚 Mounting prompts router at /api/prompts');
 app.use('/api/prompts', authenticateUser, promptsRouter);
+console.log('✅ Prompts router mounted successfully');
 
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {

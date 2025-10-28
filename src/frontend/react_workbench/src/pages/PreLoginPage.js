@@ -520,10 +520,9 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-cyan-300 mb-2">
-                        Prompt #{num}
+                      <div className="text-lg font-bold text-cyan-300">
+                        Instant Prompt {num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -578,10 +577,9 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-green-300 mb-2">
-                        Automation #{num}
+                      <div className="text-lg font-bold text-green-300">
+                        Guided Builder {num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -636,10 +634,9 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-purple-300 mb-2">
-                        AI Agent #{num}
+                      <div className="text-lg font-bold text-purple-300">
+                        Agentic Workflow {num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -694,10 +691,9 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-pink-300 mb-2">
-                        Training #{num}
+                      <div className="text-lg font-bold text-pink-300">
+                        Training {num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
                     </div>
 
                     {/* Shine Effect on Hover */}

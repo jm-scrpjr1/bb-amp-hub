@@ -35,7 +35,8 @@ const BasketballBounceRobot = ({
   src,
   alt,
   message,
-  delay = 0
+  delay = 0,
+  showBubble = true
 }) => {
   const [showMessage, setShowMessage] = useState(false);
 
@@ -70,31 +71,6 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud - Neon Glow Style - Top Right Corner */}
-      {showMessage && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="absolute -top-8 -right-16 z-50 pointer-events-none"
-        >
-          <div className="relative">
-            {/* Main bubble with neon border - wider for text */}
-            <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-8 py-5 border-2 border-cyan-400/60 shadow-2xl w-64"
-              style={{
-                boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
-              }}>
-              <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{message}</p>
-
-              {/* Neon tail pointing down-left to robot */}
-              <div className="absolute -bottom-2 left-8 w-4 h-4 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
-                style={{
-                  filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
-                }}></div>
-            </div>
-          </div>
-        </motion.div>
-      )}
 
       {/* Robot Image with Basketball Bounce */}
       <motion.div
@@ -437,6 +413,29 @@ const PreLoginPage = () => {
 
                 {/* Card */}
                 <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
+                  {/* Chat Bubble - positioned outside card */}
+                  {currentMessageIndex[tool.id] !== undefined && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="absolute -top-20 -right-8 z-50 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-8 py-5 border-2 border-cyan-400/60 shadow-2xl w-64"
+                          style={{
+                            boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
+                          }}>
+                          <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{tool.messages[currentMessageIndex[tool.id]]}</p>
+                          <div className="absolute -bottom-2 left-8 w-4 h-4 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
+                            }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Robot Display */}
                   <div className="w-full h-48 mb-6 flex items-center justify-center">
                     <BasketballBounceRobot

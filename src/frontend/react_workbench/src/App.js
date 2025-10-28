@@ -94,13 +94,14 @@ function App() {
             <div className="App">
           <Routes>
             {/* Public Routes */}
+            <Route path="/" element={<PreLoginPage />} />
             <Route path="/explore" element={<PreLoginPage />} />
             <Route path="/auth/signin" element={<SignInPage />} />
             <Route path="/auth/signin/" element={<SignInPage />} />
             <Route path="/signin" element={<SignInPage />} />
-            
+
             {/* Protected Routes */}
-            <Route path="/" element={
+            <Route path="/home" element={
               <ProtectedRoute>
                 <HomePage />
               </ProtectedRoute>

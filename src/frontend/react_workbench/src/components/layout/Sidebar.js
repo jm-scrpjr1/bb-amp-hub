@@ -29,7 +29,7 @@ import { useAuth } from '../../providers/AuthProvider';
 // Navigation items matching the Next.js workbench structure
 const navigationItems = [
   // MY AI-AMPLIFIERS Section
-  { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.png', path: '/', active: true },
+  { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.png', path: '/home', active: true },
   { id: 'prompt-tutor', name: 'Instant Prompts', icon: '/images/PROMPT ICON.png', path: '/prompt-tutor' },
   { id: 'automations', name: 'Guided Builders', icon: '/images/AUTOMATION ICON.png', path: '/automations' },
   { id: 'ai-agents', name: 'Agentic Workflows', icon: '/images/AI AGENT ICON.png', path: '/ai-agents' },
@@ -120,8 +120,8 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   }, [navigate, onClose, signOut]);
 
   const isActive = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
+    if (path === '/home') {
+      return location.pathname === '/home';
     }
     return location.pathname.startsWith(path);
   };

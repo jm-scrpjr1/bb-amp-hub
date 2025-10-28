@@ -240,6 +240,13 @@ const PreLoginPage = () => {
     }
   ];
 
+  const scrollToRobots = () => {
+    const robotsSection = document.getElementById('robots-section');
+    if (robotsSection) {
+      robotsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-scroll scroll-smooth">
       {/* Dissolve particles - THANOS SNAP EFFECT */}
@@ -303,23 +310,27 @@ const PreLoginPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
         >
-          <p className="text-cyan-400 text-lg font-semibold mb-4">Welcome to AI Workbench™</p>
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
-            Where Your Talent
-            <br />
-            Gets <span className="text-cyan-400">Amplified</span>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-12 leading-tight">
+            Ready to amplify your talent?
           </h1>
-          <motion.button
-            onClick={() => {
-              // Scroll to bottom section
-              window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-            }}
-            className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-400/50 transition-all"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Explore Now →
-          </motion.button>
+          <div className="flex flex-col gap-4 items-center">
+            <motion.button
+              onClick={() => navigate('/auth/signin')}
+              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-cyan-400/50 transition-all w-full md:w-auto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Get Started with SSO Login →
+            </motion.button>
+            <motion.button
+              onClick={scrollToRobots}
+              className="border-2 border-cyan-400 text-cyan-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-cyan-400/10 transition-all w-full md:w-auto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Explore Now →
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Scroll indicator */}
@@ -338,7 +349,7 @@ const PreLoginPage = () => {
       </div>
 
       {/* Bottom Feature Section */}
-      <div className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-blue-900/50 to-slate-900 py-20 px-6 overflow-hidden">
+      <div id="robots-section" className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-blue-900/50 to-slate-900 py-20 px-6 overflow-hidden">
         {/* Decorative background elements - ENHANCED & VIBRANT */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Cyan glow - top left */}

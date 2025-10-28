@@ -60,6 +60,9 @@ const { PermissionService } = require('./services/permissionService');
 const AIAssessmentService = require('./services/aiAssessmentService');
 const { ResourceService } = require('./services/resourceService');
 
+// Import routes
+const promptsRouter = require('./routes/prompts');
+
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
   IT_SUPPORT: {
@@ -487,6 +490,9 @@ const authenticateUser = async (req, res, next) => {
     res.status(401).json({ error: 'Authentication failed' });
   }
 };
+
+// Mount prompts router with authentication
+app.use('/api/prompts', authenticateUser, promptsRouter);
 
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {

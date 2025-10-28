@@ -1,6 +1,7 @@
 
 // Load environment variables
 require('dotenv').config();
+console.log('🚀 APP.JS STARTING - Loading environment variables');
 
 const express = require("express");
 const cors = require("cors");

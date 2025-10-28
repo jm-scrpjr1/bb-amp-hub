@@ -76,32 +76,48 @@ class ResumeAnalyzerService {
       // Create new thread
       const threadId = await this.createThread();
 
-      // Process resume files - extract text from DOCX, upload PDFs
-      const resumeTexts = [];
-      const uploadedFileIds = [];
+      // Process resume files - extract text from DOCX, upload PDFs (IN PARALLEL for speed)
+      console.log('⚡ Processing all files in parallel for maximum speed...');
 
-      for (const resumeFile of resumeFiles) {
+      const fileProcessingPromises = resumeFiles.map(async (resumeFile) => {
         const fileExtension = path.extname(resumeFile.originalname).toLowerCase();
 
         if (fileExtension === '.docx') {
           // Extract text from DOCX
           const extractedText = await this.extractTextFromDocx(resumeFile.buffer);
-          resumeTexts.push({
+          console.log(`✅ Extracted text from DOCX: ${resumeFile.originalname}`);
+          return {
+            type: 'text',
             name: resumeFile.originalname,
             text: extractedText
-          });
-          console.log(`✅ Extracted text from DOCX: ${resumeFile.originalname}`);
+          };
         } else if (fileExtension === '.pdf') {
           // Upload PDF to OpenAI for file_search
           const fileId = await this.uploadFile(resumeFile.buffer, resumeFile.originalname);
-          uploadedFileIds.push(fileId);
           console.log(`✅ Uploaded PDF: ${resumeFile.originalname}`);
+          return {
+            type: 'file',
+            fileId: fileId
+          };
         } else {
           console.warn(`⚠️ Unsupported file type: ${fileExtension}`);
+          return null;
         }
-      }
+      });
 
-      console.log(`✅ Processed ${resumeTexts.length} DOCX files and ${uploadedFileIds.length} PDF files`);
+      // Wait for all files to be processed in parallel
+      const processedFiles = await Promise.all(fileProcessingPromises);
+
+      // Separate into resumeTexts and uploadedFileIds
+      const resumeTexts = processedFiles
+        .filter(f => f && f.type === 'text')
+        .map(f => ({ name: f.name, text: f.text }));
+
+      const uploadedFileIds = processedFiles
+        .filter(f => f && f.type === 'file')
+        .map(f => f.fileId);
+
+      console.log(`✅ Processed ${resumeTexts.length} DOCX files and ${uploadedFileIds.length} PDF files in parallel`);
 
       // Build resume content string from extracted DOCX texts
       let resumeContent = '';

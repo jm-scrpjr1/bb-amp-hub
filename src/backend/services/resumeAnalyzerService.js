@@ -211,21 +211,38 @@ Format your response as JSON with this structure:
       const responseText = assistantMessage.content[0]?.text?.value || 'No response generated';
 
       console.log('✅ Resume Analyzer responded');
+      console.log('📄 Raw response preview:', responseText.substring(0, 200));
 
       // Parse JSON response
       let parsedResponse;
       try {
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsedResponse = JSON.parse(jsonMatch[0]);
+        // Try to extract JSON from markdown code blocks first
+        const codeBlockMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+        if (codeBlockMatch) {
+          console.log('📦 Found JSON in code block');
+          parsedResponse = JSON.parse(codeBlockMatch[1]);
         } else {
-          parsedResponse = JSON.parse(responseText);
+          // Try to find JSON object in the text
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            console.log('📦 Found JSON object in text');
+            parsedResponse = JSON.parse(jsonMatch[0]);
+          } else {
+            console.log('📦 Attempting to parse entire response as JSON');
+            parsedResponse = JSON.parse(responseText);
+          }
         }
       } catch (parseError) {
         console.error('❌ Failed to parse JSON response:', parseError);
+        console.error('📄 Response text:', responseText);
         return {
           success: true,
-          response: responseText,
+          analysis: {
+            candidates: [],
+            topCandidate: 'Unknown',
+            analysis: responseText,
+            error: 'Failed to parse JSON response'
+          },
           threadId: threadId,
           format: 'text'
         };

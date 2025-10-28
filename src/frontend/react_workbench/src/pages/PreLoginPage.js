@@ -400,22 +400,22 @@ const PreLoginPage = () => {
         <div className="relative z-10 max-w-7xl mx-auto">
           {/* Section Header */}
           <motion.div
-            className="text-center mb-6"
+            className="text-center mb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
               Bold AI Workbench™
             </h2>
-            <p className="text-lg text-cyan-400 font-semibold mb-2">
+            <p className="text-xl text-cyan-400 font-semibold mb-3">
               Talent + Tools Deliver AI Amplified Results™
             </p>
-            <p className="text-sm text-gray-300 max-w-2xl mx-auto">
+            <p className="text-base text-gray-300 max-w-3xl mx-auto mb-2">
               Welcome to the AI Workbench — your space to explore and use over 400 proprietary AI-powered tools designed to make work faster, smarter, and easier.
             </p>
-            <p className="text-xs text-gray-400 mt-2">
+            <p className="text-sm text-gray-400">
               Tools are grouped into four simple categories so you can quickly find what you need:
             </p>
           </motion.div>
@@ -435,7 +435,7 @@ const PreLoginPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
                 {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
                   {/* Chat Bubble - positioned outside card */}
                   {showBubble[tool.id] && (
                     <motion.div
@@ -460,7 +460,7 @@ const PreLoginPage = () => {
                   )}
 
                   {/* Robot Display */}
-                  <div className="w-full h-48 mb-6 flex items-center justify-center">
+                  <div className="w-full h-56 mb-4 flex items-center justify-center">
                     <BasketballBounceRobot
                       src={tool.image}
                       alt={tool.title}
@@ -470,7 +470,7 @@ const PreLoginPage = () => {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-white text-center">
+                  <h3 className="text-lg font-bold text-white text-center">
                     {tool.title}
                   </h3>
                 </div>
@@ -531,7 +531,7 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-cyan-300">
+                      <div className="text-xl font-bold text-cyan-300">
                         Instant Prompt {num}
                       </div>
                     </div>
@@ -588,7 +588,7 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-green-300">
+                      <div className="text-xl font-bold text-green-300">
                         Guided Builder {num}
                       </div>
                     </div>
@@ -645,7 +645,7 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-purple-300">
+                      <div className="text-xl font-bold text-purple-300">
                         Agentic Workflow {num}
                       </div>
                     </div>
@@ -702,7 +702,7 @@ const PreLoginPage = () => {
 
                     {/* Content */}
                     <div className="relative z-10">
-                      <div className="text-lg font-bold text-pink-300">
+                      <div className="text-xl font-bold text-pink-300">
                         Training {num}
                       </div>
                     </div>

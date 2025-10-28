@@ -215,7 +215,7 @@ class ResumeBuilderService {
       console.log('📄 Generating PDF from HTML...');
 
       // Read and convert header and footer images to base64
-      const imagesPath = path.resolve(__dirname, '../frontend/react_workbench/public/images');
+      const imagesPath = path.resolve(__dirname, '../../frontend/react_workbench/public/images');
       const headerImagePath = path.join(imagesPath, 'Resume Header.png');
       const footerImagePath = path.join(imagesPath, 'Resume Footer.png');
 

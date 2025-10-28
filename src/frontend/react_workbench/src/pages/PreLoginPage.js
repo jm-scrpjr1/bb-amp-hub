@@ -590,7 +590,7 @@ const PreLoginPage = () => {
                 {promptNames.map((name, index) => (
                   <motion.div
                     key={`prompt-${index}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500 h-20 flex items-center"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -628,8 +628,8 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-cyan-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-cyan-300 leading-tight">
                         {name}
                       </div>
                     </div>
@@ -699,7 +699,7 @@ const PreLoginPage = () => {
                 {automationNames.map((name, index) => (
                   <motion.div
                     key={`automation-${index}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500 h-20 flex items-center"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -737,8 +737,8 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-green-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-green-300 leading-tight">
                         {name}
                       </div>
                     </div>
@@ -808,7 +808,7 @@ const PreLoginPage = () => {
                 {aiAgentNames.map((name, index) => (
                   <motion.div
                     key={`ai-agent-${index}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500 h-20 flex items-center"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -846,8 +846,8 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-purple-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-purple-300 leading-tight">
                         {name}
                       </div>
                     </div>
@@ -917,7 +917,7 @@ const PreLoginPage = () => {
                 {trainingNames.map((name, index) => (
                   <motion.div
                     key={`training-${index}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500 h-20 flex items-center"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -955,8 +955,8 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-pink-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-pink-300 leading-tight">
                         {name}
                       </div>
                     </div>

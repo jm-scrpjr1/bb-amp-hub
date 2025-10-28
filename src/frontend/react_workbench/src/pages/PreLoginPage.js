@@ -70,17 +70,32 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud */}
+      {/* Floating Message Cloud - Neon Glow Style */}
       {showMessage && (
         <motion.div
           initial={{ opacity: 0, scale: 0, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0, y: -20 }}
-          className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-10"
+          className="absolute -top-24 left-1/2 transform -translate-x-1/2 z-10"
         >
-          <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-lg border border-cyan-200/50 whitespace-nowrap">
-            <p className="text-sm font-medium text-gray-800">{message}</p>
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white/95"></div>
+          {/* Neon Glow Background */}
+          <div className="relative">
+            {/* Outer glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 via-purple-500/30 to-cyan-500/30 rounded-3xl blur-xl"></div>
+
+            {/* Main bubble with neon border */}
+            <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-5 py-3 border-2 border-cyan-400/60 whitespace-nowrap shadow-2xl"
+              style={{
+                boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
+              }}>
+              <p className="text-sm font-semibold text-cyan-100">{message}</p>
+
+              {/* Neon tail */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-cyan-400/60"
+                style={{
+                  filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
+                }}></div>
+            </div>
           </div>
         </motion.div>
       )}

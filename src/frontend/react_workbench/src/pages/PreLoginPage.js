@@ -436,7 +436,7 @@ const PreLoginPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
                 {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
                   {/* Robot Display */}
                   <div className="w-full h-48 mb-6 flex items-center justify-center">
                     <BasketballBounceRobot

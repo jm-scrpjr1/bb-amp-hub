@@ -266,37 +266,70 @@ const PreLoginPage = () => {
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Logo in top LEFT with glow effect */}
+        {/* Logo in top LEFT with unreal glow effect */}
         <motion.div
-          className="absolute top-8 left-8 z-20"
+          className="absolute top-6 left-6 z-20 group"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
+          whileHover={{ scale: 1.05 }}
         >
           <div className="relative">
-            {/* Glow effect */}
+            {/* Animated glow background - multiple layers for unreal effect */}
             <motion.div
-              className="absolute inset-0 rounded-lg blur-xl"
+              className="absolute inset-0 rounded-full blur-3xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+              style={{
+                background: 'radial-gradient(circle, rgba(6, 229, 236, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                width: '90px',
+                height: '90px',
+                left: '-18px',
+                top: '-18px'
+              }}
               animate={{
-                boxShadow: [
-                  '0 0 20px rgba(6, 229, 236, 0.4)',
-                  '0 0 40px rgba(6, 229, 236, 0.8)',
-                  '0 0 20px rgba(6, 229, 236, 0.4)'
-                ]
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5]
               }}
               transition={{
-                duration: 2,
+                duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
             />
-            {/* Logo image - SVG with glow effect */}
-            <img
+
+            {/* Inner glow pulse */}
+            <motion.div
+              className="absolute inset-0 rounded-full"
+              style={{
+                width: '90px',
+                height: '90px',
+                left: '-18px',
+                top: '-18px',
+                background: 'radial-gradient(circle, rgba(6, 229, 236, 0.3) 0%, transparent 70%)'
+              }}
+              animate={{
+                boxShadow: [
+                  '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)',
+                  '0 0 40px rgba(6, 229, 236, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                  '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)'
+                ]
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+
+            {/* Logo image - SVG with premium glow */}
+            <motion.img
               src="/images/BOLD LIGHT LOGO.svg"
               alt="Bold Business Logo"
-              className="relative h-20 w-auto drop-shadow-lg"
+              className="relative h-14 w-auto drop-shadow-2xl"
               style={{
-                filter: 'drop-shadow(0 0 20px rgba(6, 229, 236, 0.8))',
+                filter: 'drop-shadow(0 0 25px rgba(6, 229, 236, 0.9)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.4))',
+              }}
+              whileHover={{
+                filter: 'drop-shadow(0 0 35px rgba(6, 229, 236, 1)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.6))'
               }}
             />
           </div>

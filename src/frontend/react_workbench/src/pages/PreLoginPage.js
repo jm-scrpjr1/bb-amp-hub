@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import AnimatedRobot from '../components/ui/AnimatedRobot';
 
 // Particle dissolve effect component - EPIC THANOS SNAP
 const DissolveParticle = ({ x, y, delay, size = 3 }) => {
@@ -30,146 +31,7 @@ const DissolveParticle = ({ x, y, delay, size = 3 }) => {
   );
 };
 
-// Animated Robot Component with Floating Messages
-const AnimatedRobot = ({
-  src,
-  alt,
-  message,
-  delay = 0,
-  animationType = 'bounce'
-}) => {
-  const [showMessage, setShowMessage] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowMessage(true);
-      const messageInterval = setInterval(() => {
-        setShowMessage(prev => !prev);
-      }, 3000);
-      return () => clearInterval(messageInterval);
-    }, delay);
-    return () => clearTimeout(timer);
-  }, [delay]);
-
-  const getAnimationVariants = () => {
-    switch (animationType) {
-      case 'bounce':
-        return {
-          animate: {
-            y: [0, -30, 0],
-            x: [0, 8, -8, 0],
-            rotate: [0, 8, -8, 0],
-            scale: [1, 1.1, 1]
-          },
-          transition: {
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }
-        };
-      case 'shake':
-        return {
-          animate: {
-            x: [0, -10, 10, -10, 10, 0],
-            y: [0, -5, 5, -5, 5, 0],
-            rotate: [0, -3, 3, -3, 3, 0]
-          },
-          transition: {
-            duration: 1.2,
-            repeat: Infinity,
-            repeatDelay: 2
-          }
-        };
-      case 'float':
-        return {
-          animate: {
-            y: [0, -25, 0],
-            x: [0, 12, -12, 0],
-            rotate: [0, 5, -5, 0],
-            scale: [1, 1.05, 1]
-          },
-          transition: {
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }
-        };
-      default:
-        return {
-          animate: {
-            y: [0, -20, 0],
-            x: [0, 10, -10, 0],
-            rotate: [0, 5, -5, 0]
-          },
-          transition: {
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }
-        };
-    }
-  };
-
-  return (
-    <motion.div
-      className="relative w-full h-full flex items-center justify-center"
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
-    >
-      {/* Floating Message Cloud */}
-      <AnimatePresence>
-        {showMessage && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0, y: -20 }}
-            className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-10"
-          >
-            <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-lg border border-cyan-200/50 whitespace-nowrap">
-              <p className="text-sm font-medium text-gray-800">{message}</p>
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white/95"></div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Robot Image */}
-      <motion.div
-        className="w-40 h-40 relative"
-        {...getAnimationVariants()}
-        whileHover={{ scale: 1.15 }}
-      >
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-full object-contain drop-shadow-lg"
-          onError={(e) => {
-            console.warn(`Failed to load robot image: ${src}`);
-            e.target.src = '/images/default.png';
-          }}
-        />
-
-        {/* Glowing effect */}
-        <motion.div
-          className="absolute inset-0 rounded-full"
-          animate={{
-            boxShadow: [
-              '0 0 20px rgba(6, 229, 236, 0.3)',
-              '0 0 40px rgba(6, 229, 236, 0.6)',
-              '0 0 20px rgba(6, 229, 236, 0.3)'
-            ]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
-    </motion.div>
-  );
-};
 
 const PreLoginPage = () => {
   const navigate = useNavigate();

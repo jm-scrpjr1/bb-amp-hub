@@ -33,6 +33,7 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import ProfilePage from './pages/ProfilePage';
 import SubmitBoldIdeaPage from './pages/SubmitBoldIdeaPage';
 import SignInPage from './pages/SignInPage';
+import PreLoginPage from './pages/PreLoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Layout Components
@@ -93,6 +94,7 @@ function App() {
             <div className="App">
           <Routes>
             {/* Public Routes */}
+            <Route path="/explore" element={<PreLoginPage />} />
             <Route path="/auth/signin" element={<SignInPage />} />
             <Route path="/auth/signin/" element={<SignInPage />} />
             <Route path="/signin" element={<SignInPage />} />

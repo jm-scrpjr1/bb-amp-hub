@@ -1,0 +1,359 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Animated Robot Component with Floating Messages
+const AnimatedRobot = ({
+  src,
+  alt,
+  message,
+  delay = 0,
+  animationType = 'bounce'
+}) => {
+  const [showMessage, setShowMessage] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMessage(true);
+      const messageInterval = setInterval(() => {
+        setShowMessage(prev => !prev);
+      }, 3000);
+      return () => clearInterval(messageInterval);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  const getAnimationVariants = () => {
+    switch (animationType) {
+      case 'bounce':
+        return {
+          animate: {
+            y: [0, -30, 0],
+            x: [0, 8, -8, 0],
+            rotate: [0, 8, -8, 0],
+            scale: [1, 1.1, 1]
+          },
+          transition: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        };
+      case 'shake':
+        return {
+          animate: {
+            x: [0, -10, 10, -10, 10, 0],
+            y: [0, -5, 5, -5, 5, 0],
+            rotate: [0, -3, 3, -3, 3, 0]
+          },
+          transition: {
+            duration: 1.2,
+            repeat: Infinity,
+            repeatDelay: 2
+          }
+        };
+      case 'float':
+        return {
+          animate: {
+            y: [0, -25, 0],
+            x: [0, 12, -12, 0],
+            rotate: [0, 5, -5, 0],
+            scale: [1, 1.05, 1]
+          },
+          transition: {
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        };
+      default:
+        return {
+          animate: {
+            y: [0, -20, 0],
+            x: [0, 10, -10, 0],
+            rotate: [0, 5, -5, 0]
+          },
+          transition: {
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        };
+    }
+  };
+
+  return (
+    <motion.div
+      className="relative w-full h-full flex items-center justify-center"
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
+    >
+      {/* Floating Message Cloud */}
+      <AnimatePresence>
+        {showMessage && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0, y: -20 }}
+            className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-10"
+          >
+            <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-lg border border-cyan-200/50 whitespace-nowrap">
+              <p className="text-sm font-medium text-gray-800">{message}</p>
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white/95"></div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Robot Image */}
+      <motion.div
+        className="w-40 h-40 relative"
+        {...getAnimationVariants()}
+        whileHover={{ scale: 1.15 }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-contain drop-shadow-lg"
+          onError={(e) => {
+            console.warn(`Failed to load robot image: ${src}`);
+            e.target.src = '/images/default.png';
+          }}
+        />
+
+        {/* Glowing effect */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          animate={{
+            boxShadow: [
+              '0 0 20px rgba(6, 229, 236, 0.3)',
+              '0 0 40px rgba(6, 229, 236, 0.6)',
+              '0 0 20px rgba(6, 229, 236, 0.3)'
+            ]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const PreLoginPage = () => {
+  const navigate = useNavigate();
+
+  const toolCategories = [
+    {
+      id: 'prompts',
+      title: 'Instant Prompts',
+      image: '/images/PROMPT 1.png',
+      animation: 'bounce',
+      message: "Need the perfect prompt? I've got you covered! 🎯"
+    },
+    {
+      id: 'automations',
+      title: 'Guided Builders',
+      image: '/images/AUTOMATION 3.png',
+      animation: 'shake',
+      message: "Why do it manually when I can automate it? ⚡"
+    },
+    {
+      id: 'ai-agents',
+      title: 'Agentic Workflows',
+      image: '/images/AI AGENT 1.png',
+      animation: 'float',
+      message: "Meet my AI squad - we're quite the team! 👥"
+    },
+    {
+      id: 'training',
+      title: 'Knowledge and Trainings',
+      image: '/images/AI TRAINING 3.png',
+      animation: 'bounce',
+      message: "Let's level up your AI skills! 📚"
+    }
+  ];
+
+  return (
+    <div className="w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-scroll scroll-smooth">
+      {/* Top Hero Section */}
+      <div
+        className="relative w-full h-screen bg-cover bg-center flex flex-col items-center justify-center overflow-hidden"
+        style={{
+          backgroundImage: 'url(/images/Iconic.png)',
+          backgroundAttachment: 'fixed'
+        }}
+      >
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Logo in top right */}
+        <motion.div
+          className="absolute top-8 right-8 z-20"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <img
+            src="/images/AI Workbench Logo.png"
+            alt="AI Workbench Logo"
+            className="h-12 w-auto drop-shadow-lg"
+          />
+        </motion.div>
+
+        {/* Navigation Links */}
+        <motion.div
+          className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+        >
+          <a href="#" className="text-white text-sm font-medium hover:text-cyan-400 transition">Home</a>
+          <a href="#" className="text-white text-sm font-medium hover:text-cyan-400 transition">Blogs</a>
+          <button
+            onClick={() => navigate('/auth/signin')}
+            className="text-white text-sm font-medium hover:text-cyan-400 transition"
+          >
+            Login
+          </button>
+        </motion.div>
+
+        {/* Hero Content */}
+        <motion.div
+          className="relative z-10 text-center max-w-2xl px-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+        >
+          <p className="text-cyan-400 text-lg font-semibold mb-4">Welcome to AI Workbench™</p>
+          <h1 className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
+            Where Your Talent
+            <br />
+            Gets <span className="text-cyan-400">Amplified</span>
+          </h1>
+          <motion.button
+            onClick={() => {
+              // Scroll to bottom section
+              window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+            }}
+            className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:shadow-cyan-400/50 transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Explore Now →
+          </motion.button>
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          className="absolute bottom-8 z-10"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <div className="text-white text-center">
+            <p className="text-sm mb-2">Scroll to explore</p>
+            <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Bottom Feature Section */}
+      <div className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-purple-900/30 to-slate-900 py-20 px-6">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Bold AI Workbench™
+            </h2>
+            <p className="text-xl text-cyan-400 font-semibold mb-4">
+              Talent + Tools Deliver AI Amplified Results™
+            </p>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              Welcome to the AI Workbench — your space to explore and use over 400 proprietary AI-powered tools designed to make work faster, smarter, and easier.
+            </p>
+            <p className="text-gray-400 mt-4">
+              Tools are grouped into four simple categories so you can quickly find what you need:
+            </p>
+          </motion.div>
+
+          {/* Tool Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {toolCategories.map((tool, index) => (
+              <motion.div
+                key={tool.id}
+                className="group relative"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                {/* Card Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
+
+                {/* Card */}
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15">
+                  {/* Robot Display */}
+                  <div className="w-full h-48 mb-6 flex items-center justify-center">
+                    <AnimatedRobot
+                      src={tool.image}
+                      alt={tool.title}
+                      message={tool.message}
+                      delay={index * 200}
+                      animationType={tool.animation}
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-bold text-white text-center">
+                    {tool.title}
+                  </h3>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* CTA Section */}
+          <motion.div
+            className="text-center mt-20"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <p className="text-gray-300 mb-8 text-lg">
+              Ready to amplify your talent?
+            </p>
+            <motion.button
+              onClick={() => navigate('/auth/signin')}
+              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-cyan-400/50 transition-all"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Get Started with SSO Login →
+            </motion.button>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PreLoginPage;
+

@@ -196,15 +196,30 @@ const RecruitingPromptsPage = () => {
         formData.append(`resumes`, file);
       });
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/resume-analyzer`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
+      console.log('🔍 Resume Analyzer API URL:', `${apiUrl}/resume-analyzer`);
+
+      const response = await fetch(`${apiUrl}/resume-analyzer`, {
         method: 'POST',
         body: formData
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', response.headers);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error('❌ Non-JSON response:', textResponse.substring(0, 500));
+        throw new Error(`Server returned non-JSON response (${response.status}). Check console for details.`);
+      }
+
       const data = await response.json();
+      console.log('📦 Response data:', data);
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to analyze resumes');
+        throw new Error(data.message || data.error || 'Failed to analyze resumes');
       }
 
       setAnalyzerResult(data.analysis);

@@ -6,7 +6,7 @@ import AnimatedRobot from '../ui/AnimatedRobot';
 const quickstartTiles = [
   {
     id: 'prompts',
-    title: 'Prompts',
+    title: 'Instant Prompts',
     image: '/images/PROMPT 1.png',
     animation: 'bounce',
     color: 'cyan',
@@ -20,7 +20,7 @@ const quickstartTiles = [
   },
   {
     id: 'automations',
-    title: 'Automations',
+    title: 'Guided Builders',
     image: '/images/AUTOMATION 3.png',
     animation: 'bounce',
     color: 'yellow',
@@ -34,7 +34,7 @@ const quickstartTiles = [
   },
   {
     id: 'ai-agents',
-    title: 'AI Agents',
+    title: 'Agentic Workflows',
     image: '/images/AI AGENT 1.png',
     animation: 'bounce',
     color: 'red',
@@ -48,7 +48,7 @@ const quickstartTiles = [
   },
   {
     id: 'training',
-    title: 'Training',
+    title: 'Knowledge and Trainings',
     image: '/images/AI TRAINING 3.png',
     animation: 'bounce',
     color: 'purple',

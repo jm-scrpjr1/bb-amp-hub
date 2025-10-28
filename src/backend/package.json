@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
+    "build": "node src/backend/build.js",
+    "start": "npm run build && node app.js",
     "dev": "node app.js",
     "studio": "prisma studio",
     "db:generate": "prisma generate",

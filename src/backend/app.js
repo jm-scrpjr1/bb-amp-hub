@@ -1,7 +1,6 @@
 
 // Load environment variables
 require('dotenv').config();
-console.log('🚀 APP.JS STARTING - Loading environment variables');
 
 const express = require("express");
 const cors = require("cors");
@@ -62,9 +61,7 @@ const AIAssessmentService = require('./services/aiAssessmentService');
 const { ResourceService } = require('./services/resourceService');
 
 // Import routes
-console.log('📚 About to import prompts router...');
 const promptsRouter = require('./routes/prompts');
-console.log('✅ Prompts router imported successfully');
 
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
@@ -495,9 +492,7 @@ const authenticateUser = async (req, res, next) => {
 };
 
 // Mount prompts router with authentication
-console.log('📚 Mounting prompts router at /api/prompts');
 app.use('/api/prompts', authenticateUser, promptsRouter);
-console.log('✅ Prompts router mounted successfully');
 
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {

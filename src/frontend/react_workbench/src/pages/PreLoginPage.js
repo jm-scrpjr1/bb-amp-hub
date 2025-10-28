@@ -478,10 +478,10 @@ const PreLoginPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Prompts Column */}
               <div className="space-y-4">
-                {[1, 2, 3].map((num) => (
+                {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`prompt-${num}`}
-                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    className="group relative bg-white/10 backdrop-blur-md border border-cyan-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-cyan-400/80 transition-all duration-300 hover:bg-white/15"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -505,25 +505,12 @@ const PreLoginPage = () => {
                       </div>
                     </motion.div>
 
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-
-                    {/* Animated Border */}
-                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 opacity-20 blur-lg" />
-                    </div>
-
                     {/* Content */}
                     <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-2xl font-bold text-cyan-300">
+                      <div className="text-lg font-bold text-cyan-300">
                         Prompt #{num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
-                    </div>
-
-                    {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                      <p className="text-gray-300 text-xs">Insert Name</p>
                     </div>
                   </motion.div>
                 ))}
@@ -531,10 +518,10 @@ const PreLoginPage = () => {
 
               {/* Automations Column */}
               <div className="space-y-4">
-                {[1, 2, 3].map((num) => (
+                {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`automation-${num}`}
-                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    className="group relative bg-white/10 backdrop-blur-md border border-green-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-green-400/80 transition-all duration-300 hover:bg-white/15"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -558,25 +545,12 @@ const PreLoginPage = () => {
                       </div>
                     </motion.div>
 
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-
-                    {/* Animated Border */}
-                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 opacity-20 blur-lg" />
-                    </div>
-
                     {/* Content */}
                     <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-2xl font-bold text-green-300">
+                      <div className="text-lg font-bold text-green-300">
                         Automation #{num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
-                    </div>
-
-                    {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                      <p className="text-gray-300 text-xs">Insert Name</p>
                     </div>
                   </motion.div>
                 ))}
@@ -584,10 +558,10 @@ const PreLoginPage = () => {
 
               {/* AI Agents Column */}
               <div className="space-y-4">
-                {[1, 2, 3].map((num) => (
+                {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`ai-agent-${num}`}
-                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    className="group relative bg-white/10 backdrop-blur-md border border-purple-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-purple-400/80 transition-all duration-300 hover:bg-white/15"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -611,25 +585,12 @@ const PreLoginPage = () => {
                       </div>
                     </motion.div>
 
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-
-                    {/* Animated Border */}
-                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-400 to-violet-500 opacity-20 blur-lg" />
-                    </div>
-
                     {/* Content */}
                     <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-2xl font-bold text-purple-300">
+                      <div className="text-lg font-bold text-purple-300">
                         AI Agent #{num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
-                    </div>
-
-                    {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                      <p className="text-gray-300 text-xs">Insert Name</p>
                     </div>
                   </motion.div>
                 ))}
@@ -637,10 +598,10 @@ const PreLoginPage = () => {
 
               {/* Training Column */}
               <div className="space-y-4">
-                {[1, 2, 3].map((num) => (
+                {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`training-${num}`}
-                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    className="group relative bg-white/10 backdrop-blur-md border border-pink-400/40 rounded-2xl p-4 cursor-pointer overflow-visible hover:border-pink-400/80 transition-all duration-300 hover:bg-white/15"
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -664,25 +625,12 @@ const PreLoginPage = () => {
                       </div>
                     </motion.div>
 
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/20 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-
-                    {/* Animated Border */}
-                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-pink-400 to-rose-500 opacity-20 blur-lg" />
-                    </div>
-
                     {/* Content */}
                     <div className="relative z-10 flex items-center gap-3">
-                      <div className="text-2xl font-bold text-pink-300">
+                      <div className="text-lg font-bold text-pink-300">
                         Training #{num}
                       </div>
-                      <p className="text-gray-300 text-sm">Insert Name</p>
-                    </div>
-
-                    {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                      <p className="text-gray-300 text-xs">Insert Name</p>
                     </div>
                   </motion.div>
                 ))}

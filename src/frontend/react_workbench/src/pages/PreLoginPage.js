@@ -175,6 +175,12 @@ const PreLoginPage = () => {
   const navigate = useNavigate();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [particles, setParticles] = useState([]);
+  const [currentMessageIndex, setCurrentMessageIndex] = useState({
+    prompts: 0,
+    automations: 0,
+    'ai-agents': 0,
+    training: 0
+  });
 
   useEffect(() => {
     const handleScroll = (e) => {
@@ -202,34 +208,67 @@ const PreLoginPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Rotate messages every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex(prev => ({
+        prompts: (prev.prompts + 1) % 4,
+        automations: (prev.automations + 1) % 4,
+        'ai-agents': (prev['ai-agents'] + 1) % 4,
+        training: (prev.training + 1) % 4
+      }));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   const toolCategories = [
     {
       id: 'prompts',
       title: 'Instant Prompts',
       image: '/images/PROMPT 1.png',
       animation: 'bounce',
-      message: "Need the perfect prompt? I've got you covered! 🎯"
+      messages: [
+        "Need the perfect prompt? I've got you covered! 🎯",
+        "Unlock your creativity with AI prompts! ✨",
+        "78 prompts ready to supercharge your work! 🚀",
+        "Let's craft something amazing together! 💡"
+      ]
     },
     {
       id: 'automations',
       title: 'Guided Builders',
       image: '/images/AUTOMATION 3.png',
       animation: 'shake',
-      message: "Why do it manually when I can automate it? ⚡"
+      messages: [
+        "Why do it manually when I can automate it? ⚡",
+        "Automate your workflows in seconds! 🤖",
+        "Save time, boost productivity! ⏱️",
+        "Let's eliminate the repetitive work! 🎯"
+      ]
     },
     {
       id: 'ai-agents',
       title: 'Agentic Workflows',
       image: '/images/AI AGENT 1.png',
       animation: 'float',
-      message: "Meet my AI squad - we're quite the team! 👥"
+      messages: [
+        "Meet my AI squad - we're quite the team! 👥",
+        "Intelligent agents working for you! 🧠",
+        "Automate complex workflows effortlessly! 🌟",
+        "Your AI team is ready to go! 🚀"
+      ]
     },
     {
       id: 'training',
       title: 'Knowledge and Trainings',
       image: '/images/AI TRAINING 3.png',
       animation: 'bounce',
-      message: "Let's level up your AI skills! 📚"
+      messages: [
+        "Let's level up your AI skills! 📚",
+        "Master AI with expert training! 🎓",
+        "Continuous learning, continuous growth! 📈",
+        "Become an AI expert today! 🌟"
+      ]
     }
   ];
 
@@ -331,11 +370,52 @@ const PreLoginPage = () => {
       </div>
 
       {/* Bottom Feature Section */}
-      <div className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-purple-900/30 to-slate-900 py-20 px-6">
-        {/* Decorative background elements */}
+      <div className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-blue-900/50 to-slate-900 py-20 px-6 overflow-hidden">
+        {/* Decorative background elements - ENHANCED & VIBRANT */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl"></div>
+          {/* Cyan glow - top left */}
+          <motion.div
+            className="absolute top-20 left-10 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.35, 0.2]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          ></motion.div>
+
+          {/* Purple glow - bottom right */}
+          <motion.div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.2, 0.35, 0.2]
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 1
+            }}
+          ></motion.div>
+
+          {/* Blue accent - center */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.15, 1],
+              opacity: [0.15, 0.25, 0.15]
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2
+            }}
+          ></motion.div>
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto">
@@ -382,7 +462,7 @@ const PreLoginPage = () => {
                     <AnimatedRobot
                       src={tool.image}
                       alt={tool.title}
-                      message={tool.message}
+                      message={tool.messages[currentMessageIndex[tool.id]]}
                       delay={index * 200}
                       animationType={tool.animation}
                     />

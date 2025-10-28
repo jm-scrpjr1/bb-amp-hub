@@ -247,6 +247,35 @@ const PreLoginPage = () => {
     }
   };
 
+  // Placeholder item names for each category
+  const promptNames = [
+    'TalentFit Agent',
+    'Sentiment Pulse Analyzer',
+    'Project Plan Builder',
+    'Smart Task Prioritizer'
+  ];
+
+  const automationNames = [
+    'Marketing Coordinator',
+    'Content Flow Converter',
+    'Adaptive Hook Generator',
+    'Sheet-to-Text Generator'
+  ];
+
+  const aiAgentNames = [
+    'Weekly Plan Assistant',
+    'Client Issue Tracker',
+    'Market Differentiation Analyzer',
+    'Client Growth Scanner'
+  ];
+
+  const trainingNames = [
+    'AI Assessment',
+    'AI Fundamentals Course',
+    'Prompt Engineering Mastery',
+    'Automation Best Practices'
+  ];
+
   return (
     <div className="w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-scroll scroll-smooth">
       {/* Dissolve particles - THANOS SNAP EFFECT */}
@@ -558,9 +587,9 @@ const PreLoginPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Prompts Column */}
               <div className="space-y-2">
-                {[1, 2, 3, 4].map((num) => (
+                {promptNames.map((name, index) => (
                   <motion.div
-                    key={`prompt-${num}`}
+                    key={`prompt-${index}`}
                     className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
@@ -601,7 +630,7 @@ const PreLoginPage = () => {
                     {/* Content */}
                     <div className="relative z-10">
                       <div className="text-xl font-bold text-cyan-300">
-                        Instant Prompt {num}
+                        {name}
                       </div>
                     </div>
 
@@ -667,9 +696,9 @@ const PreLoginPage = () => {
 
               {/* Automations Column */}
               <div className="space-y-2">
-                {[1, 2, 3, 4].map((num) => (
+                {automationNames.map((name, index) => (
                   <motion.div
-                    key={`automation-${num}`}
+                    key={`automation-${index}`}
                     className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
@@ -710,7 +739,7 @@ const PreLoginPage = () => {
                     {/* Content */}
                     <div className="relative z-10">
                       <div className="text-xl font-bold text-green-300">
-                        Guided Builder {num}
+                        {name}
                       </div>
                     </div>
 
@@ -776,9 +805,9 @@ const PreLoginPage = () => {
 
               {/* AI Agents Column */}
               <div className="space-y-2">
-                {[1, 2, 3, 4].map((num) => (
+                {aiAgentNames.map((name, index) => (
                   <motion.div
-                    key={`ai-agent-${num}`}
+                    key={`ai-agent-${index}`}
                     className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
@@ -819,7 +848,7 @@ const PreLoginPage = () => {
                     {/* Content */}
                     <div className="relative z-10">
                       <div className="text-xl font-bold text-purple-300">
-                        Agentic Workflow {num}
+                        {name}
                       </div>
                     </div>
 
@@ -885,9 +914,9 @@ const PreLoginPage = () => {
 
               {/* Training Column */}
               <div className="space-y-2">
-                {[1, 2, 3, 4].map((num) => (
+                {trainingNames.map((name, index) => (
                   <motion.div
-                    key={`training-${num}`}
+                    key={`training-${index}`}
                     className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
@@ -928,7 +957,7 @@ const PreLoginPage = () => {
                     {/* Content */}
                     <div className="relative z-10">
                       <div className="text-xl font-bold text-pink-300">
-                        Training {num}
+                        {name}
                       </div>
                     </div>
 

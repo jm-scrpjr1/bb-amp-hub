@@ -600,10 +600,62 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-cyan-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-cyan-300 mb-3">
                         Instant Prompt {num}
                       </div>
+
+                      {/* View More Button with Glow */}
+                      <motion.div
+                        className="relative group/btn"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {/* Animated glow background */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full blur-lg opacity-60 group-hover/btn:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(6, 229, 236, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                          }}
+                          animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Inner glow pulse */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(6, 229, 236, 0.2) 0%, transparent 70%)'
+                          }}
+                          animate={{
+                            boxShadow: [
+                              '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)',
+                              '0 0 40px rgba(6, 229, 236, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                              '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)'
+                            ]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Button */}
+                        <button
+                          onClick={() => navigate('/auth/signin')}
+                          className="relative w-full border-2 border-cyan-400 text-cyan-400 px-4 py-2 rounded-full font-bold text-sm hover:bg-cyan-400/10 transition-all"
+                        >
+                          View More →
+                        </button>
+                      </motion.div>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -657,10 +709,62 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-green-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-green-300 mb-3">
                         Guided Builder {num}
                       </div>
+
+                      {/* View More Button with Glow */}
+                      <motion.div
+                        className="relative group/btn"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {/* Animated glow background */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full blur-lg opacity-60 group-hover/btn:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(34, 197, 94, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                          }}
+                          animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Inner glow pulse */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, transparent 70%)'
+                          }}
+                          animate={{
+                            boxShadow: [
+                              '0 0 15px rgba(34, 197, 94, 0.4), inset 0 0 15px rgba(34, 197, 94, 0.2)',
+                              '0 0 40px rgba(34, 197, 94, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                              '0 0 15px rgba(34, 197, 94, 0.4), inset 0 0 15px rgba(34, 197, 94, 0.2)'
+                            ]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Button */}
+                        <button
+                          onClick={() => navigate('/auth/signin')}
+                          className="relative w-full border-2 border-green-400 text-green-400 px-4 py-2 rounded-full font-bold text-sm hover:bg-green-400/10 transition-all"
+                        >
+                          View More →
+                        </button>
+                      </motion.div>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -714,10 +818,62 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-purple-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-purple-300 mb-3">
                         Agentic Workflow {num}
                       </div>
+
+                      {/* View More Button with Glow */}
+                      <motion.div
+                        className="relative group/btn"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {/* Animated glow background */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full blur-lg opacity-60 group-hover/btn:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                          }}
+                          animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Inner glow pulse */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%)'
+                          }}
+                          animate={{
+                            boxShadow: [
+                              '0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 15px rgba(168, 85, 247, 0.2)',
+                              '0 0 40px rgba(168, 85, 247, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                              '0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 15px rgba(168, 85, 247, 0.2)'
+                            ]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Button */}
+                        <button
+                          onClick={() => navigate('/auth/signin')}
+                          className="relative w-full border-2 border-purple-400 text-purple-400 px-4 py-2 rounded-full font-bold text-sm hover:bg-purple-400/10 transition-all"
+                        >
+                          View More →
+                        </button>
+                      </motion.div>
                     </div>
 
                     {/* Shine Effect on Hover */}
@@ -771,10 +927,62 @@ const PreLoginPage = () => {
                     </motion.div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-xl font-bold text-pink-300">
+                    <div className="relative z-10 w-full">
+                      <div className="text-xl font-bold text-pink-300 mb-3">
                         Training {num}
                       </div>
+
+                      {/* View More Button with Glow */}
+                      <motion.div
+                        className="relative group/btn"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {/* Animated glow background */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full blur-lg opacity-60 group-hover/btn:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                          }}
+                          animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.5, 0.8, 0.5]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Inner glow pulse */}
+                        <motion.div
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, transparent 70%)'
+                          }}
+                          animate={{
+                            boxShadow: [
+                              '0 0 15px rgba(236, 72, 153, 0.4), inset 0 0 15px rgba(236, 72, 153, 0.2)',
+                              '0 0 40px rgba(236, 72, 153, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                              '0 0 15px rgba(236, 72, 153, 0.4), inset 0 0 15px rgba(236, 72, 153, 0.2)'
+                            ]
+                          }}
+                          transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+
+                        {/* Button */}
+                        <button
+                          onClick={() => navigate('/auth/signin')}
+                          className="relative w-full border-2 border-pink-400 text-pink-400 px-4 py-2 rounded-full font-bold text-sm hover:bg-pink-400/10 transition-all"
+                        >
+                          View More →
+                        </button>
+                      </motion.div>
                     </div>
 
                     {/* Shine Effect on Hover */}

@@ -2,6 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Particle dissolve effect component
+const DissolveParticle = ({ x, y, delay }) => {
+  return (
+    <motion.div
+      className="absolute w-2 h-2 bg-cyan-400 rounded-full"
+      style={{ left: `${x}%`, top: `${y}%` }}
+      initial={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: 0, scale: 0, x: (Math.random() - 0.5) * 200, y: (Math.random() - 0.5) * 200 }}
+      transition={{ delay, duration: 1.5, ease: "easeOut" }}
+    />
+  );
+};
+
 // Animated Robot Component with Floating Messages
 const AnimatedRobot = ({
   src,
@@ -145,6 +158,31 @@ const AnimatedRobot = ({
 
 const PreLoginPage = () => {
   const navigate = useNavigate();
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    const handleScroll = (e) => {
+      const scrollTop = e.target.scrollingElement.scrollTop;
+      const docHeight = e.target.scrollingElement.scrollHeight - window.innerHeight;
+      const scrolled = scrollTop / docHeight;
+      setScrollProgress(scrolled);
+
+      // Generate particles when scrolling
+      if (scrolled > 0 && scrolled < 0.5 && Math.random() > 0.7) {
+        const newParticle = {
+          id: Math.random(),
+          x: Math.random() * 100,
+          y: Math.random() * 50,
+          delay: 0
+        };
+        setParticles(prev => [...prev.slice(-20), newParticle]);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const toolCategories = [
     {
@@ -179,46 +217,52 @@ const PreLoginPage = () => {
 
   return (
     <div className="w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-scroll scroll-smooth">
+      {/* Dissolve particles */}
+      {particles.map(particle => (
+        <DissolveParticle key={particle.id} x={particle.x} y={particle.y} delay={particle.delay} />
+      ))}
+
       {/* Top Hero Section */}
       <div
         className="relative w-full h-screen bg-cover bg-center flex flex-col items-center justify-center overflow-hidden"
         style={{
           backgroundImage: 'url(/images/Iconic.png)',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: 'fixed',
+          opacity: 1 - scrollProgress * 1.5
         }}
       >
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Logo in top right */}
+        {/* Logo in top LEFT with glow effect */}
         <motion.div
-          className="absolute top-8 right-8 z-20"
+          className="absolute top-8 left-8 z-20"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
-          <img
-            src="/images/AI Workbench Logo.png"
-            alt="AI Workbench Logo"
-            className="h-12 w-auto drop-shadow-lg"
-          />
-        </motion.div>
-
-        {/* Navigation Links */}
-        <motion.div
-          className="absolute top-8 left-1/2 transform -translate-x-1/2 z-20 flex gap-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-        >
-          <a href="#" className="text-white text-sm font-medium hover:text-cyan-400 transition">Home</a>
-          <a href="#" className="text-white text-sm font-medium hover:text-cyan-400 transition">Blogs</a>
-          <button
-            onClick={() => navigate('/auth/signin')}
-            className="text-white text-sm font-medium hover:text-cyan-400 transition"
-          >
-            Login
-          </button>
+          <div className="relative">
+            {/* Glow effect */}
+            <motion.div
+              className="absolute inset-0 rounded-lg blur-xl"
+              animate={{
+                boxShadow: [
+                  '0 0 20px rgba(6, 229, 236, 0.4)',
+                  '0 0 40px rgba(6, 229, 236, 0.8)',
+                  '0 0 20px rgba(6, 229, 236, 0.4)'
+                ]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
+            {/* Logo text */}
+            <div className="relative text-4xl font-bold text-white drop-shadow-lg">
+              AI Workbench
+            </div>
+          </div>
         </motion.div>
 
         {/* Hero Content */}

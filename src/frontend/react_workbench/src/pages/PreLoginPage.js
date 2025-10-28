@@ -467,6 +467,159 @@ const PreLoginPage = () => {
             ))}
           </div>
 
+          {/* Placeholder Items Grid */}
+          <motion.div
+            className="mt-16 space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            {/* Prompts Row */}
+            <div>
+              <h4 className="text-lg font-semibold text-cyan-300 mb-4">Prompts</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((num) => (
+                  <motion.div
+                    key={`prompt-${num}`}
+                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    whileHover={{ scale: 1.05, borderColor: 'rgba(34, 211, 238, 0.8)' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Animated Border */}
+                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 opacity-20 blur-lg" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <div className="text-4xl font-bold text-cyan-300 mb-3">
+                        Prompt #{num}
+                      </div>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Hover Shine Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Automations Row */}
+            <div>
+              <h4 className="text-lg font-semibold text-green-300 mb-4">Automations</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((num) => (
+                  <motion.div
+                    key={`automation-${num}`}
+                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    whileHover={{ scale: 1.05, borderColor: 'rgba(34, 197, 94, 0.8)' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Animated Border */}
+                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-green-400 to-emerald-500 opacity-20 blur-lg" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <div className="text-4xl font-bold text-green-300 mb-3">
+                        Automation #{num}
+                      </div>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Hover Shine Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* AI Agents Row */}
+            <div>
+              <h4 className="text-lg font-semibold text-purple-300 mb-4">AI Agents</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((num) => (
+                  <motion.div
+                    key={`ai-agent-${num}`}
+                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    whileHover={{ scale: 1.05, borderColor: 'rgba(168, 85, 247, 0.8)' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Animated Border */}
+                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-400 to-violet-500 opacity-20 blur-lg" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <div className="text-4xl font-bold text-purple-300 mb-3">
+                        AI Agent #{num}
+                      </div>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Hover Shine Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Training Row */}
+            <div>
+              <h4 className="text-lg font-semibold text-pink-300 mb-4">Training</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((num) => (
+                  <motion.div
+                    key={`training-${num}`}
+                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    whileHover={{ scale: 1.05, borderColor: 'rgba(236, 72, 153, 0.8)' }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* Hover Glow Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/20 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Animated Border */}
+                    <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-pink-400 to-rose-500 opacity-20 blur-lg" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      <div className="text-4xl font-bold text-pink-300 mb-3">
+                        Training #{num}
+                      </div>
+                      <p className="text-gray-300 text-sm">Insert Name</p>
+                    </div>
+
+                    {/* Hover Shine Effect */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
           {/* CTA Section */}
           <motion.div
             className="text-center mt-20"

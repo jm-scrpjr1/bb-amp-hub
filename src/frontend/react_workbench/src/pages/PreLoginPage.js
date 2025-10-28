@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import TalentFitModal from '../components/TalentFitModal';
 
 // Particle dissolve effect component - EPIC THANOS SNAP
 const DissolveParticle = ({ x, y, delay, size = 3 }) => {
@@ -143,6 +144,7 @@ const PreLoginPage = () => {
     'ai-agents': true,
     training: true
   });
+  const [isTalentFitModalOpen, setIsTalentFitModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = (e) => {
@@ -593,6 +595,11 @@ const PreLoginPage = () => {
                     className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500 h-20 flex items-center"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
+                    onClick={() => {
+                      if (name === 'TalentFit Agent') {
+                        setIsTalentFitModalOpen(true);
+                      }
+                    }}
                   >
                     {/* Animated Glow Background on Hover */}
                     <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -1026,6 +1033,12 @@ const PreLoginPage = () => {
 
         </div>
       </div>
+
+      {/* TalentFit Modal */}
+      <TalentFitModal
+        isOpen={isTalentFitModalOpen}
+        onClose={() => setIsTalentFitModalOpen(false)}
+      />
     </div>
   );
 };

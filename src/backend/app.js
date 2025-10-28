@@ -1055,6 +1055,62 @@ app.post('/api/resume-analyzer', upload.array('resumes', 20), async (req, res) =
   }
 });
 
+// PUBLIC TalentFit API (no authentication required) - for pre-login /explore page
+app.post('/api/public/talentfit/analyze', upload.array('resumes', 20), async (req, res) => {
+  try {
+    const { jobDescription, clientWords } = req.body;
+    const files = req.files || [];
+
+    console.log('🌐 PUBLIC TalentFit request received');
+    console.log('📋 Job Description length:', jobDescription?.length || 0);
+    console.log('🎤 Client Words length:', clientWords?.length || 0);
+    console.log('📄 Number of resumes:', files.length);
+
+    // Validate inputs
+    if (!jobDescription || !clientWords || files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: jobDescription, clientWords, and at least one resume file'
+      });
+    }
+
+    // Initialize TalentFit Service
+    const analyzerService = new ResumeAnalyzerService();
+
+    // Analyze resumes (no userId for public access)
+    const result = await analyzerService.analyzeResumes(
+      jobDescription,
+      clientWords,
+      files,
+      null // No userId for public access
+    );
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Resume analysis failed',
+        message: result.error
+      });
+    }
+
+    // Return analysis results
+    res.json({
+      success: true,
+      analysis: result.analysis,
+      threadId: result.threadId,
+      assistantId: 'asst_R5RXI0LcyRxsgR80xb05oNQb'
+    });
+
+  } catch (error) {
+    console.error('❌ PUBLIC TalentFit error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'TalentFit request failed',
+      message: error.message
+    });
+  }
+});
+
 // Groups API
 app.get('/api/groups', authenticateUser, async (req, res) => {
   try {

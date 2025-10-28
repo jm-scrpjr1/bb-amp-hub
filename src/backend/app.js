@@ -998,13 +998,13 @@ app.get('/api/download-resume/:filename', (req, res) => {
   }
 });
 
-// Resume Analyzer API with multiple file upload support
+// TalentFit API with multiple file upload support
 app.post('/api/resume-analyzer', upload.array('resumes', 20), async (req, res) => {
   try {
     const { jobDescription, clientWords, userId } = req.body;
     const files = req.files || [];
 
-    console.log('🔍 Resume Analyzer request received');
+    console.log('🔍 TalentFit request received');
     console.log('📋 Job Description length:', jobDescription?.length || 0);
     console.log('🎤 Client Words length:', clientWords?.length || 0);
     console.log('📄 Number of resumes:', files.length);
@@ -1018,7 +1018,7 @@ app.post('/api/resume-analyzer', upload.array('resumes', 20), async (req, res) =
       });
     }
 
-    // Initialize Resume Analyzer Service
+    // Initialize TalentFit Service
     const analyzerService = new ResumeAnalyzerService();
 
     // Analyze resumes
@@ -1046,10 +1046,10 @@ app.post('/api/resume-analyzer', upload.array('resumes', 20), async (req, res) =
     });
 
   } catch (error) {
-    console.error('❌ Resume Analyzer error:', error);
+    console.error('❌ TalentFit error:', error);
     res.status(500).json({
       success: false,
-      error: 'Resume Analyzer request failed',
+      error: 'TalentFit request failed',
       message: error.message
     });
   }

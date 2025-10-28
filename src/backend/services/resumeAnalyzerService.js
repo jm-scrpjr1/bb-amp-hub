@@ -11,7 +11,7 @@ class ResumeAnalyzerService {
       organization: process.env.OPENAI_ORG_ID
     });
 
-    // Resume Analyzer Assistant ID
+    // TalentFit Assistant ID
     this.assistantId = 'asst_R5RXI0LcyRxsgR80xb05oNQb'; // Using ARIA's assistant for consistency
   }
 
@@ -68,7 +68,7 @@ class ResumeAnalyzerService {
 
   async analyzeResumes(jobDescription, clientWords, resumeFiles, userId = null) {
     try {
-      console.log('🔍 Resume Analyzer processing request');
+      console.log('🔍 TalentFit processing request');
       console.log('👤 User ID:', userId || 'anonymous');
       console.log('📄 Number of resumes:', resumeFiles.length);
 
@@ -171,7 +171,7 @@ Format your response as JSON with this structure:
         }
       );
 
-      console.log('🏃 Started Resume Analyzer run:', run.id);
+      console.log('🏃 Started TalentFit run:', run.id);
 
       // Poll for completion
       let runStatus = await this.client.beta.threads.runs.retrieve(
@@ -198,7 +198,7 @@ Format your response as JSON with this structure:
         throw new Error('Resume analysis timed out');
       }
 
-      console.log('✅ Resume analysis completed');
+      console.log('✅ TalentFit analysis completed');
 
       // Get the response
       const messages = await this.client.beta.threads.messages.list(threadId);
@@ -210,7 +210,7 @@ Format your response as JSON with this structure:
 
       const responseText = assistantMessage.content[0]?.text?.value || 'No response generated';
 
-      console.log('✅ Resume Analyzer responded');
+      console.log('✅ TalentFit responded');
       console.log('📄 Raw response preview:', responseText.substring(0, 200));
 
       // Parse JSON response
@@ -258,7 +258,7 @@ Format your response as JSON with this structure:
       };
 
     } catch (error) {
-      console.error('❌ Resume Analyzer error:', error);
+      console.error('❌ TalentFit error:', error);
       return {
         success: false,
         error: error.message

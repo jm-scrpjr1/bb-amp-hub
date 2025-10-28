@@ -17,7 +17,7 @@ const prompts = [
   },
   {
     id: 'resume-analyzer',
-    name: 'Resume Analyzer & Ranking',
+    name: 'TalentFit',
     description: 'Intelligently rank candidates against job requirements and client fit',
     status: 'live',
     assistantId: 'asst_R5RXI0LcyRxsgR80xb05oNQb',
@@ -197,7 +197,7 @@ const RecruitingPromptsPage = () => {
       });
 
       const apiUrl = process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api';
-      console.log('🔍 Resume Analyzer API URL:', `${apiUrl}/resume-analyzer`);
+      console.log('🔍 TalentFit API URL:', `${apiUrl}/resume-analyzer`);
 
       const response = await fetch(`${apiUrl}/resume-analyzer`, {
         method: 'POST',

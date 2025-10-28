@@ -1,4 +1,4 @@
-# Resume Analyzer Test Data
+# TalentFit Test Data
 
 ## Job Description
 
@@ -77,7 +77,7 @@ Senior Full Stack Engineer | TechCorp AI (2021 - Present)
 - Implemented real-time data visualization using WebSockets and D3.js
 
 Full Stack Developer | StartupXYZ (2018 - 2021)
-- Developed full-stack web applications using React and Node.js
+- Developed full-stack web applications using React and Node.js 
 - Designed and optimized PostgreSQL databases for high-traffic applications
 - Implemented CI/CD pipelines using GitHub Actions and AWS CodeDeploy
 - Collaborated with product team to translate requirements into technical solutions
@@ -189,7 +189,7 @@ NOTE: Limited frontend experience, no AI/ML background, timezone is CST (not PST
 ## How to Test:
 
 1. Go to **Recruiting Prompts** page
-2. Select **Resume Analyzer & Ranking**
+2. Select **TalentFit**
 3. Copy and paste the **Job Description** into the first field
 4. Copy and paste the **Client's Own Words** into the second field
 5. Create 3 dummy resume files (PDF or DOCX) with the content from the sample resumes above

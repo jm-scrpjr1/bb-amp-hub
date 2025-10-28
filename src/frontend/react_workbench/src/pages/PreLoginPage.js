@@ -70,13 +70,13 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud - Neon Glow Style - Right Positioned */}
+      {/* Floating Message Cloud - Neon Glow Style - Top Right Corner */}
       {showMessage && (
         <motion.div
           initial={{ opacity: 0, scale: 0, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0, x: 20 }}
-          className="absolute -top-20 -right-40 z-50 pointer-events-none"
+          className="absolute -top-12 -right-24 z-50 pointer-events-none"
         >
           {/* Neon Glow Background */}
           <div className="relative w-48">

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import AnimatedRobot from '../components/ui/AnimatedRobot';
 
 // Particle dissolve effect component - EPIC THANOS SNAP
 const DissolveParticle = ({ x, y, delay, size = 3 }) => {
@@ -27,6 +26,114 @@ const DissolveParticle = ({ x, y, delay, size = 3 }) => {
       transition={{ delay, duration: 1.2, ease: "easeOut" }}
     >
       <div className={`w-${size} h-${size} bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full shadow-lg shadow-cyan-400/50`} />
+    </motion.div>
+  );
+};
+
+// Basketball Bounce Component with Futuristic Effects
+const BasketballBounceRobot = ({
+  src,
+  alt,
+  message,
+  delay = 0
+}) => {
+  const [showMessage, setShowMessage] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowMessage(true);
+      const messageInterval = setInterval(() => {
+        setShowMessage(prev => !prev);
+      }, 4000);
+      return () => clearInterval(messageInterval);
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [delay]);
+
+  // Basketball bounce: high bounce, then progressively lower bounces
+  const bounceVariants = {
+    animate: {
+      y: [0, -120, 0, -80, 0, -50, 0, -25, 0, -10, 0],
+      transition: {
+        duration: 2.2,
+        repeat: Infinity,
+        ease: "easeOut",
+        times: [0, 0.15, 0.3, 0.45, 0.55, 0.65, 0.72, 0.8, 0.87, 0.94, 1]
+      }
+    }
+  };
+
+  return (
+    <motion.div
+      className="relative w-full h-full flex items-center justify-center"
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
+    >
+      {/* Floating Message Cloud */}
+      {showMessage && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0, y: -20 }}
+          className="absolute -top-20 left-1/2 transform -translate-x-1/2 z-10"
+        >
+          <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-2 shadow-lg border border-cyan-200/50 whitespace-nowrap">
+            <p className="text-sm font-medium text-gray-800">{message}</p>
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-transparent border-t-white/95"></div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Robot Image with Basketball Bounce */}
+      <motion.div
+        className="w-40 h-40 relative"
+        {...bounceVariants}
+        whileHover={{ scale: 1.15 }}
+        style={{ willChange: 'transform' }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-contain drop-shadow-lg"
+          onError={(e) => {
+            console.warn(`Failed to load robot image: ${src}`);
+            e.target.src = '/images/default.png';
+          }}
+        />
+
+        {/* Glowing effect */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          animate={{
+            boxShadow: [
+              '0 0 20px rgba(6, 229, 236, 0.3)',
+              '0 0 40px rgba(6, 229, 236, 0.6)',
+              '0 0 20px rgba(6, 229, 236, 0.3)'
+            ]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+
+        {/* Bounce Impact Flash Effect */}
+        <motion.div
+          className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-400/0 via-cyan-300/40 to-cyan-400/0"
+          animate={{
+            opacity: [0, 0.8, 0, 0, 0.6, 0, 0, 0.4, 0, 0, 0.2, 0],
+            scale: [1, 1.3, 1, 1, 1.2, 1, 1, 1.1, 1, 1, 1.05, 1]
+          }}
+          transition={{
+            duration: 2.2,
+            repeat: Infinity,
+            times: [0, 0.15, 0.3, 0.45, 0.48, 0.55, 0.72, 0.75, 0.87, 0.9, 0.94, 1],
+            ease: "easeOut"
+          }}
+        />
+      </motion.div>
     </motion.div>
   );
 };
@@ -321,12 +428,11 @@ const PreLoginPage = () => {
                 <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15">
                   {/* Robot Display */}
                   <div className="w-full h-48 mb-6 flex items-center justify-center">
-                    <AnimatedRobot
+                    <BasketballBounceRobot
                       src={tool.image}
                       alt={tool.title}
                       message={tool.messages[currentMessageIndex[tool.id]]}
                       delay={index * 200}
-                      animationType={tool.animation}
                     />
                   </div>
 

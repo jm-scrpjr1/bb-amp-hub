@@ -2,16 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Particle dissolve effect component
-const DissolveParticle = ({ x, y, delay }) => {
+// Particle dissolve effect component - EPIC THANOS SNAP
+const DissolveParticle = ({ x, y, delay, size = 3 }) => {
+  const randomX = (Math.random() - 0.5) * 400;
+  const randomY = (Math.random() - 0.5) * 400;
+
   return (
     <motion.div
-      className="absolute w-2 h-2 bg-cyan-400 rounded-full"
-      style={{ left: `${x}%`, top: `${y}%` }}
+      className="fixed pointer-events-none"
+      style={{
+        left: `${x}%`,
+        top: `${y}%`,
+        zIndex: 50
+      }}
       initial={{ opacity: 1, scale: 1 }}
-      animate={{ opacity: 0, scale: 0, x: (Math.random() - 0.5) * 200, y: (Math.random() - 0.5) * 200 }}
-      transition={{ delay, duration: 1.5, ease: "easeOut" }}
-    />
+      animate={{
+        opacity: 0,
+        scale: 0,
+        x: randomX,
+        y: randomY,
+        rotate: Math.random() * 360
+      }}
+      transition={{ delay, duration: 1.2, ease: "easeOut" }}
+    >
+      <div className={`w-${size} h-${size} bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full shadow-lg shadow-cyan-400/50`} />
+    </motion.div>
   );
 };
 
@@ -168,15 +183,18 @@ const PreLoginPage = () => {
       const scrolled = scrollTop / docHeight;
       setScrollProgress(scrolled);
 
-      // Generate particles when scrolling
-      if (scrolled > 0 && scrolled < 0.5 && Math.random() > 0.7) {
-        const newParticle = {
+      // Generate EPIC particles when scrolling - THANOS SNAP EFFECT
+      if (scrolled > 0 && scrolled < 0.6) {
+        // Create multiple particles per scroll event for dramatic effect
+        const particleCount = Math.floor(Math.random() * 8) + 4; // 4-12 particles
+        const newParticles = Array.from({ length: particleCount }).map((_, i) => ({
           id: Math.random(),
           x: Math.random() * 100,
-          y: Math.random() * 50,
-          delay: 0
-        };
-        setParticles(prev => [...prev.slice(-20), newParticle]);
+          y: Math.random() * 60,
+          delay: i * 0.05,
+          size: Math.floor(Math.random() * 4) + 2
+        }));
+        setParticles(prev => [...prev.slice(-50), ...newParticles]);
       }
     };
 
@@ -217,9 +235,9 @@ const PreLoginPage = () => {
 
   return (
     <div className="w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-scroll scroll-smooth">
-      {/* Dissolve particles */}
+      {/* Dissolve particles - THANOS SNAP EFFECT */}
       {particles.map(particle => (
-        <DissolveParticle key={particle.id} x={particle.x} y={particle.y} delay={particle.delay} />
+        <DissolveParticle key={particle.id} x={particle.x} y={particle.y} delay={particle.delay} size={particle.size} />
       ))}
 
       {/* Top Hero Section */}
@@ -258,10 +276,15 @@ const PreLoginPage = () => {
                 ease: "easeInOut"
               }}
             />
-            {/* Logo text */}
-            <div className="relative text-4xl font-bold text-white drop-shadow-lg">
-              AI Workbench
-            </div>
+            {/* Logo image with white filter */}
+            <img
+              src="/images/AI Workbench Logo.png"
+              alt="AI Workbench Logo"
+              className="relative h-16 w-auto drop-shadow-lg"
+              style={{
+                filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(6, 229, 236, 0.6))'
+              }}
+            />
           </div>
         </motion.div>
 

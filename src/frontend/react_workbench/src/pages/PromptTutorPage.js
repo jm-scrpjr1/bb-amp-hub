@@ -247,11 +247,13 @@ const PromptTutorPage = () => {
   useEffect(() => {
     const fetchPromptCounts = async () => {
       try {
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
         const response = await fetch(
           `${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/prompts/categories`,
           {
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` })
             }
           }
         );

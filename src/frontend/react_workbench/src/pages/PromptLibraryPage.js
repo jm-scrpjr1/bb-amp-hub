@@ -57,12 +57,14 @@ const PromptLibraryPage = () => {
       setLoading(true);
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
-      
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
+
       const response = await fetch(
         `${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/prompts?category=${encodeURIComponent(category)}&userId=${user?.email || ''}`,
         {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           }
         }
       );
@@ -70,7 +72,7 @@ const PromptLibraryPage = () => {
       const data = await response.json();
       if (data.success) {
         setPrompts(data.prompts);
-        
+
         // Set favorites
         const favSet = new Set();
         data.prompts.forEach(p => {
@@ -89,6 +91,7 @@ const PromptLibraryPage = () => {
     try {
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
 
       if (!user) {
         alert('Please sign in to favorite prompts');
@@ -100,7 +103,8 @@ const PromptLibraryPage = () => {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
           },
           body: JSON.stringify({ userId: user.email })
         }
@@ -170,6 +174,7 @@ const PromptLibraryPage = () => {
 
       const userStr = localStorage.getItem('user');
       const user = userStr ? JSON.parse(userStr) : null;
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
 
       // Use FormData if file is uploaded
       const formData = new FormData();
@@ -184,6 +189,9 @@ const PromptLibraryPage = () => {
         `${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/prompts/${selectedPrompt.id}/execute`,
         {
           method: 'POST',
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          },
           body: formData // Don't set Content-Type header, let browser set it with boundary
         }
       );

@@ -276,13 +276,14 @@ const PreLoginPage = () => {
                 ease: "easeInOut"
               }}
             />
-            {/* Logo image with white filter */}
+            {/* Logo image - keep signature O color, make rest white */}
             <img
               src="/images/AI Workbench Logo.png"
               alt="AI Workbench Logo"
               className="relative h-16 w-auto drop-shadow-lg"
               style={{
-                filter: 'brightness(0) invert(1) drop-shadow(0 0 10px rgba(6, 229, 236, 0.6))'
+                filter: 'brightness(1.2) contrast(1.1) drop-shadow(0 0 15px rgba(6, 229, 236, 0.7))',
+                mixBlendMode: 'screen'
               }}
             />
           </div>

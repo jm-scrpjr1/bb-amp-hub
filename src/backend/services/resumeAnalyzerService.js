@@ -53,9 +53,10 @@ class ResumeAnalyzerService {
   async uploadFile(fileBuffer, fileName) {
     try {
       console.log('📤 Uploading file to OpenAI:', fileName);
-      
-      const file = await this.client.beta.files.upload({
-        file: new File([fileBuffer], fileName, { type: 'application/octet-stream' }),
+
+      const file = await this.client.files.create({
+        file: new File([fileBuffer], fileName, { type: 'application/pdf' }),
+        purpose: 'assistants'
       });
 
       console.log('✅ File uploaded successfully:', file.id);

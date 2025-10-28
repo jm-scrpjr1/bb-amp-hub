@@ -266,73 +266,18 @@ const PreLoginPage = () => {
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Logo in top LEFT with unreal glow effect */}
+        {/* Logo in top LEFT */}
         <motion.div
-          className="absolute top-6 left-6 z-20 group"
+          className="absolute top-6 left-6 z-20"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          whileHover={{ scale: 1.05 }}
         >
-          <div className="relative">
-            {/* Animated glow background - multiple layers for unreal effect */}
-            <motion.div
-              className="absolute inset-0 rounded-full blur-3xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-              style={{
-                background: 'radial-gradient(circle, rgba(6, 229, 236, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
-                width: '90px',
-                height: '90px',
-                left: '-18px',
-                top: '-18px'
-              }}
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5]
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-
-            {/* Inner glow pulse */}
-            <motion.div
-              className="absolute inset-0 rounded-full"
-              style={{
-                width: '90px',
-                height: '90px',
-                left: '-18px',
-                top: '-18px',
-                background: 'radial-gradient(circle, rgba(6, 229, 236, 0.3) 0%, transparent 70%)'
-              }}
-              animate={{
-                boxShadow: [
-                  '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)',
-                  '0 0 40px rgba(6, 229, 236, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
-                  '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)'
-                ]
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-
-            {/* Logo image - SVG with premium glow */}
-            <motion.img
-              src="/images/BOLD LIGHT LOGO.svg"
-              alt="Bold Business Logo"
-              className="relative h-14 w-auto drop-shadow-2xl"
-              style={{
-                filter: 'drop-shadow(0 0 25px rgba(6, 229, 236, 0.9)) drop-shadow(0 0 50px rgba(168, 85, 247, 0.4))',
-              }}
-              whileHover={{
-                filter: 'drop-shadow(0 0 35px rgba(6, 229, 236, 1)) drop-shadow(0 0 70px rgba(168, 85, 247, 0.6))'
-              }}
-            />
-          </div>
+          <img
+            src="/images/BOLD LIGHT LOGO.svg"
+            alt="Bold Business Logo"
+            className="h-14 w-auto"
+          />
         </motion.div>
 
         {/* Hero Content */}
@@ -346,22 +291,111 @@ const PreLoginPage = () => {
             Ready to amplify your talent?
           </h1>
           <div className="flex flex-col gap-4 items-center">
-            <motion.button
-              onClick={() => navigate('/auth/signin')}
-              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-cyan-400/50 transition-all w-full md:w-auto"
+            {/* Get Started Button with unreal glow */}
+            <motion.div
+              className="relative group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Get Started with SSO Login →
-            </motion.button>
-            <motion.button
-              onClick={scrollToRobots}
-              className="border-2 border-cyan-400 text-cyan-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-cyan-400/10 transition-all w-full md:w-auto"
+              {/* Animated glow background */}
+              <motion.div
+                className="absolute inset-0 rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: 'radial-gradient(circle, rgba(6, 229, 236, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                  padding: '4px'
+                }}
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.5, 0.8, 0.5]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* Inner glow pulse */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, rgba(6, 229, 236, 0.2) 0%, transparent 70%)'
+                }}
+                animate={{
+                  boxShadow: [
+                    '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)',
+                    '0 0 40px rgba(6, 229, 236, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                    '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)'
+                  ]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* Button */}
+              <button
+                onClick={() => navigate('/auth/signin')}
+                className="relative bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-cyan-400/50 transition-all w-full md:w-auto"
+              >
+                Get Started with SSO Login →
+              </button>
+            </motion.div>
+
+            {/* Explore Now Button with unreal glow */}
+            <motion.div
+              className="relative group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Explore Now →
-            </motion.button>
+              {/* Animated glow background */}
+              <motion.div
+                className="absolute inset-0 rounded-full blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                style={{
+                  background: 'radial-gradient(circle, rgba(6, 229, 236, 0.6) 0%, rgba(168, 85, 247, 0.3) 50%, transparent 100%)',
+                  padding: '4px'
+                }}
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.5, 0.8, 0.5]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* Inner glow pulse */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'radial-gradient(circle, rgba(6, 229, 236, 0.2) 0%, transparent 70%)'
+                }}
+                animate={{
+                  boxShadow: [
+                    '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)',
+                    '0 0 40px rgba(6, 229, 236, 0.8), inset 0 0 30px rgba(168, 85, 247, 0.3)',
+                    '0 0 15px rgba(6, 229, 236, 0.4), inset 0 0 15px rgba(6, 229, 236, 0.2)'
+                  ]
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              />
+
+              {/* Button */}
+              <button
+                onClick={scrollToRobots}
+                className="relative border-2 border-cyan-400 text-cyan-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-cyan-400/10 transition-all w-full md:w-auto"
+              >
+                Explore Now →
+              </button>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -438,9 +472,13 @@ const PreLoginPage = () => {
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">
-              Bold AI Workbench™
-            </h2>
+            <div className="flex justify-center mb-3">
+              <img
+                src="/images/BOLD LIGHT LOGO.svg"
+                alt="Bold AI Workbench"
+                className="h-16 w-auto"
+              />
+            </div>
             <p className="text-xl text-cyan-400 font-semibold mb-3">
               Talent + Tools Deliver AI Amplified Results™
             </p>

@@ -70,24 +70,24 @@ const BasketballBounceRobot = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
     >
-      {/* Floating Message Cloud - Neon Glow Style - Centered Above */}
+      {/* Floating Message Cloud - Neon Glow Style - Top Right Corner */}
       {showMessage && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          className="absolute -top-16 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="absolute -top-8 -right-16 z-50 pointer-events-none"
         >
           <div className="relative">
-            {/* Main bubble with neon border */}
-            <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-6 py-4 border-2 border-cyan-400/60 shadow-2xl"
+            {/* Main bubble with neon border - wider for text */}
+            <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-8 py-5 border-2 border-cyan-400/60 shadow-2xl w-64"
               style={{
                 boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
               }}>
               <p className="text-sm font-semibold text-cyan-100 text-center leading-relaxed">{message}</p>
 
-              {/* Neon tail pointing down to robot */}
-              <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
+              {/* Neon tail pointing down-left to robot */}
+              <div className="absolute -bottom-2 left-8 w-4 h-4 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
                 style={{
                   filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
                 }}></div>

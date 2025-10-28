@@ -481,12 +481,32 @@ const PreLoginPage = () => {
                 {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`prompt-${num}`}
-                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
-                    whileHover={{ scale: 1.05, borderColor: 'rgba(34, 211, 238, 0.8)' }}
+                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
+                    {/* Neon Chat Bubble */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileHover={{ opacity: 1, scale: 1 }}
+                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-cyan-400/60 shadow-2xl w-32"
+                          style={{
+                            boxShadow: '0 0 20px rgba(6, 229, 236, 0.6), 0 0 40px rgba(6, 229, 236, 0.3), inset 0 0 20px rgba(6, 229, 236, 0.1)'
+                          }}>
+                          <p className="text-xs font-semibold text-cyan-100 text-center">Explore</p>
+                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-cyan-400/60 rotate-45"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(6, 229, 236, 0.6))'
+                            }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
 
                     {/* Animated Border */}
                     <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -502,7 +522,7 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
                     </div>
                   </motion.div>
@@ -514,12 +534,32 @@ const PreLoginPage = () => {
                 {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`automation-${num}`}
-                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
-                    whileHover={{ scale: 1.05, borderColor: 'rgba(34, 197, 94, 0.8)' }}
+                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
+                    {/* Neon Chat Bubble */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileHover={{ opacity: 1, scale: 1 }}
+                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-green-400/60 shadow-2xl w-32"
+                          style={{
+                            boxShadow: '0 0 20px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.3), inset 0 0 20px rgba(34, 197, 94, 0.1)'
+                          }}>
+                          <p className="text-xs font-semibold text-green-100 text-center">Explore</p>
+                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-green-400/60 rotate-45"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(34, 197, 94, 0.6))'
+                            }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
 
                     {/* Animated Border */}
                     <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -535,7 +575,7 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
                     </div>
                   </motion.div>
@@ -547,12 +587,32 @@ const PreLoginPage = () => {
                 {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`ai-agent-${num}`}
-                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
-                    whileHover={{ scale: 1.05, borderColor: 'rgba(168, 85, 247, 0.8)' }}
+                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
+                    {/* Neon Chat Bubble */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileHover={{ opacity: 1, scale: 1 }}
+                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-purple-400/60 shadow-2xl w-32"
+                          style={{
+                            boxShadow: '0 0 20px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.3), inset 0 0 20px rgba(168, 85, 247, 0.1)'
+                          }}>
+                          <p className="text-xs font-semibold text-purple-100 text-center">Explore</p>
+                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-purple-400/60 rotate-45"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.6))'
+                            }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
 
                     {/* Animated Border */}
                     <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -568,7 +628,7 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
                     </div>
                   </motion.div>
@@ -580,12 +640,32 @@ const PreLoginPage = () => {
                 {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`training-${num}`}
-                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
-                    whileHover={{ scale: 1.05, borderColor: 'rgba(236, 72, 153, 0.8)' }}
+                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-4 cursor-pointer overflow-visible"
+                    whileHover={{ scale: 1.05 }}
                     transition={{ duration: 0.3 }}
                   >
+                    {/* Neon Chat Bubble */}
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileHover={{ opacity: 1, scale: 1 }}
+                      className="absolute -top-12 -right-4 z-50 pointer-events-none"
+                    >
+                      <div className="relative">
+                        <div className="relative bg-slate-900/80 backdrop-blur-md rounded-3xl px-4 py-2 border-2 border-pink-400/60 shadow-2xl w-32"
+                          style={{
+                            boxShadow: '0 0 20px rgba(236, 72, 153, 0.6), 0 0 40px rgba(236, 72, 153, 0.3), inset 0 0 20px rgba(236, 72, 153, 0.1)'
+                          }}>
+                          <p className="text-xs font-semibold text-pink-100 text-center">Explore</p>
+                          <div className="absolute -bottom-2 left-4 w-3 h-3 bg-slate-900/80 border-r border-b border-pink-400/60 rotate-45"
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(236, 72, 153, 0.6))'
+                            }}></div>
+                        </div>
+                      </div>
+                    </motion.div>
+
                     {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/20 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/20 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
 
                     {/* Animated Border */}
                     <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -601,7 +681,7 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Hover Shine Effect */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700" />
                     </div>
                   </motion.div>

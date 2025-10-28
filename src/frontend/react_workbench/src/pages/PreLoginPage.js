@@ -65,7 +65,7 @@ const BasketballBounceRobot = ({
 
   return (
     <motion.div
-      className="relative w-full h-full flex items-center justify-center"
+      className="relative w-full h-full flex items-center justify-center overflow-visible"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: delay / 1000, duration: 0.5, type: "spring" }}
@@ -76,7 +76,8 @@ const BasketballBounceRobot = ({
           initial={{ opacity: 0, scale: 0, x: 20 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0, x: 20 }}
-          className="absolute -top-16 -right-32 z-50"
+          className="absolute -top-20 -right-40 z-50 pointer-events-none"
+          style={{ transform: 'translateY(-100%)' }}
         >
           {/* Neon Glow Background */}
           <div className="relative w-48">
@@ -426,7 +427,7 @@ const PreLoginPage = () => {
           </motion.div>
 
           {/* Tool Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
             {toolCategories.map((tool, index) => (
               <motion.div
                 key={tool.id}
@@ -440,9 +441,9 @@ const PreLoginPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
 
                 {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15">
+                <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 h-full flex flex-col items-center justify-center hover:border-cyan-400/50 transition-all duration-300 group-hover:bg-white/15 overflow-visible">
                   {/* Robot Display */}
-                  <div className="w-full h-48 mb-6 flex items-center justify-center">
+                  <div className="w-full h-48 mb-6 flex items-center justify-center relative">
                     <BasketballBounceRobot
                       src={tool.image}
                       alt={tool.title}

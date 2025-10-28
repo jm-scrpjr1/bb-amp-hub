@@ -349,7 +349,7 @@ const PreLoginPage = () => {
       </div>
 
       {/* Bottom Feature Section */}
-      <div id="robots-section" className="relative w-full min-h-screen bg-gradient-to-b from-slate-900 via-blue-900/50 to-slate-900 py-20 px-6 overflow-hidden">
+      <div id="robots-section" className="relative w-full h-screen bg-gradient-to-b from-slate-900 via-blue-900/50 to-slate-900 py-8 px-6 overflow-hidden">
         {/* Decorative background elements - ENHANCED & VIBRANT */}
         <div className="absolute inset-0 overflow-hidden">
           {/* Cyan glow - top left */}
@@ -400,28 +400,28 @@ const PreLoginPage = () => {
         <div className="relative z-10 max-w-7xl mx-auto">
           {/* Section Header */}
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
               Bold AI Workbench™
             </h2>
-            <p className="text-xl text-cyan-400 font-semibold mb-4">
+            <p className="text-lg text-cyan-400 font-semibold mb-2">
               Talent + Tools Deliver AI Amplified Results™
             </p>
-            <p className="text-gray-300 max-w-2xl mx-auto">
+            <p className="text-sm text-gray-300 max-w-2xl mx-auto">
               Welcome to the AI Workbench — your space to explore and use over 400 proprietary AI-powered tools designed to make work faster, smarter, and easier.
             </p>
-            <p className="text-gray-400 mt-4">
+            <p className="text-xs text-gray-400 mt-2">
               Tools are grouped into four simple categories so you can quickly find what you need:
             </p>
           </motion.div>
 
           {/* Tool Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {toolCategories.map((tool, index) => (
               <motion.div
                 key={tool.id}
@@ -480,19 +480,19 @@ const PreLoginPage = () => {
 
           {/* Placeholder Items Grid - Column Based Layout */}
           <motion.div
-            className="mt-16"
+            className="mt-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Prompts Column */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`prompt-${num}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -545,11 +545,11 @@ const PreLoginPage = () => {
               </div>
 
               {/* Automations Column */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`automation-${num}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-green-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -602,11 +602,11 @@ const PreLoginPage = () => {
               </div>
 
               {/* AI Agents Column */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`ai-agent-${num}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-purple-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -659,11 +659,11 @@ const PreLoginPage = () => {
               </div>
 
               {/* Training Column */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[1, 2, 3, 4].map((num) => (
                   <motion.div
                     key={`training-${num}`}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-6 cursor-pointer overflow-visible transition-all duration-500"
+                    className="group relative bg-slate-900/40 backdrop-blur-xl border border-pink-400/30 rounded-3xl p-4 cursor-pointer overflow-visible transition-all duration-500"
                     whileHover={{ scale: 1.08, y: -8 }}
                     transition={{ duration: 0.4 }}
                   >
@@ -717,26 +717,7 @@ const PreLoginPage = () => {
             </div>
           </motion.div>
 
-          {/* CTA Section */}
-          <motion.div
-            className="text-center mt-20"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <p className="text-gray-300 mb-8 text-lg">
-              Ready to amplify your talent?
-            </p>
-            <motion.button
-              onClick={() => navigate('/auth/signin')}
-              className="bg-gradient-to-r from-cyan-400 to-blue-500 text-white px-10 py-4 rounded-full font-bold text-lg hover:shadow-lg hover:shadow-cyan-400/50 transition-all"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started with SSO Login →
-            </motion.button>
-          </motion.div>
+
         </div>
       </div>
     </div>

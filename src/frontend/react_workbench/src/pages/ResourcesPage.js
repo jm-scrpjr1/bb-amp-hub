@@ -1,9 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/layout/MainLayout';
 import { ScrollEffects } from '../components/effects';
-import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building, X, Eye, Heart, Star } from 'lucide-react';
+import { FileText, Download, ExternalLink, Search, Filter, Users, Globe, Building, X, Eye, Heart, Star, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DocumentViewerModal from '../components/modals/DocumentViewerModal';
+import { useAuth } from '../providers/AuthProvider';
+
+// ===== RBAC FILTERING LOGIC =====
+/**
+ * Check if user can view a document based on RBAC rules
+ * Rules:
+ * - All Employees / New Hires: Viewable by ANY ROLE + matching country (or All Countries)
+ * - Leaders: Viewable by TEAM_MANAGER, SUPER_ADMIN, OWNER only + matching country
+ */
+const canViewDocument = (user, document) => {
+  if (!user || !document) return false;
+
+  const userRole = user.roles?.name || user.role;
+  const userCountry = user.country || 'US';
+  const docStakeholder = document.stakeholder?.trim() || '';
+  const docCountry = document.country?.trim() || 'All Countries';
+
+  // Check country restriction first
+  const countryMatches = docCountry === 'All Countries' || docCountry === 'All countries' || userCountry === docCountry;
+  if (!countryMatches) {
+    return false;
+  }
+
+  // Check stakeholder-based access
+  if (docStakeholder === 'All Employees' || docStakeholder === 'New Hires') {
+    // Anyone can view these (country already checked)
+    return true;
+  }
+
+  if (docStakeholder === 'Leaders') {
+    // Only TEAM_MANAGER, SUPER_ADMIN, OWNER can view
+    const allowedRoles = ['TEAM_MANAGER', 'SUPER_ADMIN', 'OWNER'];
+    return allowedRoles.includes(userRole);
+  }
+
+  // Default: deny access if stakeholder is unknown
+  return false;
+};
 
 // CSV Data Loading Function with proper parsing for URLs with commas and quoted fields
 const loadCSVData = async () => {
@@ -171,6 +209,7 @@ const getCategoryColor = (category) => {
 };
 
 const ResourcesPage = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStakeholder, setSelectedStakeholder] = useState('all');
@@ -178,12 +217,14 @@ const ResourcesPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [documents, setDocuments] = useState([]);
+  const [accessibleDocuments, setAccessibleDocuments] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCategoryForModal, setSelectedCategoryForModal] = useState(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [rbacInfo, setRbacInfo] = useState(null);
 
   // Load CSV data on component mount
   useEffect(() => {
@@ -204,9 +245,31 @@ const ResourcesPage = () => {
     loadData();
   }, []);
 
-  const categories = getDocumentCategories(documents);
-  const stakeholders = [...new Set(documents.map(doc => doc.stakeholder))].filter(Boolean);
-  const countries = [...new Set(documents.map(doc => doc.country))].filter(Boolean).filter(country => country !== 'All Countries');
+  // Apply RBAC filtering when user or documents change
+  useEffect(() => {
+    if (user && documents.length > 0) {
+      const filtered = documents.filter(doc => canViewDocument(user, doc));
+      setAccessibleDocuments(filtered);
+
+      const userRole = user.roles?.name || user.role;
+      const userCountry = user.country || 'US';
+
+      setRbacInfo({
+        userRole,
+        userCountry,
+        totalDocuments: documents.length,
+        accessibleDocuments: filtered.length,
+        deniedDocuments: documents.length - filtered.length
+      });
+
+      console.log(`🔐 RBAC Filtering: User ${user.email} (${userRole}, ${userCountry}) can access ${filtered.length}/${documents.length} documents`);
+    }
+  }, [user, documents]);
+
+  // Use accessible documents for categories and filters
+  const categories = getDocumentCategories(accessibleDocuments.length > 0 ? accessibleDocuments : documents);
+  const stakeholders = [...new Set(accessibleDocuments.map(doc => doc.stakeholder))].filter(Boolean);
+  const countries = [...new Set(accessibleDocuments.map(doc => doc.country))].filter(Boolean).filter(country => country !== 'All Countries');
 
   // Modal management
   const openDocumentModal = (doc) => {
@@ -318,6 +381,26 @@ const ResourcesPage = () => {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Access company resources, forms, policies, and documentation organized by category and stakeholder.
             </p>
+
+            {/* RBAC Info Display */}
+            {rbacInfo && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 inline-block bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg px-4 py-3"
+              >
+                <div className="flex items-center space-x-2 text-sm">
+                  <Lock className="w-4 h-4 text-blue-600" />
+                  <span className="text-gray-700">
+                    <span className="font-semibold text-blue-600">{rbacInfo.userRole}</span> in <span className="font-semibold text-blue-600">{rbacInfo.userCountry}</span>
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-600">
+                    Viewing <span className="font-semibold">{rbacInfo.accessibleDocuments}</span> of <span className="font-semibold">{rbacInfo.totalDocuments}</span> documents
+                  </span>
+                </div>
+              </motion.div>
+            )}
           </div>
         </ScrollEffects>
 

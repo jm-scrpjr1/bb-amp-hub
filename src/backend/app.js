@@ -58,6 +58,7 @@ const { AIGroupService } = require('./services/aiGroupService');
 const { GroupService } = require('./services/groupService');
 const { PermissionService } = require('./services/permissionService');
 const AIAssessmentService = require('./services/aiAssessmentService');
+const { ResourceService } = require('./services/resourceService');
 
 // INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
@@ -1756,6 +1757,83 @@ app.get('/api/assessment/session/:sessionId', authenticateUser, async (req, res)
     res.status(500).json({
       success: false,
       message: 'Failed to get assessment session'
+    });
+  }
+});
+
+// ===== RESOURCES API ENDPOINTS WITH RBAC =====
+
+// Get accessible resources/documents for current user with RBAC filtering
+app.get('/api/resources', authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log(`📚 Resources endpoint called by user: ${user.email}, role: ${user.roles?.name || user.role}, country: ${user.country}`);
+
+    // For now, we'll return a message indicating the endpoint is ready
+    // The actual CSV data will be loaded and filtered on the frontend
+    // This endpoint can be extended to serve CSV data from the backend if needed
+
+    res.json({
+      success: true,
+      message: 'Resources endpoint ready with RBAC support',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.roles?.name || user.role,
+        country: user.country || 'US'
+      },
+      rbacRules: {
+        'All Employees': 'Viewable by ANY ROLE + matching country (or All Countries)',
+        'New Hires': 'Viewable by ANY ROLE + matching country (or All Countries)',
+        'Leaders': 'Viewable by TEAM_MANAGER, SUPER_ADMIN, OWNER only + matching country'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch resources'
+    });
+  }
+});
+
+// Validate document access for a specific document
+app.post('/api/resources/validate-access', authenticateUser, async (req, res) => {
+  try {
+    const user = req.user;
+    const { document } = req.body;
+
+    if (!user || !document) {
+      return res.status(400).json({ error: 'User and document are required' });
+    }
+
+    const canAccess = ResourceService.canViewDocument(user, document);
+
+    console.log(`🔐 Access validation for ${user.email} to document "${document.name}": ${canAccess ? 'ALLOWED' : 'DENIED'}`);
+
+    res.json({
+      success: true,
+      canAccess,
+      document: {
+        name: document.name,
+        stakeholder: document.stakeholder,
+        country: document.country
+      },
+      user: {
+        role: user.roles?.name || user.role,
+        country: user.country || 'US'
+      }
+    });
+  } catch (error) {
+    console.error('Error validating document access:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to validate access'
     });
   }
 });

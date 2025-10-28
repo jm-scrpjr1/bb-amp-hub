@@ -467,22 +467,21 @@ const PreLoginPage = () => {
             ))}
           </div>
 
-          {/* Placeholder Items Grid */}
+          {/* Placeholder Items Grid - Column Based Layout */}
           <motion.div
-            className="mt-16 space-y-8"
+            className="mt-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
-            {/* Prompts Row */}
-            <div>
-              <h4 className="text-lg font-semibold text-cyan-300 mb-4">Prompts</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((num) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Prompts Column */}
+              <div className="space-y-4">
+                {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`prompt-${num}`}
-                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    className="group relative bg-gradient-to-br from-blue-900/40 to-cyan-900/40 border border-cyan-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
                     whileHover={{ scale: 1.05, borderColor: 'rgba(34, 211, 238, 0.8)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -495,8 +494,8 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-4xl font-bold text-cyan-300 mb-3">
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className="text-2xl font-bold text-cyan-300">
                         Prompt #{num}
                       </div>
                       <p className="text-gray-300 text-sm">Insert Name</p>
@@ -509,16 +508,13 @@ const PreLoginPage = () => {
                   </motion.div>
                 ))}
               </div>
-            </div>
 
-            {/* Automations Row */}
-            <div>
-              <h4 className="text-lg font-semibold text-green-300 mb-4">Automations</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((num) => (
+              {/* Automations Column */}
+              <div className="space-y-4">
+                {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`automation-${num}`}
-                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    className="group relative bg-gradient-to-br from-green-900/40 to-emerald-900/40 border border-green-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
                     whileHover={{ scale: 1.05, borderColor: 'rgba(34, 197, 94, 0.8)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -531,8 +527,8 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-4xl font-bold text-green-300 mb-3">
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className="text-2xl font-bold text-green-300">
                         Automation #{num}
                       </div>
                       <p className="text-gray-300 text-sm">Insert Name</p>
@@ -545,16 +541,13 @@ const PreLoginPage = () => {
                   </motion.div>
                 ))}
               </div>
-            </div>
 
-            {/* AI Agents Row */}
-            <div>
-              <h4 className="text-lg font-semibold text-purple-300 mb-4">AI Agents</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((num) => (
+              {/* AI Agents Column */}
+              <div className="space-y-4">
+                {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`ai-agent-${num}`}
-                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    className="group relative bg-gradient-to-br from-purple-900/40 to-violet-900/40 border border-purple-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
                     whileHover={{ scale: 1.05, borderColor: 'rgba(168, 85, 247, 0.8)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -567,8 +560,8 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-4xl font-bold text-purple-300 mb-3">
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className="text-2xl font-bold text-purple-300">
                         AI Agent #{num}
                       </div>
                       <p className="text-gray-300 text-sm">Insert Name</p>
@@ -581,16 +574,13 @@ const PreLoginPage = () => {
                   </motion.div>
                 ))}
               </div>
-            </div>
 
-            {/* Training Row */}
-            <div>
-              <h4 className="text-lg font-semibold text-pink-300 mb-4">Training</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((num) => (
+              {/* Training Column */}
+              <div className="space-y-4">
+                {[1, 2, 3].map((num) => (
                   <motion.div
                     key={`training-${num}`}
-                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-6 cursor-pointer overflow-hidden"
+                    className="group relative bg-gradient-to-br from-pink-900/40 to-rose-900/40 border border-pink-500/30 rounded-lg p-4 cursor-pointer overflow-hidden"
                     whileHover={{ scale: 1.05, borderColor: 'rgba(236, 72, 153, 0.8)' }}
                     transition={{ duration: 0.3 }}
                   >
@@ -603,8 +593,8 @@ const PreLoginPage = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10">
-                      <div className="text-4xl font-bold text-pink-300 mb-3">
+                    <div className="relative z-10 flex items-center gap-3">
+                      <div className="text-2xl font-bold text-pink-300">
                         Training #{num}
                       </div>
                       <p className="text-gray-300 text-sm">Insert Name</p>

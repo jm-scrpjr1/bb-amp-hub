@@ -329,7 +329,7 @@ const PromptTutorPage = () => {
         <ScrollEffects effect="fadeUp" delay={0.1}>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              AI Prompt Tutor
+              Instant Prompts
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Master the art of AI prompting with our specialized tutors. Each agent is designed to help you craft perfect prompts for different domains.

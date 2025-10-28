@@ -30,10 +30,10 @@ import { useAuth } from '../../providers/AuthProvider';
 const navigationItems = [
   // MY AI-AMPLIFIERS Section
   { id: 'home', name: 'AI Home', icon: '/images/HOME ICON.png', path: '/', active: true },
-  { id: 'prompt-tutor', name: 'Prompts', icon: '/images/PROMPT ICON.png', path: '/prompt-tutor' },
-  { id: 'automations', name: 'Automations', icon: '/images/AUTOMATION ICON.png', path: '/automations' },
-  { id: 'ai-agents', name: 'AI Agents', icon: '/images/AI AGENT ICON.png', path: '/ai-agents' },
-  { id: 'trainings', name: 'Trainings', icon: '/images/TRAINING ICON.svg', path: '/trainings' },
+  { id: 'prompt-tutor', name: 'Instant Prompts', icon: '/images/PROMPT ICON.png', path: '/prompt-tutor' },
+  { id: 'automations', name: 'Guided Builders', icon: '/images/AUTOMATION ICON.png', path: '/automations' },
+  { id: 'ai-agents', name: 'Agentic Workflows', icon: '/images/AI AGENT ICON.png', path: '/ai-agents' },
+  { id: 'trainings', name: 'Knowledge and Trainings', icon: '/images/TRAINING ICON.svg', path: '/trainings' },
 
   // EMPLOYEE TOOLS Section
   { id: 'my-space', name: 'My Space', icon: '/images/MY SPACE ICON.png', path: '/my-space' },

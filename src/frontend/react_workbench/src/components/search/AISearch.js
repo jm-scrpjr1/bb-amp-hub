@@ -9,10 +9,10 @@ import environmentConfig from '../../config/environment';
 const searchData = {
   pages: [
     { id: 'home', title: 'AI Home', description: 'Dashboard with quick actions and activity feed', path: '/', category: 'Navigation' },
-    { id: 'prompt-tutor', title: 'Prompts', description: 'Learn AI prompting techniques and best practices', path: '/prompt-tutor', category: 'AI Learning' },
-    { id: 'automations', title: 'Automations', description: 'Create and manage workflow automations', path: '/automations', category: 'AI Tools' },
-    { id: 'ai-agents', title: 'AI Agents', description: 'Manage and interact with AI assistants', path: '/ai-agents', category: 'AI Tools' },
-    { id: 'trainings', title: 'Trainings', description: 'Browse available training courses', path: '/trainings', category: 'Learning' },
+    { id: 'prompt-tutor', title: 'Instant Prompts', description: 'Learn AI prompting techniques and best practices', path: '/prompt-tutor', category: 'AI Learning' },
+    { id: 'automations', title: 'Guided Builders', description: 'Create and manage workflow automations', path: '/automations', category: 'AI Tools' },
+    { id: 'ai-agents', title: 'Agentic Workflows', description: 'Manage and interact with AI assistants', path: '/ai-agents', category: 'AI Tools' },
+    { id: 'trainings', title: 'Knowledge and Trainings', description: 'Browse available training courses', path: '/trainings', category: 'Learning' },
     { id: 'my-space', title: 'My Space', description: 'Your personal workspace and preferences', path: '/my-space', category: 'Personal' },
     { id: 'activity', title: 'Activity', description: 'View recent activities and updates', path: '/activity', category: 'Navigation' },
     { id: 'groups', title: 'Groups', description: 'Manage teams and group collaborations', path: '/groups', category: 'Collaboration' },

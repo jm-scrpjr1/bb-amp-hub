@@ -233,7 +233,7 @@ const AutomationsPage = () => {
         <ScrollEffects effect="fadeUp" delay={0.1}>
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              AI Automations
+              Guided Builders
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Streamline your workflows with intelligent automation agents. Each automation is designed to handle repetitive tasks and boost your productivity.

@@ -1,6 +1,7 @@
 const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
+const mammoth = require('mammoth');
 
 class ResumeAnalyzerService {
   constructor() {
@@ -12,6 +13,30 @@ class ResumeAnalyzerService {
 
     // Resume Analyzer Assistant ID
     this.assistantId = 'asst_R5RXI0LcyRxsgR80xb05oNQb'; // Using ARIA's assistant for consistency
+  }
+
+  async extractTextFromDocx(fileBuffer) {
+    try {
+      console.log('📄 Extracting text from DOCX file...');
+      const result = await mammoth.extractRawText({ buffer: fileBuffer });
+      console.log('✅ DOCX text extracted successfully');
+      return result.value;
+    } catch (error) {
+      console.error('Error extracting DOCX text:', error);
+      throw new Error(`Failed to extract text from DOCX: ${error.message}`);
+    }
+  }
+
+  async extractTextFromPdf(fileBuffer) {
+    try {
+      console.log('📄 Extracting text from PDF file...');
+      // For now, we'll send PDF directly to OpenAI
+      // OpenAI's file_search tool can handle PDFs
+      return null; // Return null to indicate PDF should be uploaded as-is
+    } catch (error) {
+      console.error('Error extracting PDF text:', error);
+      throw error;
+    }
   }
 
   async createThread() {
@@ -50,14 +75,41 @@ class ResumeAnalyzerService {
       // Create new thread
       const threadId = await this.createThread();
 
-      // Upload all resume files
+      // Process resume files - extract text from DOCX, upload PDFs
+      const resumeTexts = [];
       const uploadedFileIds = [];
+
       for (const resumeFile of resumeFiles) {
-        const fileId = await this.uploadFile(resumeFile.buffer, resumeFile.originalname);
-        uploadedFileIds.push(fileId);
+        const fileExtension = path.extname(resumeFile.originalname).toLowerCase();
+
+        if (fileExtension === '.docx') {
+          // Extract text from DOCX
+          const extractedText = await this.extractTextFromDocx(resumeFile.buffer);
+          resumeTexts.push({
+            name: resumeFile.originalname,
+            text: extractedText
+          });
+          console.log(`✅ Extracted text from DOCX: ${resumeFile.originalname}`);
+        } else if (fileExtension === '.pdf') {
+          // Upload PDF to OpenAI for file_search
+          const fileId = await this.uploadFile(resumeFile.buffer, resumeFile.originalname);
+          uploadedFileIds.push(fileId);
+          console.log(`✅ Uploaded PDF: ${resumeFile.originalname}`);
+        } else {
+          console.warn(`⚠️ Unsupported file type: ${fileExtension}`);
+        }
       }
 
-      console.log('✅ All files uploaded:', uploadedFileIds.length);
+      console.log(`✅ Processed ${resumeTexts.length} DOCX files and ${uploadedFileIds.length} PDF files`);
+
+      // Build resume content string from extracted DOCX texts
+      let resumeContent = '';
+      if (resumeTexts.length > 0) {
+        resumeContent = '\n\nRESUMES (extracted from uploaded files):\n';
+        resumeTexts.forEach((resume, index) => {
+          resumeContent += `\n--- Resume ${index + 1}: ${resume.name} ---\n${resume.text}\n`;
+        });
+      }
 
       // Create the analysis prompt
       const analysisPrompt = `You are an expert recruiter and talent analyst. Analyze the following resumes against the job requirements and client's own words/preferences.
@@ -67,6 +119,7 @@ ${jobDescription}
 
 CLIENT'S OWN WORDS (from interview/call transcripts):
 ${clientWords}
+${resumeContent}
 
 Please analyze each resume and provide:
 1. A match score (0-100) for each candidate

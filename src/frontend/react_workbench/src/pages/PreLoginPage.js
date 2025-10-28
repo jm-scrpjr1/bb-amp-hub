@@ -290,14 +290,13 @@ const PreLoginPage = () => {
                 ease: "easeInOut"
               }}
             />
-            {/* Logo image - keep signature O color, make rest white */}
+            {/* Logo image - SVG with glow effect */}
             <img
-              src="/images/AI Workbench Logo.png"
-              alt="AI Workbench Logo"
-              className="relative h-16 w-auto drop-shadow-lg"
+              src="/images/BOLD LIGHT LOGO.svg"
+              alt="Bold Business Logo"
+              className="relative h-20 w-auto drop-shadow-lg"
               style={{
-                filter: 'brightness(1.2) contrast(1.1) drop-shadow(0 0 15px rgba(6, 229, 236, 0.7))',
-                mixBlendMode: 'screen'
+                filter: 'drop-shadow(0 0 20px rgba(6, 229, 236, 0.8))',
               }}
             />
           </div>

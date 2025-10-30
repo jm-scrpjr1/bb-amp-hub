@@ -6,6 +6,7 @@ import { X, Users, UserPlus, UserMinus, Search, Crown, Shield, User } from 'luci
 
 interface Member {
   id: string;
+  userId: string;
   name: string;
   email: string;
   image?: string;
@@ -268,7 +269,7 @@ export default function ManageMembersModal({ isOpen, onClose, onSuccess, group }
                       Joined {new Date(member.joinedAt).toLocaleDateString()}
                     </span>
                     <button
-                      onClick={() => removeMember(member.id)}
+                      onClick={() => removeMember(member.userId)}
                       className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                       title="Remove member"
                     >

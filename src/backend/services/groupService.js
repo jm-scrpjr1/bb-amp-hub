@@ -216,7 +216,7 @@ class GroupService {
           },
           _count: {
             select: {
-              memberships: true
+              group_memberships: true
             }
           }
         }

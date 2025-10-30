@@ -326,7 +326,7 @@ const ManageMembersModal = memo(function ManageMembersModal({ isOpen, onClose, g
                     </div>
                     {canManageThisGroup && (
                       <button
-                        onClick={() => handleRemoveMember(member.id)}
+                        onClick={() => handleRemoveMember(member.userId)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Remove member"
                       >

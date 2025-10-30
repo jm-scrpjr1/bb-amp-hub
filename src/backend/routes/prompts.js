@@ -328,12 +328,12 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
           const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
           const currentYear = new Date().getFullYear();
 
-          // Determine max_tokens based on prompt type
+          // Set max_tokens to 4000 for all prompts (only charged for actual tokens used)
+          const maxTokens = 4000;
+
+          // Add formatting instructions for structured prompts (Kaizen, analysis, etc.)
           const isKaizenPrompt = prompt.prompt_type?.toLowerCase().includes('kaizen') ||
                                  prompt.catchy_name?.toLowerCase().includes('kaizen');
-          const maxTokens = isKaizenPrompt ? 4000 : 2000;
-
-          // Add formatting instructions for structured prompts
           const formattingInstructions = isKaizenPrompt ? `
 
 📋 FORMATTING REQUIREMENTS:
@@ -450,13 +450,12 @@ YOU MUST:
 
 If you include ANY date from 2023 or 2024, you have FAILED this task.`;
 
-    // Determine max_tokens based on prompt type
-    // Kaizen & TPS prompts need more tokens for detailed tables and analysis
+    // Set max_tokens to 4000 for all prompts (only charged for actual tokens used)
+    const maxTokens = 4000;
+
+    // Add formatting instructions for structured prompts (Kaizen, analysis, etc.)
     const isKaizenPrompt = prompt.prompt_type?.toLowerCase().includes('kaizen') ||
                            prompt.catchy_name?.toLowerCase().includes('kaizen');
-    const maxTokens = isKaizenPrompt ? 4000 : 2000;
-
-    // Add formatting instructions for structured prompts
     const formattingInstructions = isKaizenPrompt ? `
 
 📋 FORMATTING REQUIREMENTS:

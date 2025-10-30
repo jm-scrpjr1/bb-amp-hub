@@ -273,9 +273,9 @@ const PreLoginPage = () => {
 
   const trainingNames = [
     'AI Assessment',
-    'AI Fundamentals Course',
-    'Prompt Engineering Mastery',
-    'Automation Best Practices'
+    'Lean Machine 101',
+    'Being a BOLD Leader',
+    'SDR Softskills'
   ];
 
   return (

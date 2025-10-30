@@ -391,22 +391,22 @@ class AIAssessmentService {
   // Save assessment to history for tracking improvement
   static async saveAssessmentHistory(userId, sessionId, totalScore, percentageScore, aiReadinessLevel) {
     try {
-      // Get previous assessment for improvement calculation
+      // Get previous assessment for improvement calculation (order by created_at to handle multiple assessments on same day)
       const previousAssessment = await prisma.$queryRaw`
-        SELECT overall_percentage 
-        FROM user_assessment_history 
+        SELECT overall_percentage
+        FROM user_assessment_history
         WHERE user_id = ${userId}
-        ORDER BY assessment_date DESC 
+        ORDER BY created_at DESC
         LIMIT 1
       `;
 
-      const improvementFromPrevious = previousAssessment.length > 0 
+      const improvementFromPrevious = previousAssessment.length > 0
         ? percentageScore - parseFloat(previousAssessment[0].overall_percentage)
         : 0;
 
       await prisma.$queryRaw`
         INSERT INTO user_assessment_history (
-          user_id, session_id, assessment_date, overall_score, 
+          user_id, session_id, assessment_date, overall_score,
           overall_percentage, ai_readiness_level, improvement_from_previous
         )
         VALUES (
@@ -423,14 +423,14 @@ class AIAssessmentService {
   static async getUserAssessmentHistory(userId, limit = 10) {
     try {
       const history = await prisma.$queryRaw`
-        SELECT 
+        SELECT
           h.*,
           s.completed_at,
           s.session_token
         FROM user_assessment_history h
         JOIN user_assessment_sessions s ON h.session_id = s.id
         WHERE h.user_id = ${userId}
-        ORDER BY h.assessment_date DESC
+        ORDER BY h.created_at DESC
         LIMIT ${limit}
       `;
 

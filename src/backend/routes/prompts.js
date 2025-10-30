@@ -327,6 +327,24 @@ router.post('/:id/execute', upload.single('file'), async (req, res) => {
           // Use GPT-4 Vision for image analysis
           const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
           const currentYear = new Date().getFullYear();
+
+          // Determine max_tokens based on prompt type
+          const isKaizenPrompt = prompt.prompt_type?.toLowerCase().includes('kaizen') ||
+                                 prompt.catchy_name?.toLowerCase().includes('kaizen');
+          const maxTokens = isKaizenPrompt ? 4000 : 2000;
+
+          // Add formatting instructions for structured prompts
+          const formattingInstructions = isKaizenPrompt ? `
+
+📋 FORMATTING REQUIREMENTS:
+- Use markdown tables for Value Stream Maps, analysis frameworks, and action plans
+- Structure your response with clear numbered sections and subsections
+- Use bullet points for lists and key points
+- Include emojis for visual organization (✅, 🎯, ⚠️, etc.)
+- Make tables comprehensive with columns for: Stage, Actor/Owner, Input/Trigger, Activity, Output, Cycle Time, Wait Time, % VA (Value Add)
+- Provide detailed, actionable recommendations in table format
+` : '';
+
           const systemPrompt = `${prompt.refined_instructions}
 
 🚨 CRITICAL DATE REQUIREMENT 🚨
@@ -339,7 +357,7 @@ YOU MUST:
 - All future dates must be ${currentYear} or beyond
 - All past dates must be before ${currentYear}
 
-If you include ANY date from 2023 or 2024, you have FAILED this task.`;
+If you include ANY date from 2023 or 2024, you have FAILED this task.${formattingInstructions}`;
 
           const visionCompletion = await openai.chat.completions.create({
             model: 'gpt-4o',
@@ -362,7 +380,7 @@ If you include ANY date from 2023 or 2024, you have FAILED this task.`;
               }
             ],
             temperature: 0.7,
-            max_tokens: 2000
+            max_tokens: maxTokens
           });
 
           // Clean up the response to remove excessive markdown
@@ -432,13 +450,33 @@ YOU MUST:
 
 If you include ANY date from 2023 or 2024, you have FAILED this task.`;
 
+    // Determine max_tokens based on prompt type
+    // Kaizen & TPS prompts need more tokens for detailed tables and analysis
+    const isKaizenPrompt = prompt.prompt_type?.toLowerCase().includes('kaizen') ||
+                           prompt.catchy_name?.toLowerCase().includes('kaizen');
+    const maxTokens = isKaizenPrompt ? 4000 : 2000;
+
+    // Add formatting instructions for structured prompts
+    const formattingInstructions = isKaizenPrompt ? `
+
+📋 FORMATTING REQUIREMENTS:
+- Use markdown tables for Value Stream Maps, analysis frameworks, and action plans
+- Structure your response with clear numbered sections and subsections
+- Use bullet points for lists and key points
+- Include emojis for visual organization (✅, 🎯, ⚠️, etc.)
+- Make tables comprehensive with columns for: Stage, Actor/Owner, Input/Trigger, Activity, Output, Cycle Time, Wait Time, % VA (Value Add)
+- Provide detailed, actionable recommendations in table format
+` : '';
+
+    const enhancedSystemPrompt = systemPrompt + formattingInstructions;
+
     // Execute with OpenAI
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: systemPrompt
+          content: enhancedSystemPrompt
         },
         {
           role: 'user',
@@ -446,7 +484,7 @@ If you include ANY date from 2023 or 2024, you have FAILED this task.`;
         }
       ],
       temperature: 0.7,
-      max_tokens: 2000
+      max_tokens: maxTokens
     });
 
     // Clean up the response to remove excessive markdown

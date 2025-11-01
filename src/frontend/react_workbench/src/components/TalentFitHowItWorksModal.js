@@ -296,7 +296,7 @@ const TalentFitHowItWorksModal = ({ isOpen, onClose }) => {
                 transition={{ delay: 0.3 }}
               >
                 <h3 className="text-2xl font-bold text-cyan-300 mb-2">
-                  Why TalentFit vs. ChatGPT?
+                  Why TalentFit vs. Traditional LLMs?
                 </h3>
                 <p className="text-cyan-100/70 mb-6">
                   TalentFit is purpose-built for recruitment, delivering enterprise-grade insights that generic AI tools simply can't match.

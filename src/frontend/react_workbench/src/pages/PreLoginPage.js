@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import TalentFitModal from '../components/TalentFitModal';
+// ARCHIVED: Functional TalentFit modal - preserved for later use
+// import TalentFitModal from '../components/TalentFitModal';
+import TalentFitHowItWorksModal from '../components/TalentFitHowItWorksModal';
 
 // Particle dissolve effect component - EPIC THANOS SNAP
 const DissolveParticle = ({ x, y, delay, size = 3 }) => {
@@ -1034,11 +1036,18 @@ const PreLoginPage = () => {
         </div>
       </div>
 
-      {/* TalentFit Modal */}
+      {/* TalentFit "How It Works" Modal - Shows demo images and advantages */}
+      <TalentFitHowItWorksModal
+        isOpen={isTalentFitModalOpen}
+        onClose={() => setIsTalentFitModalOpen(false)}
+      />
+
+      {/* ARCHIVED: Functional TalentFit Modal - Preserved for later use
       <TalentFitModal
         isOpen={isTalentFitModalOpen}
         onClose={() => setIsTalentFitModalOpen(false)}
       />
+      */}
     </div>
   );
 };

@@ -7,8 +7,8 @@ const client = new OpenAI({
 });
 
 async function checkRunStatus() {
-  const threadId = 'thread_YMlojiXaBqIWTW67RptdqUcR';
-  const runId = 'run_EditMDacCdBdbt9aJUIXShT9';
+  const threadId = 'thread_TdQax6Eq6vdkzirUKFSJN40N';
+  const runId = 'run_kG3Wd3qJ8XUOUR9FBSyGRPYu';
 
   try {
     console.log('🔍 Checking OpenAI run status...');

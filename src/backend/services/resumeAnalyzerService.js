@@ -74,7 +74,9 @@ class ResumeAnalyzerService {
       console.log('📄 Number of resumes:', resumeFiles.length);
 
       // Create new thread
+      console.log('🔄 Creating OpenAI thread...');
       const threadId = await this.createThread();
+      console.log('✅ Thread created successfully:', threadId);
 
       // Process resume files - extract text from DOCX, upload PDFs (IN PARALLEL for speed)
       console.log('⚡ Processing all files in parallel for maximum speed...');
@@ -181,6 +183,7 @@ Format your response as JSON with this structure:
       console.log('💬 Analysis message added to thread');
 
       // Run the assistant
+      console.log('🔄 Creating assistant run...');
       const run = await this.client.beta.threads.runs.create(
         threadId,
         {

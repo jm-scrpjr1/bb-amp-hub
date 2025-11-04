@@ -192,8 +192,8 @@ Format your response as JSON with this structure:
 
       // Poll for completion
       let runStatus = await this.client.beta.threads.runs.retrieve(
-        threadId,
-        run.id
+        run.id,
+        { thread_id: threadId }
       );
 
       let attempts = 0;
@@ -205,8 +205,8 @@ Format your response as JSON with this structure:
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
         runStatus = await this.client.beta.threads.runs.retrieve(
-          threadId,
-          run.id
+          run.id,
+          { thread_id: threadId }
         );
         attempts++;
       }

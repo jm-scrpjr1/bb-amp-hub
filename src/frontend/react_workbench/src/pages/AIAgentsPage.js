@@ -4,6 +4,7 @@ import { ScrollEffects } from '../components/effects';
 import { Search, Heart, MoreVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AnimatedRobot from '../components/ui/AnimatedRobot';
+import WeeklyOptimizerModal from '../components/modals/WeeklyOptimizerModal';
 
 const categories = [
   { id: 'all', name: 'All', active: true },
@@ -176,6 +177,23 @@ const agents = [
       "I compile faster than coffee brews! ☕",
       "Coding excellence awaits! 🚀"
     ]
+  },
+  {
+    id: 7,
+    name: 'Weekly Optimizer',
+    description: 'AI-powered weekly planning with calendar and email analysis',
+    image: '/images/Automation 1.png',
+    bgColor: 'bg-gradient-to-br from-cyan-500 to-purple-600',
+    category: 'all',
+    animation: 'float',
+    liked: false,
+    wittyMessages: [
+      "Let's optimize your week! 📅",
+      "Ready to maximize your productivity? ⚡",
+      "I'll analyze your calendar and emails! 📊",
+      "Time to work smarter, not harder! 🎯",
+      "Your AI planning assistant is here! 🤖"
+    ]
   }
 ];
 
@@ -185,6 +203,7 @@ const AIAgentsPage = () => {
   const [likedAgents, setLikedAgents] = useState(new Set());
   const [hoveredAgent, setHoveredAgent] = useState(null);
   const [currentMessages, setCurrentMessages] = useState({});
+  const [isWeeklyOptimizerOpen, setIsWeeklyOptimizerOpen] = useState(false);
 
   const getRandomMessage = (messages) => {
     return messages[Math.floor(Math.random() * messages.length)];
@@ -287,6 +306,11 @@ const AIAgentsPage = () => {
                 transition={{ delay: 0.4 + index * 0.1 }}
                 onMouseEnter={() => handleAgentHover(agent.id, agent.wittyMessages)}
                 onMouseLeave={handleAgentLeave}
+                onClick={() => {
+                  if (agent.id === 7) {
+                    setIsWeeklyOptimizerOpen(true);
+                  }
+                }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -392,6 +416,12 @@ const AIAgentsPage = () => {
           </div>
         </ScrollEffects>
       </div>
+
+      {/* Weekly Optimizer Modal */}
+      <WeeklyOptimizerModal
+        isOpen={isWeeklyOptimizerOpen}
+        onClose={() => setIsWeeklyOptimizerOpen(false)}
+      />
     </MainLayout>
   );
 };

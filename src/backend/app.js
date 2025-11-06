@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const axios = require("axios");
 const openaiService = require('./services/openaiService');
 const resumeBuilderService = require('./services/resumeBuilderService');
 const ResumeAnalyzerService = require('./services/resumeAnalyzerService');
@@ -1954,6 +1955,54 @@ app.post('/api/resources/validate-access', authenticateUser, async (req, res) =>
     res.status(500).json({
       success: false,
       error: 'Failed to validate access'
+    });
+  }
+});
+
+// ============================================================================
+// MONDAY.COM FORM PROXY
+// ============================================================================
+// Proxy endpoint to bypass Monday.com's X-Frame-Options and CSP restrictions
+app.get('/api/monday-form-proxy', async (req, res) => {
+  try {
+    console.log('📋 Proxying Monday.com form request...');
+
+    const mondayFormUrl = 'https://forms.monday.com/forms/8493996ce9c50eea77637b46940cc86b?r=use1';
+
+    // Fetch the Monday.com form HTML
+    const response = await axios.get(mondayFormUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
+
+    let html = response.data;
+
+    // Remove X-Frame-Options and CSP headers that would block embedding
+    // Inject base tag to ensure relative URLs work correctly
+    html = html.replace(
+      '<head>',
+      `<head><base href="https://forms.monday.com/">`
+    );
+
+    // Set headers to allow embedding
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'self' https://aiworkbench.boldbusiness.com https://main.d1wapgj6lifsrx.amplifyapp.com http://localhost:3000");
+
+    console.log('✅ Monday.com form proxied successfully');
+    res.send(html);
+  } catch (error) {
+    console.error('❌ Error proxying Monday.com form:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to load Monday.com form',
+      details: error.message
     });
   }
 });

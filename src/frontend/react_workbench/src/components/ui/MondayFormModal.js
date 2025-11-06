@@ -58,7 +58,7 @@ const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, trigger
         </div>
       </div>
 
-      {/* Monday.com Form iframe with sandbox */}
+      {/* Monday.com Form iframe via backend proxy */}
       <div className="relative bg-white" style={{ height: '700px' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
@@ -69,14 +69,14 @@ const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, trigger
           </div>
         )}
         <iframe
-          src="https://forms.monday.com/forms/8493996ce9c50eea77637b46940cc86b?r=use1"
+          src={`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com'}/api/monday-form-proxy`}
           width="100%"
           height="100%"
           frameBorder="0"
           style={{ border: 'none' }}
           title="Submit Bold Idea Form"
           onLoad={handleIframeLoad}
-          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
           allow="fullscreen"
         />
       </div>

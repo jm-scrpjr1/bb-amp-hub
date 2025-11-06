@@ -69,7 +69,7 @@ const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, trigger
           </div>
         )}
         <iframe
-          src={`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com'}/api/monday-form-proxy`}
+          src={`${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}/monday-form-proxy`}
           width="100%"
           height="100%"
           frameBorder="0"

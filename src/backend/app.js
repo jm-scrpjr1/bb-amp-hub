@@ -1984,9 +1984,9 @@ app.get('/api/monday-form-proxy', async (req, res) => {
     let html = response.data;
 
     // Remove X-Frame-Options and CSP headers that would block embedding
-    // Inject base tag to ensure relative URLs work correctly
+    // Replace all Monday.com URLs with our proxy URLs
     html = html.replace(
-      '<head>',
+      /<head>/i,
       `<head><base href="https://forms.monday.com/">`
     );
 
@@ -1994,6 +1994,8 @@ app.get('/api/monday-form-proxy', async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('X-Frame-Options', 'ALLOWALL');
     res.setHeader('Content-Security-Policy', "frame-ancestors 'self' https://aiworkbench.boldbusiness.com https://main.d1wapgj6lifsrx.amplifyapp.com http://localhost:3000");
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     console.log('✅ Monday.com form proxied successfully');
     res.send(html);
@@ -2005,6 +2007,105 @@ app.get('/api/monday-form-proxy', async (req, res) => {
       details: error.message
     });
   }
+});
+
+// Proxy GET requests for Monday.com resources (CSS, JS, images, etc.)
+app.get('/api/monday-form-proxy/*', async (req, res) => {
+  try {
+    const targetPath = req.params[0];
+    const targetUrl = `https://forms.monday.com/${targetPath}`;
+
+    console.log('📥 Proxying Monday.com resource:', targetUrl);
+
+    const response = await axios.get(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': req.headers['accept'] || '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Referer': 'https://forms.monday.com/'
+      },
+      responseType: 'arraybuffer' // Handle binary data (images, fonts, etc.)
+    });
+
+    // Forward response headers
+    Object.keys(response.headers).forEach(key => {
+      if (!['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        res.setHeader(key, response.headers[key]);
+      }
+    });
+
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    res.send(response.data);
+  } catch (error) {
+    console.error('❌ Error proxying Monday.com resource:', error.message);
+    res.status(error.response?.status || 500).send(error.response?.data || 'Resource not found');
+  }
+});
+
+// Proxy POST requests (form submissions) to Monday.com
+app.post('/api/monday-form-proxy/*', async (req, res) => {
+  try {
+    const targetPath = req.params[0];
+    const targetUrl = `https://forms.monday.com/${targetPath}`;
+
+    console.log('📤 Proxying Monday.com form submission to:', targetUrl);
+
+    // Forward the POST request to Monday.com
+    const response = await axios({
+      method: 'POST',
+      url: targetUrl,
+      data: req.body,
+      headers: {
+        'Content-Type': req.headers['content-type'] || 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': req.headers['accept'] || '*/*',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Origin': 'https://forms.monday.com',
+        'Referer': 'https://forms.monday.com/'
+      },
+      maxRedirects: 0,
+      validateStatus: (status) => status < 500 // Accept redirects and client errors
+    });
+
+    // Forward the response headers
+    Object.keys(response.headers).forEach(key => {
+      if (!['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        res.setHeader(key, response.headers[key]);
+      }
+    });
+
+    // Set CORS headers to allow the response
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    console.log('✅ Monday.com form submission proxied successfully, status:', response.status);
+    res.status(response.status).send(response.data);
+  } catch (error) {
+    if (error.response) {
+      // Forward error responses from Monday.com
+      console.log('⚠️ Monday.com responded with error:', error.response.status);
+      res.status(error.response.status).send(error.response.data);
+    } else {
+      console.error('❌ Error proxying Monday.com form submission:', error.message);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to submit form',
+        details: error.message
+      });
+    }
+  }
+});
+
+// Handle OPTIONS requests for CORS preflight
+app.options('/api/monday-form-proxy/*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Origin, Referer');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.status(200).end();
 });
 
 const PORT = process.env.PORT || 3001;

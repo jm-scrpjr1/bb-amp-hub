@@ -29,6 +29,12 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
         }
       });
 
+      // 404 is expected when no optimization exists yet
+      if (response.status === 404) {
+        setOptimization(null);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch optimization');
       }

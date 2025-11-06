@@ -1983,11 +1983,40 @@ app.get('/api/monday-form-proxy', async (req, res) => {
 
     let html = response.data;
 
-    // Remove X-Frame-Options and CSP headers that would block embedding
-    // Replace all Monday.com URLs with our proxy URLs
+    // Inject script to intercept all fetch and XMLHttpRequest calls
+    const interceptScript = `
+    <script>
+      (function() {
+        const PROXY_BASE = '${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}';
+        const MONDAY_BASE = 'https://forms.monday.com';
+
+        // Intercept fetch
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+          if (typeof url === 'string' && url.startsWith(MONDAY_BASE)) {
+            url = url.replace(MONDAY_BASE, PROXY_BASE + '/monday-form-proxy');
+            console.log('🔄 Proxying fetch request:', url);
+          }
+          return originalFetch.call(this, url, options);
+        };
+
+        // Intercept XMLHttpRequest
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+          if (typeof url === 'string' && url.startsWith(MONDAY_BASE)) {
+            url = url.replace(MONDAY_BASE, PROXY_BASE + '/monday-form-proxy');
+            console.log('🔄 Proxying XHR request:', url);
+          }
+          return originalOpen.call(this, method, url, ...rest);
+        };
+      })();
+    </script>
+    `;
+
+    // Inject the intercept script right after <head>
     html = html.replace(
       /<head>/i,
-      `<head><base href="https://forms.monday.com/">`
+      `<head>${interceptScript}`
     );
 
     // Set headers to allow embedding

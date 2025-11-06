@@ -1,37 +1,35 @@
 import React, { useState, useEffect, memo } from 'react';
-import { X, ExternalLink } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider';
 import GenieModal from './GenieModal';
 
 const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, triggerElement }) {
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Auto-open in new tab when modal opens (since iframe is blocked by Monday.com)
   useEffect(() => {
-    if (isOpen && user) {
-      // Open Monday.com form in new tab
-      window.open('https://forms.monday.com/forms/8493996ce9c50eea77637b46940cc86b?r=use1', '_blank');
-      // Close the modal immediately
-      setTimeout(() => {
-        onClose();
-      }, 500);
+    if (isOpen) {
+      setIsLoading(true);
     }
-  }, [isOpen, user, onClose]);
+  }, [isOpen]);
+
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+  };
 
   if (!mounted) return null;
 
-  // Show a brief message before redirecting
   return (
     <GenieModal
       isOpen={isOpen}
       onClose={onClose}
       triggerElement={triggerElement}
-      className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
+      className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
     >
       {/* Header */}
       <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 p-6 rounded-t-2xl">
@@ -44,6 +42,9 @@ const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, trigger
               <h2 className="text-xl font-bold text-white">
                 Submit Your Bold Idea
               </h2>
+              <p className="text-purple-100 text-sm">
+                Share innovations that amplify our workspace
+              </p>
             </div>
           </div>
 
@@ -57,31 +58,27 @@ const MondayFormModal = memo(function MondayFormModal({ isOpen, onClose, trigger
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-8 text-center">
-        <div className="mb-6">
-          <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ExternalLink className="w-8 h-8 text-purple-600" />
+      {/* Monday.com Form iframe with sandbox */}
+      <div className="relative bg-white" style={{ height: '700px' }}>
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+            <div className="text-center">
+              <div className="animate-spin w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-gray-600 font-medium">Loading form...</p>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Opening Form...
-          </h3>
-          <p className="text-gray-600 text-sm">
-            The Bold Idea submission form is opening in a new tab.
-          </p>
-        </div>
-
-        <div className="text-xs text-gray-500">
-          If the form didn't open, please{' '}
-          <a
-            href="https://forms.monday.com/forms/8493996ce9c50eea77637b46940cc86b?r=use1"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-purple-600 hover:text-purple-700 underline"
-          >
-            click here
-          </a>
-        </div>
+        )}
+        <iframe
+          src="https://forms.monday.com/forms/8493996ce9c50eea77637b46940cc86b?r=use1"
+          width="100%"
+          height="100%"
+          frameBorder="0"
+          style={{ border: 'none' }}
+          title="Submit Bold Idea Form"
+          onLoad={handleIframeLoad}
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+          allow="fullscreen"
+        />
       </div>
     </GenieModal>
   );

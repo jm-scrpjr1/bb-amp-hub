@@ -141,13 +141,7 @@ const WeeklyOptimizerDashboard = () => {
               <div className="text-center py-8">
                 <Sparkles className="h-16 w-16 mx-auto mb-4 opacity-80" />
                 <p className="text-xl mb-4">Your weekly optimization is being prepared!</p>
-                <button
-                  onClick={handleRefresh}
-                  disabled={refreshing}
-                  className="px-6 py-3 bg-white text-cyan-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
-                >
-                  {refreshing ? 'Generating...' : 'Generate Now'}
-                </button>
+                <p className="text-sm opacity-75">Check back soon or visit the AI Agents page to generate manually</p>
               </div>
             ) : (
               <p className="text-lg opacity-90">

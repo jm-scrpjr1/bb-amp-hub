@@ -23,14 +23,11 @@ class WeeklyOptimizerService {
   }
 
   /**
-   * Get Prisma client (lazy initialization)
+   * Get Prisma client (always fresh to avoid caching issues)
    */
-  get prisma() {
-    if (!this._prisma) {
-      const { prisma } = require('../lib/db');
-      this._prisma = prisma;
-    }
-    return this._prisma;
+  getPrisma() {
+    const { prisma } = require('../lib/db');
+    return prisma;
   }
 
   /**
@@ -263,7 +260,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       console.log(`🔄 Starting weekly optimization for user ${userId}`);
 
       // Get user from database
-      const user = await this.prisma.users.findUnique({
+      const prisma = this.getPrisma();
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         include: { roles: true }
       });
@@ -273,7 +271,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       }
 
       // Get user's optimizer settings
-      const settings = await this.prisma.weekly_optimizer_settings.findUnique({
+      const settings = await prisma.weekly_optimizer_settings.findUnique({
         where: { user_id: userId }
       });
 
@@ -326,7 +324,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       };
 
       // Save to database
-      await this.prisma.weekly_optimizations.create({
+      await prisma.weekly_optimizations.create({
         data: {
           user_id: userId,
           week_start_date: weekStart,
@@ -344,7 +342,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       console.log(`✅ Weekly optimization completed for ${user.email} in ${processingTime}ms`);
 
       // Log success
-      await this.prisma.weekly_optimizer_logs.create({
+      await prisma.weekly_optimizer_logs.create({
         data: {
           user_id: userId,
           status: 'success',
@@ -358,7 +356,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       console.error(`❌ Error optimizing week for user ${userId}:`, error);
 
       // Log error
-      await this.prisma.weekly_optimizer_logs.create({
+      const prisma = this.getPrisma();
+      await prisma.weekly_optimizer_logs.create({
         data: {
           user_id: userId,
           status: 'error',
@@ -474,8 +473,9 @@ Please provide a comprehensive weekly optimization with recommendations, insight
   async getCurrentOptimization(userId) {
     try {
       const { weekStart } = this.getUpcomingWeekDates();
+      const prisma = this.getPrisma();
 
-      const optimization = await this.prisma.weekly_optimizations.findFirst({
+      const optimization = await prisma.weekly_optimizations.findFirst({
         where: {
           user_id: userId,
           week_start_date: weekStart
@@ -497,13 +497,14 @@ Please provide a comprehensive weekly optimization with recommendations, insight
    */
   async getUserSettings(userId) {
     try {
-      let settings = await this.prisma.weekly_optimizer_settings.findUnique({
+      const prisma = this.getPrisma();
+      let settings = await prisma.weekly_optimizer_settings.findUnique({
         where: { user_id: userId }
       });
 
       if (!settings) {
         // Create default settings
-        settings = await this.prisma.weekly_optimizer_settings.create({
+        settings = await prisma.weekly_optimizer_settings.create({
           data: {
             user_id: userId,
             enabled: true,
@@ -527,7 +528,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
    */
   async updateUserSettings(userId, updates) {
     try {
-      const settings = await this.prisma.weekly_optimizer_settings.upsert({
+      const prisma = this.getPrisma();
+      const settings = await prisma.weekly_optimizer_settings.upsert({
         where: { user_id: userId },
         update: {
           ...updates,

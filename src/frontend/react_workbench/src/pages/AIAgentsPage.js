@@ -182,7 +182,7 @@ const agents = [
     id: 7,
     name: 'Weekly Optimizer',
     description: 'AI-powered weekly planning with calendar and email analysis',
-    image: '/images/Automation 1.png',
+    image: '/images/AI AGENT 4.png',
     bgColor: 'bg-gradient-to-br from-cyan-500 to-purple-600',
     category: 'all',
     animation: 'float',

@@ -1987,15 +1987,36 @@ app.get('/api/monday-form-proxy', async (req, res) => {
     const interceptScript = `<script>
 (function() {
   const PROXY_BASE = '${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}';
-  const MONDAY_BASE = 'https://forms.monday.com';
+  const MONDAY_DOMAINS = [
+    'https://forms.monday.com',
+    'https://cdn.monday.com',
+    'https://forms-cdn.monday.com',
+    'https://api.monday.com'
+  ];
   console.log('🚀 Monday.com form interceptor loaded');
+
+  function shouldProxy(url) {
+    if (typeof url !== 'string') return false;
+    return MONDAY_DOMAINS.some(domain => url.startsWith(domain));
+  }
+
+  function proxyUrl(url) {
+    for (const domain of MONDAY_DOMAINS) {
+      if (url.startsWith(domain)) {
+        const path = url.substring(domain.length);
+        const proxiedUrl = PROXY_BASE + '/monday-form-proxy' + path;
+        console.log('🔄 Proxying:', url, '→', proxiedUrl);
+        return proxiedUrl;
+      }
+    }
+    return url;
+  }
 
   // Intercept fetch
   const originalFetch = window.fetch;
   window.fetch = function(url, options) {
-    if (typeof url === 'string' && url.startsWith(MONDAY_BASE)) {
-      url = url.replace(MONDAY_BASE, PROXY_BASE + '/monday-form-proxy');
-      console.log('🔄 Proxying fetch request:', url);
+    if (shouldProxy(url)) {
+      url = proxyUrl(url);
     }
     return originalFetch.call(this, url, options);
   };
@@ -2003,9 +2024,8 @@ app.get('/api/monday-form-proxy', async (req, res) => {
   // Intercept XMLHttpRequest
   const originalOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-    if (typeof url === 'string' && url.startsWith(MONDAY_BASE)) {
-      url = url.replace(MONDAY_BASE, PROXY_BASE + '/monday-form-proxy');
-      console.log('🔄 Proxying XHR request:', url);
+    if (shouldProxy(url)) {
+      url = proxyUrl(url);
     }
     return originalOpen.call(this, method, url, ...rest);
   };
@@ -2038,11 +2058,28 @@ app.get('/api/monday-form-proxy', async (req, res) => {
   }
 });
 
+// Helper function to determine the correct Monday.com domain based on the path
+function getMondayDomain(path) {
+  if (path.startsWith('/workforms/') || path.startsWith('/forms/')) {
+    return 'https://forms.monday.com';
+  } else if (path.startsWith('/assets/') || path.startsWith('/images/')) {
+    return 'https://cdn.monday.com';
+  } else if (path.startsWith('/traces')) {
+    return 'https://forms.monday.com';
+  } else if (path.startsWith('/cdn-cgi/')) {
+    return 'https://forms.monday.com';
+  } else {
+    // Default to forms.monday.com
+    return 'https://forms.monday.com';
+  }
+}
+
 // Proxy GET requests for Monday.com resources (CSS, JS, images, etc.)
 app.get('/api/monday-form-proxy/*', async (req, res) => {
   try {
-    const targetPath = req.params[0];
-    const targetUrl = `https://forms.monday.com/${targetPath}`;
+    const targetPath = '/' + req.params[0];
+    const mondayDomain = getMondayDomain(targetPath);
+    const targetUrl = mondayDomain + targetPath;
 
     console.log('📥 Proxying Monday.com resource:', targetUrl);
 
@@ -2051,7 +2088,7 @@ app.get('/api/monday-form-proxy/*', async (req, res) => {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': req.headers['accept'] || '*/*',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Referer': 'https://forms.monday.com/'
+        'Referer': mondayDomain + '/'
       },
       responseType: 'arraybuffer' // Handle binary data (images, fonts, etc.)
     });
@@ -2077,8 +2114,9 @@ app.get('/api/monday-form-proxy/*', async (req, res) => {
 // Proxy POST requests (form submissions) to Monday.com
 app.post('/api/monday-form-proxy/*', async (req, res) => {
   try {
-    const targetPath = req.params[0];
-    const targetUrl = `https://forms.monday.com/${targetPath}`;
+    const targetPath = '/' + req.params[0];
+    const mondayDomain = getMondayDomain(targetPath);
+    const targetUrl = mondayDomain + targetPath;
 
     console.log('📤 Proxying Monday.com form submission to:', targetUrl);
 
@@ -2092,8 +2130,8 @@ app.post('/api/monday-form-proxy/*', async (req, res) => {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept': req.headers['accept'] || '*/*',
         'Accept-Language': 'en-US,en;q=0.5',
-        'Origin': 'https://forms.monday.com',
-        'Referer': 'https://forms.monday.com/'
+        'Origin': mondayDomain,
+        'Referer': mondayDomain + '/'
       },
       maxRedirects: 0,
       validateStatus: (status) => status < 500 // Accept redirects and client errors

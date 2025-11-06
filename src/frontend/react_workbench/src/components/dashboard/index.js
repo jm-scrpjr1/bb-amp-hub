@@ -5,3 +5,4 @@ export { default as TutorialButton } from './TutorialButton';
 export { default as TrainingStatus } from './TrainingStatus';
 export { default as BoldUpdates } from './BoldUpdates';
 export { default as ActivitySection } from './ActivitySection';
+export { default as WeeklyOptimizerDashboard } from './WeeklyOptimizerDashboard';

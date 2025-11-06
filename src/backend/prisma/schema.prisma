@@ -381,3 +381,47 @@ enum UserStatus {
   INACTIVE
   SUSPENDED
 }
+
+// Weekly Optimizer Tables
+model weekly_optimizer_settings {
+  id                    String   @id @default(uuid())
+  user_id               String   @unique @db.VarChar(255)
+  enabled               Boolean  @default(true)
+  schedule_day          String   @default("Sunday") @db.VarChar(20)
+  schedule_time         String   @default("18:00") @db.VarChar(5)
+  delivery_email        Boolean  @default(true)
+  delivery_dashboard    Boolean  @default(true)
+  next_optimization_time DateTime?
+  created_at            DateTime @default(now()) @db.Timestamp(6)
+  updated_at            DateTime @updatedAt @db.Timestamp(6)
+
+  @@index([user_id])
+  @@index([next_optimization_time])
+}
+
+model weekly_optimizations {
+  id                String   @id @default(uuid())
+  user_id           String   @db.VarChar(255)
+  week_start_date   DateTime @db.Date
+  week_end_date     DateTime @db.Date
+  optimization_data Json
+  created_at        DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([user_id])
+  @@index([week_start_date])
+  @@index([user_id, week_start_date])
+}
+
+model weekly_optimizer_logs {
+  id              String   @id @default(uuid())
+  user_id         String?  @db.VarChar(255)
+  execution_time  DateTime @default(now()) @db.Timestamp(6)
+  status          String   @db.VarChar(20)
+  error_message   String?
+  processing_time Int?
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([user_id])
+  @@index([execution_time])
+  @@index([status])
+}

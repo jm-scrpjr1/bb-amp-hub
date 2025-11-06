@@ -322,6 +322,181 @@ class GoogleWorkspaceService {
 
     return 'FUNCTIONAL';
   }
+
+  // ========== WEEKLY OPTIMIZER METHODS ==========
+
+  /**
+   * Get authenticated client for a specific user (for Calendar/Gmail access)
+   */
+  async getAuthClientForUser(userEmail) {
+    try {
+      const auth = new google.auth.GoogleAuth({
+        keyFile: this.serviceAccountPath,
+        scopes: [
+          'https://www.googleapis.com/auth/calendar.readonly',
+          'https://www.googleapis.com/auth/calendar.events.readonly',
+          'https://www.googleapis.com/auth/gmail.readonly',
+          'https://www.googleapis.com/auth/gmail.metadata',
+          'https://www.googleapis.com/auth/gmail.send',
+          'https://www.googleapis.com/auth/gmail.modify',
+        ],
+        subject: userEmail, // Impersonate this user
+      });
+
+      return auth;
+    } catch (error) {
+      console.error(`Error creating auth client for ${userEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get calendar events for a user within a date range
+   */
+  async getCalendarEvents(userEmail, startDate, endDate) {
+    try {
+      const auth = await this.getAuthClientForUser(userEmail);
+      const calendar = google.calendar({ version: 'v3', auth });
+
+      const response = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: startDate.toISOString(),
+        timeMax: endDate.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+        maxResults: 250,
+      });
+
+      const events = response.data.items || [];
+      console.log(`📅 Found ${events.length} calendar events for ${userEmail}`);
+
+      return events.map(event => ({
+        id: event.id,
+        summary: event.summary || 'No title',
+        description: event.description || '',
+        start: event.start.dateTime || event.start.date,
+        end: event.end.dateTime || event.end.date,
+        attendees: event.attendees || [],
+        organizer: event.organizer,
+        status: event.status,
+        location: event.location || '',
+        hangoutLink: event.hangoutLink || '',
+      }));
+    } catch (error) {
+      console.error(`Error fetching calendar events for ${userEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get email summary for a user within a date range
+   */
+  async getEmailSummary(userEmail, startDate, endDate) {
+    try {
+      const auth = await this.getAuthClientForUser(userEmail);
+      const gmail = google.gmail({ version: 'v1', auth });
+
+      // Build query for emails in date range
+      const afterTimestamp = Math.floor(startDate.getTime() / 1000);
+      const beforeTimestamp = Math.floor(endDate.getTime() / 1000);
+      const query = `after:${afterTimestamp} before:${beforeTimestamp}`;
+
+      // Get message list
+      const response = await gmail.users.messages.list({
+        userId: 'me',
+        q: query,
+        maxResults: 100,
+      });
+
+      const messages = response.data.messages || [];
+      console.log(`📧 Found ${messages.length} emails for ${userEmail}`);
+
+      // Get details for each message (limited to first 50 for performance)
+      const detailedMessages = [];
+      const limit = Math.min(messages.length, 50);
+
+      for (let i = 0; i < limit; i++) {
+        try {
+          const msg = await gmail.users.messages.get({
+            userId: 'me',
+            id: messages[i].id,
+            format: 'metadata',
+            metadataHeaders: ['From', 'To', 'Subject', 'Date'],
+          });
+
+          const headers = msg.data.payload.headers;
+          const getHeader = (name) => headers.find(h => h.name === name)?.value || '';
+
+          detailedMessages.push({
+            id: msg.data.id,
+            threadId: msg.data.threadId,
+            from: getHeader('From'),
+            to: getHeader('To'),
+            subject: getHeader('Subject'),
+            date: getHeader('Date'),
+            snippet: msg.data.snippet,
+            labelIds: msg.data.labelIds || [],
+            isUnread: msg.data.labelIds?.includes('UNREAD') || false,
+            isImportant: msg.data.labelIds?.includes('IMPORTANT') || false,
+          });
+        } catch (error) {
+          console.error(`Error fetching message ${messages[i].id}:`, error.message);
+        }
+      }
+
+      return {
+        total: messages.length,
+        fetched: detailedMessages.length,
+        messages: detailedMessages,
+        unreadCount: detailedMessages.filter(m => m.isUnread).length,
+        importantCount: detailedMessages.filter(m => m.isImportant).length,
+      };
+    } catch (error) {
+      console.error(`Error fetching emails for ${userEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Send email via Gmail API
+   */
+  async sendEmail(userEmail, to, subject, htmlBody) {
+    try {
+      const auth = await this.getAuthClientForUser(userEmail);
+      const gmail = google.gmail({ version: 'v1', auth });
+
+      // Create email in RFC 2822 format
+      const email = [
+        `To: ${to}`,
+        `From: ${userEmail}`,
+        `Subject: ${subject}`,
+        'MIME-Version: 1.0',
+        'Content-Type: text/html; charset=utf-8',
+        '',
+        htmlBody,
+      ].join('\r\n');
+
+      // Encode email in base64url format
+      const encodedEmail = Buffer.from(email)
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      const response = await gmail.users.messages.send({
+        userId: 'me',
+        requestBody: {
+          raw: encodedEmail,
+        },
+      });
+
+      console.log(`✅ Email sent successfully to ${to}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error sending email to ${to}:`, error);
+      throw error;
+    }
+  }
 }
 
 module.exports = { GoogleWorkspaceService };

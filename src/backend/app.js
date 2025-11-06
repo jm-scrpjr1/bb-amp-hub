@@ -11,6 +11,7 @@ const resumeBuilderService = require('./services/resumeBuilderService');
 const ResumeAnalyzerService = require('./services/resumeAnalyzerService');
 const { testConnection, prisma } = require('./lib/db');
 const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
+const weeklyOptimizerCron = require('./jobs/weeklyOptimizerCron');
 const app = express();
 
 // CORS Configuration - Only enable if not behind Nginx proxy
@@ -495,6 +496,102 @@ const authenticateUser = async (req, res, next) => {
 
 // Mount prompts router with authentication
 app.use('/api/prompts', authenticateUser, promptsRouter);
+
+// ===== WEEKLY OPTIMIZER API ENDPOINTS =====
+const weeklyOptimizerService = require('./services/weeklyOptimizerService');
+
+// Get current week's optimization for authenticated user
+app.get('/api/weekly-optimizer/current', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId);
+
+    if (!optimization) {
+      return res.status(404).json({
+        success: false,
+        message: 'No optimization found for current week'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: optimization
+    });
+  } catch (error) {
+    console.error('Error fetching current optimization:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch optimization',
+      details: error.message
+    });
+  }
+});
+
+// Get user's Weekly Optimizer settings
+app.get('/api/weekly-optimizer/settings', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const settings = await weeklyOptimizerService.getUserSettings(userId);
+
+    res.json({
+      success: true,
+      data: settings
+    });
+  } catch (error) {
+    console.error('Error fetching optimizer settings:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch settings',
+      details: error.message
+    });
+  }
+});
+
+// Update user's Weekly Optimizer settings
+app.post('/api/weekly-optimizer/settings', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const updates = req.body;
+
+    const settings = await weeklyOptimizerService.updateUserSettings(userId, updates);
+
+    res.json({
+      success: true,
+      data: settings,
+      message: 'Settings updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating optimizer settings:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update settings',
+      details: error.message
+    });
+  }
+});
+
+// Manually trigger optimization for authenticated user
+app.post('/api/weekly-optimizer/trigger', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log(`🔄 Manual optimization triggered by user ${userId}`);
+
+    const optimization = await weeklyOptimizerService.optimizeUserWeek(userId);
+
+    res.json({
+      success: true,
+      data: optimization,
+      message: 'Weekly optimization completed successfully'
+    });
+  } catch (error) {
+    console.error('Error triggering manual optimization:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to trigger optimization',
+      details: error.message
+    });
+  }
+});
 
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
@@ -1730,6 +1827,14 @@ async function initializeApp() {
   } else {
     console.log('⚠️ Database not available, using fallback mode');
   }
+
+  // Start Weekly Optimizer cron job
+  try {
+    weeklyOptimizerCron.start();
+    console.log('✅ Weekly Optimizer cron job initialized');
+  } catch (error) {
+    console.error('❌ Failed to start Weekly Optimizer cron:', error);
+  }
 }
 
 // ===== AI ASSESSMENT API ENDPOINTS =====
@@ -1987,6 +2092,7 @@ app.get('/api/monday-form-proxy', async (req, res) => {
     const interceptScript = `<script>
 (function() {
   const PROXY_BASE = '${process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api'}';
+  const CURRENT_ORIGIN = window.location.origin;
   const MONDAY_DOMAINS = [
     'https://forms.monday.com',
     'https://cdn.monday.com',
@@ -1994,21 +2100,59 @@ app.get('/api/monday-form-proxy', async (req, res) => {
     'https://api.monday.com'
   ];
   console.log('🚀 Monday.com form interceptor loaded');
+  console.log('📍 Current origin:', CURRENT_ORIGIN);
+  console.log('🎯 Proxy base:', PROXY_BASE);
 
   function shouldProxy(url) {
     if (typeof url !== 'string') return false;
-    return MONDAY_DOMAINS.some(domain => url.startsWith(domain));
+
+    // Proxy if URL starts with any Monday.com domain
+    if (MONDAY_DOMAINS.some(domain => url.startsWith(domain))) {
+      return true;
+    }
+
+    // Proxy if URL starts with current origin (api.boldbusiness.com)
+    // EXCEPT if it's already a proxy URL
+    if (url.startsWith(CURRENT_ORIGIN) && !url.includes('/monday-form-proxy')) {
+      return true;
+    }
+
+    // Proxy relative URLs (starting with /)
+    if (url.startsWith('/') && !url.startsWith('//')) {
+      return true;
+    }
+
+    return false;
   }
 
   function proxyUrl(url) {
+    // Handle Monday.com domain URLs
     for (const domain of MONDAY_DOMAINS) {
       if (url.startsWith(domain)) {
         const path = url.substring(domain.length);
         const proxiedUrl = PROXY_BASE + '/monday-form-proxy' + path;
-        console.log('🔄 Proxying:', url, '→', proxiedUrl);
+        console.log('🔄 Proxying Monday domain:', url, '→', proxiedUrl);
         return proxiedUrl;
       }
     }
+
+    // Handle current origin URLs (api.boldbusiness.com/something)
+    if (url.startsWith(CURRENT_ORIGIN)) {
+      const path = url.substring(CURRENT_ORIGIN.length);
+      if (!path.startsWith('/api/monday-form-proxy')) {
+        const proxiedUrl = PROXY_BASE + '/monday-form-proxy' + path;
+        console.log('🔄 Proxying current origin:', url, '→', proxiedUrl);
+        return proxiedUrl;
+      }
+    }
+
+    // Handle relative URLs
+    if (url.startsWith('/') && !url.startsWith('//')) {
+      const proxiedUrl = PROXY_BASE + '/monday-form-proxy' + url;
+      console.log('🔄 Proxying relative URL:', url, '→', proxiedUrl);
+      return proxiedUrl;
+    }
+
     return url;
   }
 
@@ -2118,7 +2262,12 @@ app.post('/api/monday-form-proxy/*', async (req, res) => {
     const mondayDomain = getMondayDomain(targetPath);
     const targetUrl = mondayDomain + targetPath;
 
-    console.log('📤 Proxying Monday.com form submission to:', targetUrl);
+    // Check if this is an analytics/tracking endpoint (non-critical)
+    const isAnalyticsEndpoint = targetPath.includes('/traces') ||
+                                targetPath.includes('/cdn-cgi/rum') ||
+                                targetPath.includes('/cdn-cgi/challenge-platform');
+
+    console.log('📤 Proxying Monday.com form submission to:', targetUrl, isAnalyticsEndpoint ? '(analytics)' : '');
 
     // Forward the POST request to Monday.com
     const response = await axios({
@@ -2137,22 +2286,53 @@ app.post('/api/monday-form-proxy/*', async (req, res) => {
       validateStatus: (status) => status < 500 // Accept redirects and client errors
     });
 
-    // Forward the response headers
-    Object.keys(response.headers).forEach(key => {
-      if (!['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
-        res.setHeader(key, response.headers[key]);
-      }
-    });
+    // For analytics endpoints that return 401/403, silently succeed
+    if (isAnalyticsEndpoint && (response.status === 401 || response.status === 403)) {
+      console.log('ℹ️ Analytics endpoint rejected (expected):', response.status, targetPath);
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      return res.status(200).json({ success: true, message: 'Analytics tracking skipped' });
+    }
 
     // Set CORS headers to allow the response
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
 
     console.log('✅ Monday.com form submission proxied successfully, status:', response.status);
+
+    // For successful submissions, return a clean JSON response
+    if (response.status === 201 || response.status === 200) {
+      return res.status(200).json({
+        success: true,
+        message: 'Form submitted successfully',
+        status: response.status
+      });
+    }
+
+    // For other responses, forward the headers and data
+    Object.keys(response.headers).forEach(key => {
+      if (!['content-encoding', 'transfer-encoding', 'connection'].includes(key.toLowerCase())) {
+        res.setHeader(key, response.headers[key]);
+      }
+    });
+
     res.status(response.status).send(response.data);
   } catch (error) {
     if (error.response) {
-      // Forward error responses from Monday.com
+      const targetPath = '/' + req.params[0];
+      const isAnalyticsEndpoint = targetPath.includes('/traces') ||
+                                  targetPath.includes('/cdn-cgi/rum') ||
+                                  targetPath.includes('/cdn-cgi/challenge-platform');
+
+      // For analytics endpoints, silently succeed even if Monday.com rejects them
+      if (isAnalyticsEndpoint && (error.response.status === 401 || error.response.status === 403)) {
+        console.log('ℹ️ Analytics endpoint rejected (expected):', error.response.status, targetPath);
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        return res.status(200).json({ success: true, message: 'Analytics tracking skipped' });
+      }
+
+      // Forward error responses from Monday.com for critical endpoints
       console.log('⚠️ Monday.com responded with error:', error.response.status);
       res.status(error.response.status).send(error.response.data);
     } else {

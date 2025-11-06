@@ -27,6 +27,9 @@ class WeeklyOptimizerService {
    */
   getPrisma() {
     const { prisma } = require('../lib/db');
+    if (!prisma) {
+      throw new Error('Prisma client is undefined');
+    }
     return prisma;
   }
 

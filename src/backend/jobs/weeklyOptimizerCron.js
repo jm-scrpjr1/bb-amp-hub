@@ -55,6 +55,12 @@ class WeeklyOptimizerCron {
    */
   async updateNextOptimizationTimes() {
     try {
+      // Check if Prisma is available
+      if (!prisma || !prisma.weekly_optimizer_settings) {
+        console.log('⚠️ Prisma not yet initialized, skipping update');
+        return;
+      }
+
       const settings = await prisma.weekly_optimizer_settings.findMany({
         where: { enabled: true }
       });
@@ -89,8 +95,15 @@ class WeeklyOptimizerCron {
     this.isRunning = true;
 
     try {
+      // Check if Prisma is available
+      if (!prisma || !prisma.weekly_optimizer_settings) {
+        console.log('⚠️ Prisma not yet initialized, skipping processing');
+        this.isRunning = false;
+        return;
+      }
+
       const now = new Date();
-      
+
       // Find users whose next_optimization_time has passed
       const dueSettings = await prisma.weekly_optimizer_settings.findMany({
         where: {

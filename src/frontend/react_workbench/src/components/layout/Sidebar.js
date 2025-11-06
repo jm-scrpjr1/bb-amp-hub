@@ -108,8 +108,8 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
     }
 
     if (itemId === 'submit-bold-idea') {
-      // Dispatch event to open bold idea modal (handled by App.js)
-      const event = new CustomEvent('openBoldIdeaModal');
+      // Dispatch event to open Monday.com form modal (handled by App.js)
+      const event = new CustomEvent('openMondayFormModal');
       window.dispatchEvent(event);
       return;
     }

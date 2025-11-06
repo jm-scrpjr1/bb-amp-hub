@@ -12,7 +12,7 @@ import { RBACProvider } from './providers/RBACProvider';
 // import { LiquidCursor } from './components/effects'; // Temporarily disabled for performance
 
 // UI Components
-import { FloatingChatbot, TrackTimeModal, BoldIdeaModal, TicketConfirmationModal } from './components/ui';
+import { FloatingChatbot, TrackTimeModal, BoldIdeaModal, MondayFormModal, TicketConfirmationModal } from './components/ui';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -43,6 +43,7 @@ function App() {
   // Modal states
   const [trackTimeModalOpen, setTrackTimeModalOpen] = useState(false);
   const [boldIdeaModalOpen, setBoldIdeaModalOpen] = useState(false);
+  const [mondayFormModalOpen, setMondayFormModalOpen] = useState(false);
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [ticketType, setTicketType] = useState('IT');
   const [triggerElement, setTriggerElement] = useState(null);
@@ -59,6 +60,11 @@ function App() {
       setBoldIdeaModalOpen(true);
     };
 
+    const handleOpenMondayFormModal = (event) => {
+      setTriggerElement(event.detail?.triggerElement || null);
+      setMondayFormModalOpen(true);
+    };
+
     const handleOpenTicketModal = (event) => {
       setTriggerElement(event.detail?.triggerElement || null);
       setTicketType(event.detail?.type || 'IT');
@@ -68,12 +74,14 @@ function App() {
     // Add event listeners
     window.addEventListener('openTrackTimeModal', handleOpenTrackTimeModal);
     window.addEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
+    window.addEventListener('openMondayFormModal', handleOpenMondayFormModal);
     window.addEventListener('openTicketModal', handleOpenTicketModal);
 
     // Cleanup
     return () => {
       window.removeEventListener('openTrackTimeModal', handleOpenTrackTimeModal);
       window.removeEventListener('openBoldIdeaModal', handleOpenBoldIdeaModal);
+      window.removeEventListener('openMondayFormModal', handleOpenMondayFormModal);
       window.removeEventListener('openTicketModal', handleOpenTicketModal);
     };
   }, []);
@@ -226,6 +234,12 @@ function App() {
           <BoldIdeaModal
             isOpen={boldIdeaModalOpen}
             onClose={() => setBoldIdeaModalOpen(false)}
+            triggerElement={triggerElement}
+          />
+
+          <MondayFormModal
+            isOpen={mondayFormModalOpen}
+            onClose={() => setMondayFormModalOpen(false)}
             triggerElement={triggerElement}
           />
 

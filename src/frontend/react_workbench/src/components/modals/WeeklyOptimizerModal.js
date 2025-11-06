@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../providers/AuthProvider';
 import environmentConfig from '../../config/environment';
 
 const WeeklyOptimizerModal = ({ isOpen, onClose }) => {

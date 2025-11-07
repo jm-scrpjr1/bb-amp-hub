@@ -16,7 +16,10 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
     schedule_time: '18:00',
     delivery_email: true,
     delivery_dashboard: true,
-    delivery_slack: false
+    delivery_slack: false,
+    user_role: '',
+    top_priorities: '',
+    time_constraints: ''
   });
 
   useEffect(() => {
@@ -262,6 +265,70 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
                     </div>
                   </div>
                 )}
+
+                {/* User Configuration (TPS Context) */}
+                <div className="bg-gradient-to-br from-purple-50 to-cyan-50 border-2 border-purple-200 rounded-xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Settings className="h-5 w-5 text-purple-600" />
+                    <h3 className="text-lg font-semibold text-gray-800">Weekly Plan Configuration</h3>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Help me understand your role and priorities for better recommendations:
+                  </p>
+
+                  <div className="space-y-4">
+                    {/* Role & Context */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Your Role & Context
+                      </label>
+                      <input
+                        type="text"
+                        value={settings.user_role || ''}
+                        onChange={(e) => setSettings({ ...settings, user_role: e.target.value })}
+                        placeholder="e.g., IT Supervisor, Sales Manager, Product Lead"
+                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Describe your role and current strategic goals
+                      </p>
+                    </div>
+
+                    {/* Top Priorities */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Top Priorities (3-5 OKRs)
+                      </label>
+                      <textarea
+                        value={settings.top_priorities || ''}
+                        onChange={(e) => setSettings({ ...settings, top_priorities: e.target.value })}
+                        placeholder="e.g., AI Workbench launch, Team capacity building, CISA portal completion"
+                        rows={3}
+                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        What are your 3-5 most important objectives this week?
+                      </p>
+                    </div>
+
+                    {/* Time Constraints */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Time Constraints & Blocks
+                      </label>
+                      <textarea
+                        value={settings.time_constraints || ''}
+                        onChange={(e) => setSettings({ ...settings, time_constraints: e.target.value })}
+                        placeholder="e.g., Focus time at least 3 hours per day, No meetings before 9 AM"
+                        rows={2}
+                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Any non-negotiable commitments or scheduling constraints?
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Schedule Preferences */}
                 <div className="bg-white border-2 border-gray-200 rounded-xl p-6">

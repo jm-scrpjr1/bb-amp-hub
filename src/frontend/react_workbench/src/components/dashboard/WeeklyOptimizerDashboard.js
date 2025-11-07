@@ -91,9 +91,12 @@ const WeeklyOptimizerDashboard = () => {
 
   const optimizationData = optimization?.optimization_data || {};
   const weekOverview = optimizationData.week_overview || {};
-  const recommendations = optimizationData.recommendations || [];
-  const ariaInsights = optimizationData.aria_insights || '';
-  const dailyBreakdown = optimizationData.daily_breakdown || {};
+  const executiveSummary = optimizationData.executive_summary || '';
+  const balanceAnalysis = optimizationData.balance_analysis || '';
+  const recommendedPriorities = optimizationData.recommended_priorities || '';
+  const improvementInsights = optimizationData.improvement_insights || '';
+  const risksAndConflicts = optimizationData.risks_and_conflicts || '';
+  const dailyBreakdown = optimizationData.daily_breakdown || '';
 
   // Calculate workload color
   const getWorkloadColor = (status) => {
@@ -203,93 +206,91 @@ const WeeklyOptimizerDashboard = () => {
             </div>
           </ScrollEffects>
 
-          {/* ARIA Insights */}
-          {ariaInsights && (
+          {/* Executive Summary */}
+          {executiveSummary && (
             <ScrollEffects effect="fadeUp" delay={0.3}>
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
+              <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-xl p-6 border-2 border-cyan-200">
                 <div className="flex items-start space-x-3">
-                  <Sparkles className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+                  <Sparkles className="h-6 w-6 text-purple-600 flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-lg font-semibold text-blue-900 mb-2">ARIA's Insights</h3>
-                    <p className="text-blue-800 leading-relaxed">{ariaInsights}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🎯 Executive Summary</h3>
+                    <p className="text-gray-700 leading-relaxed">{executiveSummary}</p>
                   </div>
                 </div>
               </div>
             </ScrollEffects>
           )}
 
-          {/* Recommendations */}
-          {recommendations.length > 0 && (
+          {/* Balance Analysis (Heijunka) */}
+          {balanceAnalysis && (
+            <ScrollEffects effect="fadeUp" delay={0.35}>
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="h-6 w-6 text-blue-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">⚖️ Balance Analysis (Heijunka)</h3>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{balanceAnalysis}</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollEffects>
+          )}
+
+          {/* Recommended Priorities */}
+          {recommendedPriorities && (
             <ScrollEffects effect="fadeUp" delay={0.4}>
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <AlertCircle className="h-6 w-6 mr-2 text-purple-600" />
-                  Top Recommendations
-                </h3>
-                <div className="space-y-3">
-                  {recommendations.slice(0, 5).map((rec, index) => (
-                    <div
-                      key={index}
-                      className="p-4 bg-gray-50 rounded-lg border-l-4 border-l-purple-500 hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">
-                            {rec.title || rec.type}
-                          </h4>
-                          <p className="text-sm text-gray-600">{rec.description}</p>
-                        </div>
-                        {rec.impact && (
-                          <span className={`ml-4 px-2 py-1 rounded text-xs font-semibold ${
-                            rec.impact === 'high' ? 'bg-red-100 text-red-700' :
-                            rec.impact === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {rec.impact}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+              <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="h-6 w-6 text-purple-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🚀 Recommended Priorities</h3>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">{recommendedPriorities}</div>
+                  </div>
+                </div>
+              </div>
+            </ScrollEffects>
+          )}
+
+          {/* Improvement Insights (Kaizen) */}
+          {improvementInsights && (
+            <ScrollEffects effect="fadeUp" delay={0.45}>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                <div className="flex items-start space-x-3">
+                  <Sparkles className="h-6 w-6 text-green-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">📈 Improvement Insights (Kaizen)</h3>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{improvementInsights}</p>
+                  </div>
+                </div>
+              </div>
+            </ScrollEffects>
+          )}
+
+          {/* Risks & Conflicts */}
+          {risksAndConflicts && (
+            <ScrollEffects effect="fadeUp" delay={0.5}>
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-300">
+                <div className="flex items-start space-x-3">
+                  <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">⚠️ Risks & Items for Review</h3>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{risksAndConflicts}</p>
+                  </div>
                 </div>
               </div>
             </ScrollEffects>
           )}
 
           {/* Daily Breakdown */}
-          {Object.keys(dailyBreakdown).length > 0 && (
-            <ScrollEffects effect="fadeUp" delay={0.5}>
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                  <Clock className="h-6 w-6 mr-2 text-cyan-600" />
-                  Daily Breakdown
-                </h3>
-                <div className="space-y-3">
-                  {Object.entries(dailyBreakdown).map(([day, data]) => (
-                    <div key={day} className="flex items-center space-x-4">
-                      <div className="w-24 text-sm font-medium text-gray-700">{day}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${
-                                data.capacity >= 85 ? 'bg-red-500' :
-                                data.capacity >= 70 ? 'bg-yellow-500' :
-                                'bg-green-500'
-                              }`}
-                              style={{ width: `${Math.min(data.capacity, 100)}%` }}
-                            ></div>
-                          </div>
-                          <span className="text-sm text-gray-600 w-12 text-right">
-                            {data.capacity}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-32 text-right">
-                        {data.meetings} meetings ({typeof data.hours === 'number' ? data.hours.toFixed(2) : data.hours}h)
-                      </div>
-                    </div>
-                  ))}
+          {dailyBreakdown && (
+            <ScrollEffects effect="fadeUp" delay={0.55}>
+              <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-gray-200">
+                <div className="flex items-start space-x-3">
+                  <Calendar className="h-6 w-6 text-cyan-600 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">📅 Daily Breakdown</h3>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">{dailyBreakdown}</div>
+                  </div>
                 </div>
               </div>
             </ScrollEffects>

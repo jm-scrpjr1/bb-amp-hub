@@ -376,75 +376,80 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                {/* ARIA Insights */}
-                {optimizationData?.aria_insights && (
-                  <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-xl p-6 border border-cyan-200">
+                {/* Executive Summary */}
+                {optimizationData?.executive_summary && (
+                  <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-xl p-6 border-2 border-cyan-200">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-5 w-5 text-purple-600" />
-                      <h3 className="text-lg font-semibold text-gray-800">ARIA's Insights</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">🎯 Executive Summary</h3>
                     </div>
                     <p className="text-gray-700 leading-relaxed">
-                      {optimizationData.aria_insights}
+                      {optimizationData.executive_summary}
                     </p>
                   </div>
                 )}
 
-                {/* Top Recommendations */}
-                {recommendations.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Recommendations</h3>
-                    <div className="space-y-3">
-                      {recommendations.slice(0, 5).map((rec, index) => (
-                        <div
-                          key={index}
-                          className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex items-start gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-cyan-500 to-purple-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
-                              {index + 1}
-                            </span>
-                            <div className="flex-1">
-                              <p className="text-gray-800 font-medium">{rec.title || rec}</p>
-                              {rec.description && (
-                                <p className="text-sm text-gray-600 mt-1">{rec.description}</p>
-                              )}
-                              {rec.impact && (
-                                <span className={`inline-block mt-2 px-2 py-1 rounded-full text-xs font-medium ${
-                                  rec.impact === 'High' ? 'bg-red-100 text-red-700' :
-                                  rec.impact === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                  'bg-green-100 text-green-700'
-                                }`}>
-                                  {rec.impact} Impact
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                {/* Balance Analysis (Heijunka) */}
+                {optimizationData?.balance_analysis && (
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                      <h3 className="text-lg font-semibold text-gray-800">⚖️ Balance Analysis (Heijunka)</h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {optimizationData.balance_analysis}
+                    </p>
+                  </div>
+                )}
+
+                {/* Recommended Priorities */}
+                {optimizationData?.recommended_priorities && (
+                  <div className="bg-white border-2 border-purple-200 rounded-xl p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                      <h3 className="text-lg font-semibold text-gray-800">🚀 Recommended Priorities</h3>
+                    </div>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {optimizationData.recommended_priorities}
                     </div>
                   </div>
                 )}
 
+                {/* Improvement Insights (Kaizen) */}
+                {optimizationData?.improvement_insights && (
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="h-5 w-5 text-green-600" />
+                      <h3 className="text-lg font-semibold text-gray-800">📈 Improvement Insights (Kaizen)</h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {optimizationData.improvement_insights}
+                    </p>
+                  </div>
+                )}
+
+                {/* Risks & Conflicts */}
+                {optimizationData?.risks_and_conflicts && (
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-300">
+                    <div className="flex items-center gap-2 mb-3">
+                      <TrendingUp className="h-5 w-5 text-amber-600" />
+                      <h3 className="text-lg font-semibold text-gray-800">⚠️ Risks & Items for Review</h3>
+                    </div>
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {optimizationData.risks_and_conflicts}
+                    </p>
+                  </div>
+                )}
+
                 {/* Daily Breakdown */}
-                {dailyBreakdown.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Daily Breakdown</h3>
-                    <div className="space-y-3">
-                      {dailyBreakdown.map((day, index) => (
-                        <div key={index} className="bg-gray-50 rounded-xl p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-gray-800">{day.day}</span>
-                            <span className="text-sm text-gray-600">{day.meetings || 0} meetings</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                            <div
-                              className="bg-gradient-to-r from-cyan-500 to-purple-600 h-2 rounded-full"
-                              style={{ width: `${Math.min((day.capacity || 0) * 100, 100)}%` }}
-                            />
-                          </div>
-                          <p className="text-sm text-gray-600">{day.summary}</p>
-                        </div>
-                      ))}
+                {optimizationData?.daily_breakdown && (
+                  <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="h-5 w-5 text-cyan-600" />
+                      <h3 className="text-lg font-semibold text-gray-800">📅 Daily Breakdown</h3>
+                    </div>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {optimizationData.daily_breakdown}
                     </div>
                   </div>
                 )}

@@ -219,119 +219,122 @@ class WeeklyOptimizerService {
   }
 
   /**
-   * Generate optimization recommendations using OpenAI Assistant
+   * Generate optimization recommendations using OpenAI with structured JSON output
+   * Inspired by Abacus.ai approach with retry logic
    */
-  async generateRecommendations(calendarData, emailData, userContext) {
-    try {
-      console.log('🤖 Creating OpenAI thread...');
+  async generateRecommendations(calendarData, emailData, userContext, actionableEmails = []) {
+    const maxRetries = 3;
 
-      // Create a thread for this optimization
-      const thread = await this.client.beta.threads.create();
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        console.log(`🤖 Generating recommendations (attempt ${attempt + 1}/${maxRetries})...`);
 
-      if (!thread || !thread.id) {
-        throw new Error('Failed to create OpenAI thread - thread ID is undefined');
-      }
+        // Build comprehensive data summary (like Abacus.ai)
+        const dataSummary = {
+          user_role: userContext.role || 'Team Member',
+          user_name: userContext.name,
+          user_email: userContext.email,
+          priorities: userContext.priorities || 'Not specified',
+          constraints: userContext.constraints || 'None specified',
+          improvement_feedback: userContext.feedback || 'None provided',
+          calendar_summary: {
+            total_meetings: calendarData.totalMeetings,
+            total_hours: calendarData.totalMeetingHours,
+            daily_breakdown: calendarData.dailyBreakdown,
+            conflicts: calendarData.conflicts,
+            events_count: calendarData.events?.length || 0
+          },
+          email_summary: {
+            total: emailData.totalEmails,
+            unread: emailData.unreadCount,
+            important: emailData.importantCount,
+            actionable_count: actionableEmails.length
+          },
+          actionable_emails: actionableEmails.slice(0, 10).map(e => ({
+            from: e.from,
+            subject: e.subject,
+            snippet: e.snippet
+          }))
+        };
 
-      console.log(`✅ Thread created: ${thread.id}`);
+        // System message emphasizing TPS principles and concise output
+        const systemMessage = `You are a Weekly Plan Assistant following Toyota Production System principles (Heijunka, Kaizen, Muri).
+Create a CONCISE, SCANNABLE weekly plan that eliminates waste and builds in quality.
 
-      // Prepare the prompt with all context
-      const prompt = `Analyze this user's upcoming week and provide optimization recommendations.
+IMPORTANT: Keep output brief and actionable. Use bullet points. Avoid wordiness.
 
-USER CONTEXT:
-- Email: ${userContext.email}
-- Name: ${userContext.name}
-- Role: ${userContext.role || 'Team Member'}
+Return ONLY valid JSON matching this exact structure:
+{
+  "executive_summary": "2-3 sentence summary of week's focus",
+  "balance_analysis": "Brief analysis of time allocation with percentages (Focus/Collaboration/Admin)",
+  "recommended_priorities": "3-5 numbered actionable priorities with next steps",
+  "improvement_insights": "2-3 Kaizen opportunities for improvement",
+  "daily_breakdown": "Brief day-by-day highlights (Monday-Friday only)",
+  "risks_and_conflicts": "Key risks, conflicts, or items needing attention"
+}`;
 
-CALENDAR DATA:
-- Total Meetings: ${calendarData.totalMeetings}
-- Total Meeting Hours: ${calendarData.totalMeetingHours}
-- Daily Breakdown: ${JSON.stringify(calendarData.dailyBreakdown, null, 2)}
-- Conflicts: ${JSON.stringify(calendarData.conflicts, null, 2)}
+        const userPrompt = `Analyze this data and create a balanced weekly plan:
 
-EMAIL DATA:
-- Total Emails: ${emailData.totalEmails}
-- Unread: ${emailData.unreadCount}
-- Important: ${emailData.importantCount}
-- Urgent Responses Needed: ${emailData.urgentResponseNeeded}
-- High Priority: ${emailData.highPriorityCount}
+${JSON.stringify(dataSummary, null, 2)}
 
-Top Urgent Emails:
-${emailData.topUrgentEmails.map((e, i) => `${i + 1}. From: ${e.from}\n   Subject: ${e.subject}\n   Date: ${e.date}`).join('\n')}
+Focus on:
+1. Real commitments and deadlines from calendar/email
+2. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
+3. Identifying conflicts and improvement opportunities
+4. Preventing overburden (Muri)
 
-Please provide a comprehensive weekly optimization with recommendations, insights, and action items.`;
+Return ONLY valid JSON. Be concise and actionable.`;
 
-      // Add message to thread
-      console.log(`📝 Adding message to thread ${thread.id}...`);
-      await this.client.beta.threads.messages.create(thread.id, {
-        role: 'user',
-        content: prompt
-      });
+        // Use GPT-4 with JSON mode for structured output
+        const response = await this.client.chat.completions.create({
+          model: 'gpt-4o',
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: userPrompt }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.7,
+          max_tokens: 2000
+        });
 
-      // Run the assistant
-      console.log(`🚀 Running assistant ${this.assistantId} on thread ${thread.id}...`);
-      const run = await this.client.beta.threads.runs.create(thread.id, {
-        assistant_id: this.assistantId
-      });
+        const content = response.choices[0].message.content;
 
-      console.log(`🔍 Debug - run object:`, JSON.stringify(run, null, 2));
+        // Validate JSON
+        const parsed = JSON.parse(content);
 
-      if (!run || !run.id) {
-        throw new Error('Failed to create run - run ID is undefined');
-      }
+        // Ensure all required fields exist
+        const required = ['executive_summary', 'balance_analysis', 'recommended_priorities',
+                         'improvement_insights', 'daily_breakdown', 'risks_and_conflicts'];
+        const missing = required.filter(field => !parsed[field]);
 
-      console.log(`✅ Run created: ${run.id}`);
-
-      // Wait for completion
-      console.log(`⏳ Waiting for run ${run.id} to complete...`);
-      // OpenAI SDK signature: retrieve(runId, { thread_id })
-      let runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
-      let attempts = 0;
-      const maxAttempts = 60; // 60 seconds timeout
-
-      while (runStatus.status === 'in_progress' || runStatus.status === 'queued') {
-        if (attempts >= maxAttempts) {
-          throw new Error('Assistant response timeout');
+        if (missing.length > 0) {
+          throw new Error(`Missing required fields: ${missing.join(', ')}`);
         }
 
+        console.log('✅ Successfully generated structured recommendations');
+        return parsed;
+
+      } catch (error) {
+        console.error(`❌ Attempt ${attempt + 1} failed:`, error.message);
+
+        if (attempt === maxRetries - 1) {
+          // Last attempt failed, return fallback
+          console.warn('⚠️ All retries failed, returning fallback response');
+          return {
+            executive_summary: `Week planning for ${userContext.name} with ${calendarData.totalMeetings} meetings scheduled.`,
+            balance_analysis: `Meetings: ${calendarData.totalMeetingHours}h total. Review workload balance.`,
+            recommended_priorities: `1. Review ${calendarData.conflicts?.length || 0} scheduling conflicts\n2. Process ${emailData.unreadCount} unread emails\n3. Focus on key deliverables`,
+            improvement_insights: 'Enable detailed analysis by connecting Google Calendar and Gmail.',
+            daily_breakdown: 'Daily breakdown unavailable - retry optimization.',
+            risks_and_conflicts: calendarData.conflicts?.length > 0
+              ? `${calendarData.conflicts.length} scheduling conflicts detected`
+              : 'No major conflicts detected'
+          };
+        }
+
+        // Wait before retry
         await new Promise(resolve => setTimeout(resolve, 1000));
-        // OpenAI SDK signature: retrieve(runId, { thread_id })
-        runStatus = await this.client.beta.threads.runs.retrieve(run.id, { thread_id: thread.id });
-        attempts++;
       }
-
-      if (runStatus.status === 'completed') {
-        // Get the assistant's response
-        const messages = await this.client.beta.threads.messages.list(thread.id);
-        const assistantMessage = messages.data.find(
-          msg => msg.role === 'assistant' && msg.run_id === run.id
-        );
-
-        if (assistantMessage && assistantMessage.content[0]) {
-          const responseText = assistantMessage.content[0].text.value;
-          
-          // Try to parse as JSON
-          try {
-            return JSON.parse(responseText);
-          } catch (parseError) {
-            console.warn('Assistant response is not JSON, wrapping it:', parseError.message);
-            // If not JSON, wrap it in a structure
-            return {
-              aria_insights: responseText,
-              week_overview: {
-                total_meetings: calendarData.totalMeetings,
-                total_meeting_hours: calendarData.totalMeetingHours,
-                unread_emails: emailData.unreadCount,
-                high_priority_emails: emailData.highPriorityCount
-              }
-            };
-          }
-        }
-      }
-
-      throw new Error(`Assistant run failed with status: ${runStatus.status}`);
-    } catch (error) {
-      console.error('Error generating recommendations:', error);
-      throw error;
     }
   }
 
@@ -372,6 +375,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
 
       let calendarEvents = [];
       let emailSummary = [];
+      let actionableEmails = [];
       let usedMockData = false;
 
       // Fetch calendar events with fallback
@@ -382,29 +386,27 @@ Please provide a comprehensive weekly optimization with recommendations, insight
           weekStart,
           weekEnd
         );
-        console.log(`📅 Found ${calendarEvents.length} calendar events for ${user.email}`);
-        if (calendarEvents.length === 0) {
-          console.log(`⚠️  No events found - this could mean:`);
-          console.log(`   1. Calendar is actually empty for this date range`);
-          console.log(`   2. Service account doesn't have calendar access`);
-          console.log(`   3. Events are in a different calendar (not primary)`);
-        }
         console.log(`✅ Successfully fetched ${calendarEvents.length} calendar events`);
       } catch (calendarError) {
         console.error(`❌ Calendar access failed for ${user.email}:`, calendarError.message);
-
-        // Log specific error details for troubleshooting
-        if (calendarError.code === 403) {
-          console.error(`🔒 Permission Error: Google Calendar API may not be enabled in the service account project.`);
-          console.error(`📝 Enable it at: https://console.cloud.google.com/apis/library/calendar-json.googleapis.com?project=bold-ai-workbench`);
-        }
-
         console.log(`📝 Using mock calendar data for demonstration...`);
         usedMockData = true;
         calendarEvents = this.getMockCalendarEvents(weekStart, weekEnd);
       }
 
-      // Fetch email summary with fallback
+      // Fetch actionable emails with smart queries (like Abacus.ai)
+      try {
+        console.log(`📧 Fetching actionable emails for ${user.email}...`);
+        actionableEmails = await this.googleService.getActionableEmails(user.id);
+        console.log(`✅ Successfully fetched ${actionableEmails.length} actionable emails`);
+      } catch (emailError) {
+        console.error(`❌ Email access failed for ${user.email}:`, emailError.message);
+        console.log(`📝 Using mock email data for demonstration...`);
+        usedMockData = true;
+        actionableEmails = [];
+      }
+
+      // Also fetch general email summary for stats
       try {
         console.log(`📧 Fetching email summary for ${user.email}...`);
         emailSummary = await this.googleService.getEmailSummary(
@@ -412,18 +414,9 @@ Please provide a comprehensive weekly optimization with recommendations, insight
           new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
           new Date()
         );
-        console.log(`✅ Successfully fetched ${emailSummary.length} email summaries`);
+        console.log(`✅ Successfully fetched email summary`);
       } catch (emailError) {
-        console.error(`❌ Email access failed for ${user.email}:`, emailError.message);
-
-        // Log specific error details for troubleshooting
-        if (emailError.code === 403) {
-          console.error(`🔒 Permission Error: Gmail API may not be enabled in the service account project.`);
-          console.error(`📝 Enable it at: https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=bold-ai-workbench`);
-        }
-
-        console.log(`📝 Using mock email data for demonstration...`);
-        usedMockData = true;
+        console.error(`❌ Email summary failed:`, emailError.message);
         emailSummary = this.getMockEmailSummary();
       }
 
@@ -431,7 +424,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       const calendarData = this.analyzeCalendarData(calendarEvents);
       const emailData = this.analyzeEmailData(emailSummary);
 
-      // Generate AI recommendations
+      // Generate AI recommendations with user context from settings
       console.log(`🤖 Generating AI recommendations for ${user.email}...`);
       const aiRecommendations = await this.generateRecommendations(
         calendarData,
@@ -439,8 +432,12 @@ Please provide a comprehensive weekly optimization with recommendations, insight
         {
           email: user.email,
           name: user.name,
-          role: user.roles?.name
-        }
+          role: settings.user_role || user.roles?.name || 'Team Member',
+          priorities: settings.top_priorities || 'Not specified',
+          constraints: settings.time_constraints || 'None specified',
+          feedback: settings.improvement_feedback || 'None provided'
+        },
+        actionableEmails
       );
 
       // Combine all data

@@ -496,6 +496,80 @@ class GoogleWorkspaceService {
   }
 
   /**
+   * Get actionable emails using smart queries (like Abacus.ai)
+   * @param {string} userId - User ID from database
+   */
+  async getActionableEmails(userId) {
+    try {
+      const auth = await this.getAuthClientForUser(userId);
+      const gmail = google.gmail({ version: 'v1', auth });
+
+      // Smart queries targeting actionable items (like Abacus.ai)
+      const searchQueries = [
+        'newer_than:7d (TODO OR deadline OR follow-up OR action OR task)',
+        'newer_than:7d is:starred',
+        'newer_than:7d (urgent OR priority OR ASAP OR important)'
+      ];
+
+      const allMessages = [];
+      const seenIds = new Set();
+
+      // Fetch messages from each query
+      for (const query of searchQueries) {
+        try {
+          const response = await gmail.users.messages.list({
+            userId: 'me',
+            q: query,
+            maxResults: 20
+          });
+
+          const messages = response.data.messages || [];
+
+          // Get details for each message
+          for (const msg of messages.slice(0, 10)) {
+            // Skip duplicates
+            if (seenIds.has(msg.id)) continue;
+            seenIds.add(msg.id);
+
+            try {
+              const detail = await gmail.users.messages.get({
+                userId: 'me',
+                id: msg.id,
+                format: 'metadata',
+                metadataHeaders: ['From', 'To', 'Subject', 'Date']
+              });
+
+              const headers = detail.data.payload.headers;
+              const getHeader = (name) => headers.find(h => h.name === name)?.value || '';
+
+              allMessages.push({
+                id: detail.data.id,
+                from: getHeader('From'),
+                subject: getHeader('Subject'),
+                date: getHeader('Date'),
+                snippet: detail.data.snippet,
+                isUnread: detail.data.labelIds?.includes('UNREAD') || false,
+                isStarred: detail.data.labelIds?.includes('STARRED') || false,
+                isImportant: detail.data.labelIds?.includes('IMPORTANT') || false
+              });
+            } catch (error) {
+              console.error(`Error fetching message ${msg.id}:`, error.message);
+            }
+          }
+        } catch (error) {
+          console.error(`Error with query "${query}":`, error.message);
+        }
+      }
+
+      console.log(`📧 Found ${allMessages.length} actionable emails for user ${userId}`);
+      return allMessages;
+    } catch (error) {
+      console.error(`Error fetching actionable emails for user ${userId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Send email via Gmail API
    */
   async sendEmail(userEmail, to, subject, htmlBody) {

@@ -58,7 +58,20 @@ class WeeklyOptimizerService {
    * Analyze calendar data and extract insights
    */
   analyzeCalendarData(events) {
-    const totalMeetings = events.length;
+    // Helper function to check if an event is a focus time block
+    const isFocusTime = (summary) => {
+      const lowerSummary = (summary || '').toLowerCase();
+      return lowerSummary.includes('focus time') ||
+             lowerSummary.includes('focus block') ||
+             lowerSummary.includes('deep work') ||
+             lowerSummary.includes('lunch break') ||
+             lowerSummary.includes('place holder');
+    };
+
+    // Filter out focus time blocks for meeting count
+    const actualMeetings = events.filter(e => !isFocusTime(e.summary));
+    const totalMeetings = actualMeetings.length;
+
     let totalMeetingHours = 0;
     const dailyBreakdown = {
       Monday: { meetings: 0, hours: 0 },
@@ -71,35 +84,69 @@ class WeeklyOptimizerService {
     };
 
     const conflicts = [];
-    const sortedEvents = [...events].sort((a, b) => 
+    const sortedEvents = [...events].sort((a, b) =>
       new Date(a.start) - new Date(b.start)
     );
 
+    // Process all events (including focus time) for hours calculation
     for (let i = 0; i < sortedEvents.length; i++) {
       const event = sortedEvents[i];
       const start = new Date(event.start);
       const end = new Date(event.end);
       const duration = (end - start) / (1000 * 60 * 60); // hours
-      
+
       totalMeetingHours += duration;
-      
+
       // Get day name
       const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][start.getDay()];
-      dailyBreakdown[dayName].meetings++;
+
+      // Only count actual meetings (not focus time) in meeting count
+      if (!isFocusTime(event.summary)) {
+        dailyBreakdown[dayName].meetings++;
+      }
       dailyBreakdown[dayName].hours += duration;
 
-      // Check for back-to-back meetings
+      // Check for overlapping meetings (conflicts)
+      for (let j = i + 1; j < sortedEvents.length; j++) {
+        const otherEvent = sortedEvents[j];
+        const otherStart = new Date(otherEvent.start);
+        const otherEnd = new Date(otherEvent.end);
+
+        // Check if events overlap
+        if (start < otherEnd && end > otherStart) {
+          // Format time for display
+          const formatTime = (date) => date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+
+          conflicts.push({
+            type: 'overlap',
+            description: `"${event.summary}" (${formatTime(start)}-${formatTime(end)}) overlaps with "${otherEvent.summary}" (${formatTime(otherStart)}-${formatTime(otherEnd)})`,
+            severity: 'high',
+            suggestion: 'Reschedule one of these meetings to avoid conflicts',
+            events: [event.summary, otherEvent.summary],
+            day: dayName
+          });
+        }
+      }
+
+      // Check for back-to-back meetings (no overlap, but no break)
       if (i < sortedEvents.length - 1) {
         const nextEvent = sortedEvents[i + 1];
         const nextStart = new Date(nextEvent.start);
+        const nextEnd = new Date(nextEvent.end);
         const timeBetween = (nextStart - end) / (1000 * 60); // minutes
 
-        if (timeBetween === 0) {
+        // Only flag back-to-back if they don't overlap (overlap is already flagged above)
+        if (timeBetween === 0 && !(start < nextEnd && end > nextStart)) {
           conflicts.push({
             type: 'back_to_back',
-            description: `${event.summary} → ${nextEvent.summary} (no break)`,
+            description: `"${event.summary}" → "${nextEvent.summary}" (no break between meetings)`,
             severity: 'medium',
-            suggestion: 'Consider adding a 15-minute buffer between meetings'
+            suggestion: 'Consider adding a 15-minute buffer between meetings',
+            events: [event.summary, nextEvent.summary]
           });
         }
       }
@@ -114,7 +161,8 @@ class WeeklyOptimizerService {
         title: e.summary,
         start: e.start,
         end: e.end,
-        attendees: e.attendees?.length || 0
+        attendees: e.attendees?.length || 0,
+        isFocusTime: isFocusTime(e.summary)
       }))
     };
   }

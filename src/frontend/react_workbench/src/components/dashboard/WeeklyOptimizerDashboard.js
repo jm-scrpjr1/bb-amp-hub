@@ -273,13 +273,24 @@ const WeeklyOptimizerDashboard = () => {
                               <div className="flex-1">
                                 <h4 className="font-semibold text-gray-900 mb-1 text-sm">{item.priority}</h4>
                                 <p className="text-gray-700 text-sm mb-1">{item.action}</p>
+
+                                {/* Meeting details */}
                                 {item.meeting_name && (
-                                  <p className="text-purple-700 text-xs font-medium">
+                                  <p className="text-purple-700 text-xs font-medium mb-1">
                                     📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
                                   </p>
                                 )}
+
+                                {/* Conflict details */}
+                                {item.conflict_details && (
+                                  <p className="text-gray-700 text-xs mb-1 bg-white p-2 rounded border-l-2 border-purple-400">
+                                    {item.conflict_details}
+                                  </p>
+                                )}
+
+                                {/* Reason */}
                                 {item.reason && (
-                                  <p className="text-gray-600 text-xs mt-1 italic">💡 {item.reason}</p>
+                                  <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
                                 )}
                               </div>
                             </div>

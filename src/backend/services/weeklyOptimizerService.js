@@ -290,8 +290,9 @@ Return ONLY valid JSON matching this exact structure:
       "action": "Specific action to take",
       "meeting_name": "Actual meeting name if applicable",
       "day": "Day of week (e.g., Monday)",
-      "time": "Time range (e.g., 6:00 PM - 4:00 PM)",
-      "reason": "Why this is important"
+      "time": "Time range (e.g., 2:00 PM - 3:00 PM)",
+      "reason": "Why this is important",
+      "conflict_details": "Detailed explanation of what's conflicting and why"
     }
   ],
   "improvement_insights": "2-3 Kaizen opportunities for improvement",
@@ -357,14 +358,25 @@ CRITICAL REQUIREMENTS:
 9. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
 10. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
 
-IMPORTANT: Every item in "risks_and_conflicts" array MUST have:
-- "day": the day of the week (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
-- "time": the time range (e.g., "6:00 PM - 6:45 PM")
-- "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
-- "suggestion": specific actionable suggestion
+IMPORTANT FOR "recommended_priorities":
+- Create ONE priority item for EACH conflict/risk detected (not just 3 total)
+- Include "conflict_details" field explaining what's conflicting and why
+- Include "day" field showing which day the conflict occurs
+- Include "time" field showing the time range
+- Include "meeting_name" field with the meeting that needs to be moved
+- Include "action" field with specific time adjustment (e.g., "Move to 3:30 PM - 4:15 PM")
+- Include "reason" field explaining the impact
+
+IMPORTANT FOR "risks_and_conflicts":
+- Every item MUST have:
+  - "day": the day of the week (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+  - "time": the time range (e.g., "6:00 PM - 6:45 PM")
+  - "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
+  - "suggestion": specific actionable suggestion
 
 DO NOT suggest buffers around lunch breaks or personal time blocks.
 DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
+DO create a priority item for EVERY conflict detected - do not limit to 3 items.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

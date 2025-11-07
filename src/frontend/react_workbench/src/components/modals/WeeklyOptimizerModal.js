@@ -438,13 +438,24 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                               <div className="flex-1">
                                 <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
                                 <p className="text-gray-700 text-sm mb-2">{item.action}</p>
+
+                                {/* Meeting details */}
                                 {item.meeting_name && (
-                                  <p className="text-purple-700 text-sm font-medium">
+                                  <p className="text-purple-700 text-sm font-medium mb-2">
                                     📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
                                   </p>
                                 )}
+
+                                {/* Conflict details */}
+                                {item.conflict_details && (
+                                  <p className="text-gray-700 text-sm mb-2 bg-white p-2 rounded border-l-2 border-purple-400">
+                                    {item.conflict_details}
+                                  </p>
+                                )}
+
+                                {/* Reason */}
                                 {item.reason && (
-                                  <p className="text-gray-600 text-xs mt-2 italic">💡 {item.reason}</p>
+                                  <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
                                 )}
                               </div>
                             </div>

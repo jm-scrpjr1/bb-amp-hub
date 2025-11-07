@@ -339,6 +339,7 @@ Return ONLY valid JSON matching this exact structure:
 
         // Create structured daily schedule for AI grounding
         const dailySchedule = this.formatDailySchedule(eventDetails);
+        console.log('📅 STRUCTURED DAILY SCHEDULE:\n', dailySchedule);
 
         // Also keep JSON format for backward compatibility
         const eventDetailsJSON = eventDetails.map(e => ({

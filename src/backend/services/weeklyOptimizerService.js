@@ -175,8 +175,16 @@ class WeeklyOptimizerService {
    */
   async generateRecommendations(calendarData, emailData, userContext) {
     try {
+      console.log('🤖 Creating OpenAI thread...');
+
       // Create a thread for this optimization
       const thread = await this.client.beta.threads.create();
+
+      if (!thread || !thread.id) {
+        throw new Error('Failed to create OpenAI thread - thread ID is undefined');
+      }
+
+      console.log(`✅ Thread created: ${thread.id}`);
 
       // Prepare the prompt with all context
       const prompt = `Analyze this user's upcoming week and provide optimization recommendations.
@@ -205,17 +213,26 @@ ${emailData.topUrgentEmails.map((e, i) => `${i + 1}. From: ${e.from}\n   Subject
 Please provide a comprehensive weekly optimization with recommendations, insights, and action items.`;
 
       // Add message to thread
+      console.log(`📝 Adding message to thread ${thread.id}...`);
       await this.client.beta.threads.messages.create(thread.id, {
         role: 'user',
         content: prompt
       });
 
       // Run the assistant
+      console.log(`🚀 Running assistant ${this.assistantId} on thread ${thread.id}...`);
       const run = await this.client.beta.threads.runs.create(thread.id, {
         assistant_id: this.assistantId
       });
 
+      if (!run || !run.id) {
+        throw new Error('Failed to create run - run ID is undefined');
+      }
+
+      console.log(`✅ Run created: ${run.id}`);
+
       // Wait for completion
+      console.log(`⏳ Waiting for run ${run.id} to complete...`);
       let runStatus = await this.client.beta.threads.runs.retrieve(thread.id, run.id);
       let attempts = 0;
       const maxAttempts = 60; // 60 seconds timeout

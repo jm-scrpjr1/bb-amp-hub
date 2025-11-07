@@ -327,7 +327,7 @@ Return ONLY valid JSON matching this exact structure:
           const endTime = endDate.toLocaleTimeString('en-US', formatOptions);
 
           return {
-            summary: e.summary,
+            summary: e.title || e.summary || 'No title', // Use 'title' field from analyzeCalendarData
             day: startDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/New_York' }),
             start_time: startTime,
             end_time: endTime,

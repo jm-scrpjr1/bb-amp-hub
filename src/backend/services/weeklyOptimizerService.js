@@ -238,7 +238,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       console.log(`🔍 Debug - thread object:`, JSON.stringify(thread, null, 2));
       console.log(`🔍 Debug - thread.id:`, thread.id);
       console.log(`🔍 Debug - run.id:`, run.id);
-      let runStatus = await this.client.beta.threads.runs.retrieve(thread.id, run.id);
+      // OpenAI SDK signature: retrieve(runId, threadId) - parameters are SWAPPED!
+      let runStatus = await this.client.beta.threads.runs.retrieve(run.id, thread.id);
       let attempts = 0;
       const maxAttempts = 60; // 60 seconds timeout
 
@@ -248,7 +249,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
         }
 
         await new Promise(resolve => setTimeout(resolve, 1000));
-        runStatus = await this.client.beta.threads.runs.retrieve(thread.id, run.id);
+        // OpenAI SDK signature: retrieve(runId, threadId) - parameters are SWAPPED!
+        runStatus = await this.client.beta.threads.runs.retrieve(run.id, thread.id);
         attempts++;
       }
 

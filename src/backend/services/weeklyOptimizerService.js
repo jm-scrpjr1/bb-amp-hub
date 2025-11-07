@@ -123,6 +123,19 @@ class WeeklyOptimizerService {
    * Analyze email data and extract insights
    */
   analyzeEmailData(emailSummary) {
+    // Safety check: ensure emailSummary has the expected structure
+    if (!emailSummary || !emailSummary.messages) {
+      console.warn('⚠️ Invalid email summary structure, using empty data');
+      return {
+        urgentCount: 0,
+        highPriorityCount: 0,
+        unreadCount: 0,
+        importantCount: 0,
+        total: 0,
+        topSenders: []
+      };
+    }
+
     const { messages, unreadCount, importantCount, total } = emailSummary;
 
     // Find emails requiring response (unread + older than 3 days)
@@ -135,8 +148,8 @@ class WeeklyOptimizerService {
     });
 
     // Categorize by sender importance (simple heuristic)
-    const highPriorityEmails = messages.filter(msg => 
-      msg.isImportant || 
+    const highPriorityEmails = messages.filter(msg =>
+      msg.isImportant ||
       msg.from.toLowerCase().includes('ceo') ||
       msg.from.toLowerCase().includes('director') ||
       msg.subject.toLowerCase().includes('urgent')
@@ -631,29 +644,42 @@ Please provide a comprehensive weekly optimization with recommendations, insight
    * Generate mock email summary for demonstration
    */
   getMockEmailSummary() {
-    return [
+    const messages = [
       {
         id: 'mock-email-1',
         subject: 'Q4 Planning Discussion',
         from: 'manager@boldbusiness.com',
         date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        snippet: 'Let\'s schedule time to discuss Q4 priorities...'
+        snippet: 'Let\'s schedule time to discuss Q4 priorities...',
+        isUnread: true,
+        isImportant: true
       },
       {
         id: 'mock-email-2',
         subject: 'Client Feedback on Proposal',
         from: 'client@example.com',
         date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        snippet: 'Thank you for the proposal. We have some questions...'
+        snippet: 'Thank you for the proposal. We have some questions...',
+        isUnread: true,
+        isImportant: false
       },
       {
         id: 'mock-email-3',
         subject: 'Team Update - New Features',
         from: 'product@boldbusiness.com',
         date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        snippet: 'Excited to share our new feature roadmap...'
+        snippet: 'Excited to share our new feature roadmap...',
+        isUnread: false,
+        isImportant: false
       }
     ];
+
+    return {
+      messages,
+      unreadCount: messages.filter(m => m.isUnread).length,
+      importantCount: messages.filter(m => m.isImportant).length,
+      total: messages.length
+    };
   }
 }
 

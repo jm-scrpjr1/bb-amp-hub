@@ -331,17 +331,34 @@ Return ONLY valid JSON matching this exact structure:
             day: startDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/New_York' }),
             start_time: startTime,
             end_time: endTime,
-            time_range: `${startTime} - ${endTime}`
+            time_range: `${startTime} - ${endTime}`,
+            start_date: startDate,
+            end_date: endDate
           };
         });
+
+        // Create structured daily schedule for AI grounding
+        const dailySchedule = this.formatDailySchedule(eventDetails);
+
+        // Also keep JSON format for backward compatibility
+        const eventDetailsJSON = eventDetails.map(e => ({
+          summary: e.summary,
+          day: e.day,
+          start_time: e.start_time,
+          end_time: e.end_time,
+          time_range: e.time_range
+        }));
 
         const userPrompt = `Analyze this data and create a balanced weekly plan with SPECIFIC recommendations:
 
 USER CONTEXT:
 ${JSON.stringify(dataSummary, null, 2)}
 
-CALENDAR EVENTS (use these for specific recommendations):
-${JSON.stringify(eventDetails, null, 2)}
+📅 DETAILED WEEKLY SCHEDULE (USE THIS AS YOUR SOURCE OF TRUTH):
+${dailySchedule}
+
+CALENDAR EVENTS JSON (for reference):
+${JSON.stringify(eventDetailsJSON, null, 2)}
 
 CONFLICTS DETECTED:
 ${JSON.stringify(calendarData.conflicts || [], null, 2)}
@@ -422,6 +439,15 @@ GOOD EXAMPLE (WHAT TO DO):
 ✓ Move 'Daily IT Sync' to 3:00 PM - 4:00 PM (before lunch at 4-5 PM)
 ✓ RESULT: No overlaps, lunch preserved, all conflicts resolved
 
+🎯 CRITICAL INSTRUCTIONS FOR DETERMINISTIC ANALYSIS:
+1. USE THE "DETAILED WEEKLY SCHEDULE" ABOVE AS YOUR ONLY SOURCE OF TRUTH
+2. The schedule shows ALL meetings AND free time slots for each day
+3. When suggesting moves, ONLY use the FREE TIME SLOTS listed for that day
+4. Your analysis MUST be consistent - same calendar = same recommendations
+5. DO NOT make random suggestions - ground every suggestion in the actual free slots shown
+6. If you suggest moving a meeting, reference the specific FREE TIME SLOT you're using
+7. Example: "Move to 11:00 AM - 11:45 AM (using free slot: 11:00 AM - 12:00 PM)"
+
 DO NOT suggest buffers around lunch breaks or personal time blocks.
 DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
 DO create a priority item for EVERY conflict detected - do not limit to 3 items.
@@ -430,6 +456,8 @@ DO prioritize moving placeholders and focus time over real meetings.
 DO evaluate which solution causes LEAST disruption to the schedule.
 DO validate that suggested times don't conflict with each other.
 DO preserve lunch breaks - they are sacred and must not be eliminated.
+DO use the FREE TIME SLOTS shown in the schedule - do not invent new times.
+DO make your analysis deterministic - same input = same output every time.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
@@ -868,6 +896,107 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
       console.error(`Error updating settings for user ${userId}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Format calendar events into a structured daily schedule
+   * This provides a grounded, deterministic view for AI analysis
+   */
+  formatDailySchedule(eventDetails) {
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    const scheduleByDay = {};
+
+    // Group events by day
+    eventDetails.forEach(event => {
+      if (!scheduleByDay[event.day]) {
+        scheduleByDay[event.day] = [];
+      }
+      scheduleByDay[event.day].push(event);
+    });
+
+    // Sort events by start time for each day
+    Object.keys(scheduleByDay).forEach(day => {
+      scheduleByDay[day].sort((a, b) => a.start_date - b.start_date);
+    });
+
+    // Build formatted schedule
+    let schedule = '';
+    days.forEach(day => {
+      const events = scheduleByDay[day] || [];
+      schedule += `\n${day.toUpperCase()}:\n`;
+
+      if (events.length === 0) {
+        schedule += '  No scheduled meetings\n';
+      } else {
+        events.forEach(event => {
+          schedule += `  ${event.time_range} - ${event.summary}\n`;
+        });
+
+        // Identify free time slots
+        const freeSlots = this.findFreeSlots(events);
+        if (freeSlots.length > 0) {
+          schedule += `  FREE TIME SLOTS:\n`;
+          freeSlots.forEach(slot => {
+            schedule += `    ${slot}\n`;
+          });
+        }
+      }
+    });
+
+    return schedule;
+  }
+
+  /**
+   * Find free time slots between meetings
+   */
+  findFreeSlots(events) {
+    const freeSlots = [];
+    const workStart = 8; // 8 AM
+    const workEnd = 17; // 5 PM
+
+    if (events.length === 0) {
+      return [`8:00 AM - 5:00 PM (Full day available)`];
+    }
+
+    // Check gap before first meeting
+    const firstEventStart = events[0].start_date.getHours() + events[0].start_date.getMinutes() / 60;
+    if (firstEventStart > workStart) {
+      const gapStart = this.formatTime(workStart, 0);
+      const gapEnd = events[0].start_time;
+      freeSlots.push(`${gapStart} - ${gapEnd}`);
+    }
+
+    // Check gaps between meetings
+    for (let i = 0; i < events.length - 1; i++) {
+      const currentEnd = events[i].end_date;
+      const nextStart = events[i + 1].start_date;
+      const gapMinutes = (nextStart - currentEnd) / (1000 * 60);
+
+      // Only show gaps of 30+ minutes
+      if (gapMinutes >= 30) {
+        freeSlots.push(`${events[i].end_time} - ${events[i + 1].start_time}`);
+      }
+    }
+
+    // Check gap after last meeting
+    const lastEventEnd = events[events.length - 1].end_date.getHours() + events[events.length - 1].end_date.getMinutes() / 60;
+    if (lastEventEnd < workEnd) {
+      const gapStart = events[events.length - 1].end_time;
+      const gapEnd = this.formatTime(workEnd, 0);
+      freeSlots.push(`${gapStart} - ${gapEnd}`);
+    }
+
+    return freeSlots;
+  }
+
+  /**
+   * Format time as 12-hour string
+   */
+  formatTime(hours, minutes) {
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    return `${displayHours}:${displayMinutes} ${period}`;
   }
 
   /**

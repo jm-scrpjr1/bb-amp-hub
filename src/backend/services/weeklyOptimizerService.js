@@ -58,14 +58,22 @@ class WeeklyOptimizerService {
    * Analyze calendar data and extract insights
    */
   analyzeCalendarData(events) {
-    // Helper function to check if an event is a focus time block
+    // Helper function to check if an event is a focus time block or personal time
     const isFocusTime = (summary) => {
       const lowerSummary = (summary || '').toLowerCase();
       return lowerSummary.includes('focus time') ||
              lowerSummary.includes('focus block') ||
              lowerSummary.includes('deep work') ||
              lowerSummary.includes('lunch break') ||
-             lowerSummary.includes('place holder');
+             lowerSummary.includes('lunch') ||
+             lowerSummary.includes('place holder') ||
+             lowerSummary.includes('placeholder') ||
+             lowerSummary.includes('personal time') ||
+             lowerSummary.includes('break') ||
+             lowerSummary.includes('out of office') ||
+             lowerSummary.includes('ooo') ||
+             lowerSummary.includes('pto') ||
+             lowerSummary.includes('vacation');
     };
 
     // Filter out focus time blocks for meeting count
@@ -262,9 +270,12 @@ class WeeklyOptimizerService {
         const systemMessage = `You are a Weekly Plan Assistant following Toyota Production System principles (Heijunka, Kaizen, Muri).
 Create a CONCISE, SCANNABLE weekly plan that eliminates waste and builds in quality.
 
-IMPORTANT:
+CRITICAL REQUIREMENTS:
+- Analyze ALL 5 weekdays: Monday, Tuesday, Wednesday, Thursday, Friday
+- Provide recommendations and identify conflicts for EACH day (Mon-Fri)
 - Be SPECIFIC with meeting names, times, and conflicts
 - Use actual data from calendar events
+- IGNORE lunch breaks, personal time, focus blocks, OOO, PTO (these are NOT meetings)
 - Format recommendations as structured, scannable items
 - Identify exact conflicts with meeting names and times
 - Suggest specific time adjustments (e.g., "move 1 hour earlier")
@@ -334,20 +345,26 @@ ${JSON.stringify(eventDetails, null, 2)}
 CONFLICTS DETECTED:
 ${JSON.stringify(calendarData.conflicts || [], null, 2)}
 
-Focus on:
-1. Use ACTUAL meeting names and times from calendar events
-2. For each risk/conflict, ALWAYS include the "day" field (e.g., "Monday", "Tuesday")
-3. For each risk/conflict, include the "time" field with the time range (e.g., "6:00 PM - 6:45 PM")
-4. Identify SPECIFIC conflicts with exact meeting names and times
-5. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
-6. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
-7. Preventing overburden (Muri)
+CRITICAL REQUIREMENTS:
+1. Analyze ALL 5 weekdays: Monday, Tuesday, Wednesday, Thursday, Friday
+2. Provide recommendations for EACH day of the week, not just Mon/Tue
+3. Check for conflicts and overlaps on ALL days (Mon-Fri)
+4. Use ACTUAL meeting names and times from calendar events
+5. Ignore personal time blocks (lunch, breaks, focus time, OOO, PTO)
+6. For each risk/conflict, ALWAYS include the "day" field (e.g., "Monday", "Tuesday")
+7. For each risk/conflict, include the "time" field with the time range (e.g., "6:00 PM - 6:45 PM")
+8. Identify SPECIFIC conflicts with exact meeting names and times
+9. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
+10. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
 
 IMPORTANT: Every item in "risks_and_conflicts" array MUST have:
-- "day": the day of the week (e.g., "Monday")
+- "day": the day of the week (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 - "time": the time range (e.g., "6:00 PM - 6:45 PM")
-- "meetings": array of meeting names involved
+- "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
 - "suggestion": specific actionable suggestion
+
+DO NOT suggest buffers around lunch breaks or personal time blocks.
+DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

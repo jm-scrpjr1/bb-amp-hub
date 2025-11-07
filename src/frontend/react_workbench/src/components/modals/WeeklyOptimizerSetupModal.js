@@ -42,7 +42,12 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.data) {
-          setSettings(data.data);
+          setSettings({
+            ...data.data,
+            user_role: data.data.user_role || '',
+            top_priorities: data.data.top_priorities || '',
+            time_constraints: data.data.time_constraints || ''
+          });
         }
       }
     } catch (err) {

@@ -298,8 +298,16 @@ Please provide a comprehensive weekly optimization with recommendations, insight
           weekStart,
           weekEnd
         );
+        console.log(`✅ Successfully fetched ${calendarEvents.length} calendar events`);
       } catch (calendarError) {
         console.error(`❌ Calendar access failed for ${user.email}:`, calendarError.message);
+
+        // Log specific error details for troubleshooting
+        if (calendarError.code === 403) {
+          console.error(`🔒 Permission Error: Google Calendar API may not be enabled in the service account project.`);
+          console.error(`📝 Enable it at: https://console.cloud.google.com/apis/library/calendar-json.googleapis.com?project=bold-ai-workbench`);
+        }
+
         console.log(`📝 Using mock calendar data for demonstration...`);
         usedMockData = true;
         calendarEvents = this.getMockCalendarEvents(weekStart, weekEnd);
@@ -313,8 +321,16 @@ Please provide a comprehensive weekly optimization with recommendations, insight
           new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
           new Date()
         );
+        console.log(`✅ Successfully fetched ${emailSummary.length} email summaries`);
       } catch (emailError) {
         console.error(`❌ Email access failed for ${user.email}:`, emailError.message);
+
+        // Log specific error details for troubleshooting
+        if (emailError.code === 403) {
+          console.error(`🔒 Permission Error: Gmail API may not be enabled in the service account project.`);
+          console.error(`📝 Enable it at: https://console.cloud.google.com/apis/library/gmail.googleapis.com?project=bold-ai-workbench`);
+        }
+
         console.log(`📝 Using mock email data for demonstration...`);
         usedMockData = true;
         emailSummary = this.getMockEmailSummary();

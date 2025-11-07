@@ -389,7 +389,7 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
           ],
           response_format: { type: 'json_object' },
           temperature: 0.7,
-          max_tokens: 2000
+          max_tokens: 4000
         });
 
         const content = response.choices[0].message.content;

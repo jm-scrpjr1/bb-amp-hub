@@ -319,6 +319,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
 
       // Get upcoming week dates
       const { weekStart, weekEnd } = this.getUpcomingWeekDates();
+      console.log(`📆 Date range: ${weekStart.toISOString()} to ${weekEnd.toISOString()}`);
+      console.log(`📆 Human readable: ${weekStart.toLocaleDateString()} to ${weekEnd.toLocaleDateString()}`);
 
       let calendarEvents = [];
       let emailSummary = [];
@@ -332,6 +334,13 @@ Please provide a comprehensive weekly optimization with recommendations, insight
           weekStart,
           weekEnd
         );
+        console.log(`📅 Found ${calendarEvents.length} calendar events for ${user.email}`);
+        if (calendarEvents.length === 0) {
+          console.log(`⚠️  No events found - this could mean:`);
+          console.log(`   1. Calendar is actually empty for this date range`);
+          console.log(`   2. Service account doesn't have calendar access`);
+          console.log(`   3. Events are in a different calendar (not primary)`);
+        }
         console.log(`✅ Successfully fetched ${calendarEvents.length} calendar events`);
       } catch (calendarError) {
         console.error(`❌ Calendar access failed for ${user.email}:`, calendarError.message);

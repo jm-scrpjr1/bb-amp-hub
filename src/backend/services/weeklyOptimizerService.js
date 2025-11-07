@@ -378,6 +378,13 @@ IMPORTANT FOR "risks_and_conflicts":
   - "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
   - "suggestion": specific actionable suggestion that considers existing meetings
 
+ALGORITHM FOR CHOOSING WHAT TO MOVE (PRIORITY ORDER):
+1. FIRST: Check if ANY item is a "placeholder" or "Place Holder" (non-real meeting) - ALWAYS move these first
+2. SECOND: Check if ANY item is a focus time block (personal time) - consider moving this instead of real meetings
+3. THIRD: Only move real meetings if no placeholders or focus time can be moved
+4. EVALUATE IMPACT: Moving 1 focus time block is better than moving 2 real meetings
+5. SUGGEST THE BEST SOLUTION: Not just any solution, but the one with least disruption
+
 ALGORITHM FOR SUGGESTING NEW TIMES:
 1. Identify the conflicting meeting and its duration
 2. Look at ALL meetings on that day
@@ -385,11 +392,22 @@ ALGORITHM FOR SUGGESTING NEW TIMES:
 4. Prefer morning slots (8 AM - 12 PM) over afternoon
 5. Avoid suggesting times that would create new conflicts
 6. If no free slot exists on that day, suggest moving to next available day
+7. For focus time blocks: suggest moving to a different time slot on the SAME day if possible
+8. For focus time: ensure suggested time still provides adequate focus duration (minimum 2-3 hours)
+
+EXAMPLE ANALYSIS:
+- Conflict: "John's Focus Time: Project Works (12 PM - 3 PM)" overlaps with "Weekly 1:1" and "Daily IT Sync"
+- Option A: Move 2 real meetings (Weekly 1:1 + Daily IT Sync) to different times
+- Option B: Move focus time to 11 AM - 2 PM (still 3 hours, with buffer before/after)
+- BEST CHOICE: Option B (move 1 item instead of 2, preserves focus time duration)
+- Suggestion: "Move 'John's Focus Time: Project Works' to 11:00 AM - 2:00 PM to avoid conflicts with real meetings"
 
 DO NOT suggest buffers around lunch breaks or personal time blocks.
 DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
 DO create a priority item for EVERY conflict detected - do not limit to 3 items.
 DO consider the FULL calendar when making suggestions - not just the conflicting time.
+DO prioritize moving placeholders and focus time over real meetings.
+DO evaluate which solution causes LEAST disruption to the schedule.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

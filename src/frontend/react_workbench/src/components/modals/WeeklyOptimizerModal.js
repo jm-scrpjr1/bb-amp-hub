@@ -42,7 +42,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       }
 
       const data = await response.json();
-      setOptimization(data.optimization);
+      setOptimization(data.data);
     } catch (err) {
       console.error('Error fetching optimization:', err);
       setError(err.message);

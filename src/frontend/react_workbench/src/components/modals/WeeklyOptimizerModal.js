@@ -66,7 +66,9 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to trigger optimization');
+        const errorData = await response.json();
+        const errorMsg = errorData.details || errorData.error || 'Failed to trigger optimization';
+        throw new Error(errorMsg);
       }
 
       const data = await response.json();
@@ -81,6 +83,8 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
     } catch (err) {
       console.error('Error triggering optimization:', err);
       setError(err.message);
+      // Re-throw for parent handlers
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -309,6 +313,23 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
 
             {!loading && !error && optimization && (
               <div className="space-y-6">
+                {/* Demo Data Banner */}
+                {optimization.is_demo_data && (
+                  <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="bg-amber-500 rounded-full p-2 mt-0.5">
+                        <Sparkles className="h-4 w-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-amber-900 mb-1">📊 Demo Mode</h4>
+                        <p className="text-sm text-amber-800">
+                          This optimization uses sample data for demonstration. Calendar access requires Google Workspace admin configuration. Contact your IT admin to enable full calendar integration.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Week Overview Stats */}
                 {weekOverview && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

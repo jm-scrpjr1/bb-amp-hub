@@ -286,21 +286,39 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       // Get upcoming week dates
       const { weekStart, weekEnd } = this.getUpcomingWeekDates();
 
-      // Fetch calendar events
-      console.log(`📅 Fetching calendar events for ${user.email}...`);
-      const calendarEvents = await this.googleService.getCalendarEvents(
-        user.email,
-        weekStart,
-        weekEnd
-      );
+      let calendarEvents = [];
+      let emailSummary = [];
+      let usedMockData = false;
 
-      // Fetch email summary
-      console.log(`📧 Fetching email summary for ${user.email}...`);
-      const emailSummary = await this.googleService.getEmailSummary(
-        user.email,
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
-        new Date()
-      );
+      // Fetch calendar events with fallback
+      try {
+        console.log(`📅 Fetching calendar events for ${user.email}...`);
+        calendarEvents = await this.googleService.getCalendarEvents(
+          user.email,
+          weekStart,
+          weekEnd
+        );
+      } catch (calendarError) {
+        console.error(`❌ Calendar access failed for ${user.email}:`, calendarError.message);
+        console.log(`📝 Using mock calendar data for demonstration...`);
+        usedMockData = true;
+        calendarEvents = this.getMockCalendarEvents(weekStart, weekEnd);
+      }
+
+      // Fetch email summary with fallback
+      try {
+        console.log(`📧 Fetching email summary for ${user.email}...`);
+        emailSummary = await this.googleService.getEmailSummary(
+          user.email,
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+          new Date()
+        );
+      } catch (emailError) {
+        console.error(`❌ Email access failed for ${user.email}:`, emailError.message);
+        console.log(`📝 Using mock email data for demonstration...`);
+        usedMockData = true;
+        emailSummary = this.getMockEmailSummary();
+      }
 
       // Analyze data
       const calendarData = this.analyzeCalendarData(calendarEvents);
@@ -323,7 +341,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
         ...aiRecommendations,
         calendar_analysis: calendarData,
         email_analysis: emailData,
-        generated_at: new Date().toISOString()
+        generated_at: new Date().toISOString(),
+        is_demo_data: usedMockData // Flag to indicate mock data was used
       };
 
       // Save to database
@@ -549,6 +568,76 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       console.error(`Error updating settings for user ${userId}:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Generate mock calendar events for demonstration
+   */
+  getMockCalendarEvents(weekStart, weekEnd) {
+    const events = [];
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+    days.forEach((day, index) => {
+      const date = new Date(weekStart);
+      date.setDate(date.getDate() + index);
+
+      // Morning standup
+      events.push({
+        id: `mock-${index}-1`,
+        summary: 'Team Standup',
+        description: 'Daily team sync',
+        start: new Date(date.setHours(9, 0, 0)).toISOString(),
+        end: new Date(date.setHours(9, 30, 0)).toISOString(),
+        attendees: [{ email: 'team@boldbusiness.com' }],
+        organizer: { email: 'manager@boldbusiness.com' },
+        status: 'confirmed'
+      });
+
+      // Mid-day meeting
+      if (index % 2 === 0) {
+        events.push({
+          id: `mock-${index}-2`,
+          summary: 'Project Review',
+          description: 'Review project progress',
+          start: new Date(date.setHours(14, 0, 0)).toISOString(),
+          end: new Date(date.setHours(15, 0, 0)).toISOString(),
+          attendees: [{ email: 'team@boldbusiness.com' }],
+          organizer: { email: 'pm@boldbusiness.com' },
+          status: 'confirmed'
+        });
+      }
+    });
+
+    return events;
+  }
+
+  /**
+   * Generate mock email summary for demonstration
+   */
+  getMockEmailSummary() {
+    return [
+      {
+        id: 'mock-email-1',
+        subject: 'Q4 Planning Discussion',
+        from: 'manager@boldbusiness.com',
+        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        snippet: 'Let\'s schedule time to discuss Q4 priorities...'
+      },
+      {
+        id: 'mock-email-2',
+        subject: 'Client Feedback on Proposal',
+        from: 'client@example.com',
+        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        snippet: 'Thank you for the proposal. We have some questions...'
+      },
+      {
+        id: 'mock-email-3',
+        subject: 'Team Update - New Features',
+        from: 'product@boldbusiness.com',
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        snippet: 'Excited to share our new feature roadmap...'
+      }
+    ];
   }
 }
 

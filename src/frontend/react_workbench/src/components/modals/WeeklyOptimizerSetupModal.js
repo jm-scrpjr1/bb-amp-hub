@@ -60,18 +60,28 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save settings');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save settings');
       }
 
       // Call the callback to trigger optimization
       if (onSaveComplete) {
-        await onSaveComplete();
+        try {
+          await onSaveComplete();
+        } catch (triggerError) {
+          console.error('Error triggering optimization:', triggerError);
+          // Show detailed error message
+          const errorMsg = triggerError.message || 'Failed to trigger optimization';
+          alert(`Settings saved successfully!\n\nHowever, there was an issue generating the optimization:\n${errorMsg}\n\nThis might be due to calendar permissions. Please contact your admin or try again later.`);
+          onClose();
+          return;
+        }
       }
 
       onClose();
     } catch (err) {
       console.error('Error saving settings:', err);
-      alert('Failed to save settings. Please try again.');
+      alert(`Failed to save settings:\n${err.message}\n\nPlease try again.`);
     } finally {
       setSaving(false);
     }

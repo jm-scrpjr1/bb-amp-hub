@@ -68,7 +68,14 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       }
 
       const data = await response.json();
-      setOptimization(data.optimization);
+
+      // Set the optimization from the response
+      if (data.data) {
+        setOptimization(data.data);
+      } else {
+        // If no data returned, fetch the current optimization
+        await fetchCurrentOptimization();
+      }
     } catch (err) {
       console.error('Error triggering optimization:', err);
       setError(err.message);
@@ -101,20 +108,97 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
             >
               <X className="h-5 w-5" />
             </button>
-            
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="h-8 w-8" />
-              <h2 className="text-2xl font-bold">Your Optimized Week</h2>
+
+            <div className="flex items-center gap-4">
+              {/* AI Agent Image */}
+              <motion.div
+                animate={{
+                  y: [0, -10, 0],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="relative"
+              >
+                <div className="absolute inset-0 bg-white/30 rounded-full blur-xl"></div>
+                <img
+                  src="/images/AI AGENT 4.png"
+                  alt="Weekly Optimizer AI"
+                  className="relative h-20 w-20 object-contain drop-shadow-2xl"
+                />
+              </motion.div>
+
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold mb-1">Weekly Optimizer AI</h2>
+                <p className="text-white/90 text-sm">Your intelligent planning assistant</p>
+              </div>
             </div>
-            <p className="text-white/90">AI-powered insights for maximum productivity</p>
           </div>
 
           {/* Content */}
           <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
             {loading && (
-              <div className="flex flex-col items-center justify-center py-12">
-                <RefreshCw className="h-12 w-12 text-cyan-500 animate-spin mb-4" />
-                <p className="text-gray-600">Analyzing your week...</p>
+              <div className="space-y-6">
+                {/* AI Agent Working */}
+                <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-2xl p-6 border-2 border-cyan-200">
+                  <div className="flex items-start gap-4">
+                    <motion.img
+                      src="/images/AI AGENT 4.png"
+                      alt="AI Agent"
+                      className="h-16 w-16 object-contain"
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <div className="flex-1">
+                      <div className="bg-white rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center gap-2 mb-2">
+                          <RefreshCw className="h-4 w-4 text-cyan-500 animate-spin" />
+                          <p className="text-gray-800 font-semibold">Analyzing your week...</p>
+                        </div>
+                        <p className="text-gray-600 text-sm">
+                          I'm reviewing your calendar events, emails, and tasks to create your personalized optimization plan. This will just take a moment! ✨
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress Indicators */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <motion.div
+                    className="bg-blue-50 rounded-xl p-4 border border-blue-200"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Calendar className="h-6 w-6 text-blue-600 mb-2" />
+                    <p className="text-blue-900 text-sm font-medium">Scanning calendar...</p>
+                  </motion.div>
+                  <motion.div
+                    className="bg-purple-50 rounded-xl p-4 border border-purple-200"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                  >
+                    <Sparkles className="h-6 w-6 text-purple-600 mb-2" />
+                    <p className="text-purple-900 text-sm font-medium">Generating insights...</p>
+                  </motion.div>
+                  <motion.div
+                    className="bg-cyan-50 rounded-xl p-4 border border-cyan-200"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+                  >
+                    <RefreshCw className="h-6 w-6 text-cyan-600 mb-2" />
+                    <p className="text-cyan-900 text-sm font-medium">Creating plan...</p>
+                  </motion.div>
+                </div>
               </div>
             )}
 
@@ -132,20 +216,74 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
             )}
 
             {!loading && !error && !optimization && (
-              <div className="text-center py-12">
-                <Sparkles className="h-16 w-16 text-cyan-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  Your weekly optimization is being prepared!
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Generate your first optimization to get AI-powered insights
-                </p>
-                <button
-                  onClick={handleGenerateNow}
-                  className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-                >
-                  Generate Now
-                </button>
+              <div className="space-y-6">
+                {/* AI Agent Greeting */}
+                <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-2xl p-6 border-2 border-cyan-200">
+                  <div className="flex items-start gap-4">
+                    <motion.img
+                      src="/images/AI AGENT 4.png"
+                      alt="AI Agent"
+                      className="h-16 w-16 object-contain"
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <div className="flex-1">
+                      <div className="bg-white rounded-xl p-4 shadow-sm">
+                        <p className="text-gray-800 leading-relaxed">
+                          👋 <strong>Hi there!</strong> I'm your Weekly Optimizer AI assistant.
+                          I can analyze your calendar, emails, and tasks to create a personalized weekly plan.
+                        </p>
+                        <p className="text-gray-600 text-sm mt-3">
+                          ✨ I'll help you prioritize meetings, find focus time, and optimize your schedule for maximum productivity!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Card */}
+                <div className="bg-white border-2 border-gray-200 rounded-2xl p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-cyan-500" />
+                    Ready to optimize your week?
+                  </h3>
+                  <p className="text-gray-600 mb-4 text-sm">
+                    Click below to generate your first AI-powered weekly optimization. I'll analyze your upcoming week and provide personalized insights.
+                  </p>
+                  <button
+                    onClick={handleGenerateNow}
+                    disabled={loading}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    Generate My Weekly Optimization
+                  </button>
+                </div>
+
+                {/* Info Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                    <Calendar className="h-6 w-6 text-blue-600 mb-2" />
+                    <h4 className="font-semibold text-blue-900 text-sm mb-1">Calendar Analysis</h4>
+                    <p className="text-blue-700 text-xs">Review meetings & find focus time</p>
+                  </div>
+                  <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                    <Sparkles className="h-6 w-6 text-purple-600 mb-2" />
+                    <h4 className="font-semibold text-purple-900 text-sm mb-1">AI Insights</h4>
+                    <p className="text-purple-700 text-xs">Smart recommendations & tips</p>
+                  </div>
+                  <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
+                    <RefreshCw className="h-6 w-6 text-cyan-600 mb-2" />
+                    <h4 className="font-semibold text-cyan-900 text-sm mb-1">Daily Breakdown</h4>
+                    <p className="text-cyan-700 text-xs">Day-by-day action plan</p>
+                  </div>
+                </div>
               </div>
             )}
 

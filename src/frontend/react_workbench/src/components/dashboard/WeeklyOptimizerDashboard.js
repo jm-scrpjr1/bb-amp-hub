@@ -96,7 +96,21 @@ const WeeklyOptimizerDashboard = () => {
   const recommendedPriorities = optimizationData.recommended_priorities || '';
   const improvementInsights = optimizationData.improvement_insights || '';
   const risksAndConflicts = optimizationData.risks_and_conflicts || '';
-  const dailyBreakdown = optimizationData.daily_breakdown || '';
+  const dailyBreakdown = optimizationData.daily_breakdown || {};
+
+  // Convert daily_breakdown object to formatted string
+  const formatDailyBreakdown = (breakdown) => {
+    if (!breakdown || typeof breakdown !== 'object') return '';
+
+    return Object.entries(breakdown)
+      .map(([day, details]) => {
+        if (typeof details === 'string') return `${day}:\n${details}`;
+        return `${day}:\n${JSON.stringify(details, null, 2)}`;
+      })
+      .join('\n\n');
+  };
+
+  const dailyBreakdownText = formatDailyBreakdown(dailyBreakdown);
 
   // Calculate workload color
   const getWorkloadColor = (status) => {
@@ -282,14 +296,14 @@ const WeeklyOptimizerDashboard = () => {
           )}
 
           {/* Daily Breakdown */}
-          {dailyBreakdown && (
+          {dailyBreakdownText && (
             <ScrollEffects effect="fadeUp" delay={0.55}>
               <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-gray-200">
                 <div className="flex items-start space-x-3">
                   <Calendar className="h-6 w-6 text-cyan-600 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">📅 Daily Breakdown</h3>
-                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">{dailyBreakdown}</div>
+                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">{dailyBreakdownText}</div>
                   </div>
                 </div>
               </div>

@@ -166,7 +166,7 @@ const WeeklyOptimizerDashboard = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">Meetings</p>
-<parameter name="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   {typeof weekOverview.total_meeting_hours === 'number'
                     ? weekOverview.total_meeting_hours.toFixed(2)
                     : weekOverview.total_meeting_hours || 0} hours total

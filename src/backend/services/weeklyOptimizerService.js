@@ -225,6 +225,8 @@ Please provide a comprehensive weekly optimization with recommendations, insight
         assistant_id: this.assistantId
       });
 
+      console.log(`🔍 Debug - run object:`, JSON.stringify(run, null, 2));
+
       if (!run || !run.id) {
         throw new Error('Failed to create run - run ID is undefined');
       }
@@ -233,6 +235,9 @@ Please provide a comprehensive weekly optimization with recommendations, insight
 
       // Wait for completion
       console.log(`⏳ Waiting for run ${run.id} to complete...`);
+      console.log(`🔍 Debug - thread object:`, JSON.stringify(thread, null, 2));
+      console.log(`🔍 Debug - thread.id:`, thread.id);
+      console.log(`🔍 Debug - run.id:`, run.id);
       let runStatus = await this.client.beta.threads.runs.retrieve(thread.id, run.id);
       let attempts = 0;
       const maxAttempts = 60; // 60 seconds timeout

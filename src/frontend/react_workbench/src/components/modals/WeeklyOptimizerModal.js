@@ -95,7 +95,19 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const optimizationData = optimization?.optimization_data;
   const weekOverview = optimizationData?.week_overview;
   const recommendations = optimizationData?.recommendations || [];
-  const dailyBreakdown = optimizationData?.daily_breakdown || [];
+
+  // Handle both old object format and new string format for daily_breakdown
+  let dailyBreakdownContent = '';
+  if (optimizationData?.daily_breakdown) {
+    if (typeof optimizationData.daily_breakdown === 'string') {
+      dailyBreakdownContent = optimizationData.daily_breakdown;
+    } else if (typeof optimizationData.daily_breakdown === 'object') {
+      // Convert old object format to string
+      dailyBreakdownContent = Object.entries(optimizationData.daily_breakdown)
+        .map(([day, content]) => `**${day}:**\n${content}`)
+        .join('\n\n');
+    }
+  }
 
   return (
     <AnimatePresence>
@@ -442,14 +454,14 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                 )}
 
                 {/* Daily Breakdown */}
-                {optimizationData?.daily_breakdown && (
+                {dailyBreakdownContent && (
                   <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
                     <div className="flex items-center gap-2 mb-3">
                       <Calendar className="h-5 w-5 text-cyan-600" />
                       <h3 className="text-lg font-semibold text-gray-800">📅 Daily Breakdown</h3>
                     </div>
                     <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {optimizationData.daily_breakdown}
+                      {dailyBreakdownContent}
                     </div>
                   </div>
                 )}

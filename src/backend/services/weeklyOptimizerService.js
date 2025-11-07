@@ -114,11 +114,12 @@ class WeeklyOptimizerService {
 
         // Check if events overlap
         if (start < otherEnd && end > otherStart) {
-          // Format time for display
+          // Format time for display in EST
           const formatTime = (date) => date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
-            hour12: true
+            hour12: true,
+            timeZone: 'America/New_York' // EST/EDT
           });
 
           conflicts.push({
@@ -301,12 +302,24 @@ Return ONLY valid JSON matching this exact structure:
         const eventDetails = calendarEvents.map(e => {
           const startDate = new Date(e.start);
           const endDate = new Date(e.end);
+
+          // Format times in EST timezone
+          const formatOptions = {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/New_York' // EST/EDT
+          };
+
+          const startTime = startDate.toLocaleTimeString('en-US', formatOptions);
+          const endTime = endDate.toLocaleTimeString('en-US', formatOptions);
+
           return {
             summary: e.summary,
-            day: startDate.toLocaleDateString('en-US', { weekday: 'long' }),
-            start_time: startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-            end_time: endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
-            time_range: `${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} - ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
+            day: startDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'America/New_York' }),
+            start_time: startTime,
+            end_time: endTime,
+            time_range: `${startTime} - ${endTime}`
           };
         });
 

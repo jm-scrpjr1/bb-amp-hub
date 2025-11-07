@@ -421,9 +421,37 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                       <TrendingUp className="h-5 w-5 text-purple-600" />
                       <h3 className="text-lg font-semibold text-gray-800">🚀 Recommended Priorities</h3>
                     </div>
-                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {optimizationData.recommended_priorities}
-                    </div>
+
+                    {/* Handle both string and array formats */}
+                    {typeof optimizationData.recommended_priorities === 'string' ? (
+                      <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                        {optimizationData.recommended_priorities}
+                      </div>
+                    ) : Array.isArray(optimizationData.recommended_priorities) ? (
+                      <div className="space-y-4">
+                        {optimizationData.recommended_priorities.map((item, index) => (
+                          <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
+                                <p className="text-gray-700 text-sm mb-2">{item.action}</p>
+                                {item.meeting_name && (
+                                  <p className="text-purple-700 text-sm font-medium">
+                                    📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
+                                  </p>
+                                )}
+                                {item.reason && (
+                                  <p className="text-gray-600 text-xs mt-2 italic">💡 {item.reason}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 )}
 
@@ -447,9 +475,49 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                       <TrendingUp className="h-5 w-5 text-amber-600" />
                       <h3 className="text-lg font-semibold text-gray-800">⚠️ Risks & Items for Review</h3>
                     </div>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {optimizationData.risks_and_conflicts}
-                    </p>
+
+                    {/* Handle both string and array formats */}
+                    {typeof optimizationData.risks_and_conflicts === 'string' ? (
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                        {optimizationData.risks_and_conflicts}
+                      </p>
+                    ) : Array.isArray(optimizationData.risks_and_conflicts) && optimizationData.risks_and_conflicts.length > 0 ? (
+                      <div className="space-y-3">
+                        {optimizationData.risks_and_conflicts.map((item, index) => (
+                          <div key={index} className="bg-white rounded-lg p-4 border-l-4 border-amber-500">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0">
+                                {item.type === 'conflict' && <span className="text-2xl">⚠️</span>}
+                                {item.type === 'risk' && <span className="text-2xl">🚨</span>}
+                                {item.type === 'attention' && <span className="text-2xl">👀</span>}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1">{item.description}</h4>
+                                {item.meetings && item.meetings.length > 0 && (
+                                  <div className="text-sm text-gray-700 mb-2">
+                                    <strong>Meetings:</strong> {item.meetings.join(', ')}
+                                  </div>
+                                )}
+                                {item.day && item.time && (
+                                  <p className="text-sm text-gray-600 mb-2">
+                                    📅 {item.day} at {item.time}
+                                  </p>
+                                )}
+                                {item.suggestion && (
+                                  <div className="mt-2 bg-amber-100 rounded-md p-3 border border-amber-200">
+                                    <p className="text-sm text-amber-900">
+                                      <strong>💡 Suggestion:</strong> {item.suggestion}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 text-sm">No conflicts or risks detected for this week! 🎉</p>
+                    )}
                   </div>
                 )}
 

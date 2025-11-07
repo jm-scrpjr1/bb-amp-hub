@@ -261,29 +261,70 @@ class WeeklyOptimizerService {
         const systemMessage = `You are a Weekly Plan Assistant following Toyota Production System principles (Heijunka, Kaizen, Muri).
 Create a CONCISE, SCANNABLE weekly plan that eliminates waste and builds in quality.
 
-IMPORTANT: Keep output brief and actionable. Use bullet points. Avoid wordiness.
+IMPORTANT:
+- Be SPECIFIC with meeting names, times, and conflicts
+- Use actual data from calendar events
+- Format recommendations as structured, scannable items
+- Identify exact conflicts with meeting names and times
+- Suggest specific time adjustments (e.g., "move 1 hour earlier")
 
 Return ONLY valid JSON matching this exact structure:
 {
   "executive_summary": "2-3 sentence summary of week's focus",
   "balance_analysis": "Brief analysis of time allocation with percentages (Focus/Collaboration/Admin)",
-  "recommended_priorities": "3-5 numbered actionable priorities with next steps",
+  "recommended_priorities": [
+    {
+      "priority": "Priority name",
+      "action": "Specific action to take",
+      "meeting_name": "Actual meeting name if applicable",
+      "day": "Day of week",
+      "time": "Time if applicable",
+      "reason": "Why this is important"
+    }
+  ],
   "improvement_insights": "2-3 Kaizen opportunities for improvement",
   "daily_breakdown": "Brief day-by-day highlights (Monday-Friday only)",
-  "risks_and_conflicts": "Key risks, conflicts, or items needing attention"
+  "risks_and_conflicts": [
+    {
+      "type": "conflict|risk|attention",
+      "description": "What the issue is",
+      "meetings": ["Meeting A", "Meeting B"],
+      "day": "Day of week",
+      "time": "Time range",
+      "suggestion": "Specific suggestion (e.g., move Meeting A 1 hour earlier)"
+    }
+  ]
 }`;
 
-        const userPrompt = `Analyze this data and create a balanced weekly plan:
+        // Include actual calendar events for specific recommendations
+        const calendarEvents = calendarData.events || [];
+        const eventDetails = calendarEvents.map(e => ({
+          summary: e.summary,
+          start: e.start,
+          end: e.end,
+          day: new Date(e.start).toLocaleDateString('en-US', { weekday: 'long' }),
+          time: new Date(e.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        }));
 
+        const userPrompt = `Analyze this data and create a balanced weekly plan with SPECIFIC recommendations:
+
+USER CONTEXT:
 ${JSON.stringify(dataSummary, null, 2)}
 
-Focus on:
-1. Real commitments and deadlines from calendar/email
-2. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
-3. Identifying conflicts and improvement opportunities
-4. Preventing overburden (Muri)
+CALENDAR EVENTS (use these for specific recommendations):
+${JSON.stringify(eventDetails, null, 2)}
 
-Return ONLY valid JSON. Be concise and actionable.`;
+CONFLICTS DETECTED:
+${JSON.stringify(calendarData.conflicts || [], null, 2)}
+
+Focus on:
+1. Use ACTUAL meeting names and times from calendar events
+2. Identify SPECIFIC conflicts with exact meeting names and times
+3. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
+4. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
+5. Preventing overburden (Muri)
+
+Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
         // Use GPT-4 with JSON mode for structured output
         const response = await this.client.chat.completions.create({
@@ -311,6 +352,16 @@ Return ONLY valid JSON. Be concise and actionable.`;
           throw new Error(`Missing required fields: ${missing.join(', ')}`);
         }
 
+        // Ensure arrays are arrays (AI might return strings sometimes)
+        if (typeof parsed.recommended_priorities === 'string') {
+          // Keep as string for backward compatibility
+          console.log('⚠️ recommended_priorities is a string, keeping as-is');
+        }
+        if (typeof parsed.risks_and_conflicts === 'string') {
+          // Keep as string for backward compatibility
+          console.log('⚠️ risks_and_conflicts is a string, keeping as-is');
+        }
+
         console.log('✅ Successfully generated structured recommendations');
         return parsed;
 
@@ -323,12 +374,34 @@ Return ONLY valid JSON. Be concise and actionable.`;
           return {
             executive_summary: `Week planning for ${userContext.name} with ${calendarData.totalMeetings} meetings scheduled.`,
             balance_analysis: `Meetings: ${calendarData.totalMeetingHours}h total. Review workload balance.`,
-            recommended_priorities: `1. Review ${calendarData.conflicts?.length || 0} scheduling conflicts\n2. Process ${emailData.unreadCount} unread emails\n3. Focus on key deliverables`,
+            recommended_priorities: [
+              {
+                priority: 'Review Scheduling Conflicts',
+                action: `Review ${calendarData.conflicts?.length || 0} scheduling conflicts`,
+                reason: 'Prevent double-booking and ensure smooth week'
+              },
+              {
+                priority: 'Process Emails',
+                action: `Process ${emailData.unreadCount} unread emails`,
+                reason: 'Stay on top of communications'
+              },
+              {
+                priority: 'Focus on Deliverables',
+                action: 'Focus on key deliverables',
+                reason: 'Maintain productivity'
+              }
+            ],
             improvement_insights: 'Enable detailed analysis by connecting Google Calendar and Gmail.',
             daily_breakdown: 'Daily breakdown unavailable - retry optimization.',
             risks_and_conflicts: calendarData.conflicts?.length > 0
-              ? `${calendarData.conflicts.length} scheduling conflicts detected`
-              : 'No major conflicts detected'
+              ? [
+                  {
+                    type: 'conflict',
+                    description: `${calendarData.conflicts.length} scheduling conflicts detected`,
+                    suggestion: 'Review calendar and reschedule conflicting meetings'
+                  }
+                ]
+              : []
           };
         }
 

@@ -256,9 +256,37 @@ const WeeklyOptimizerDashboard = () => {
               <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-purple-200">
                 <div className="flex items-start space-x-3">
                   <TrendingUp className="h-6 w-6 text-purple-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🚀 Recommended Priorities</h3>
-                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">{recommendedPriorities}</div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">🚀 Recommended Priorities</h3>
+
+                    {/* Handle both string and array formats */}
+                    {typeof recommendedPriorities === 'string' ? (
+                      <div className="text-gray-700 leading-relaxed whitespace-pre-line">{recommendedPriorities}</div>
+                    ) : Array.isArray(recommendedPriorities) ? (
+                      <div className="space-y-3">
+                        {recommendedPriorities.map((item, index) => (
+                          <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0 w-7 h-7 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1 text-sm">{item.priority}</h4>
+                                <p className="text-gray-700 text-sm mb-1">{item.action}</p>
+                                {item.meeting_name && (
+                                  <p className="text-purple-700 text-xs font-medium">
+                                    📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
+                                  </p>
+                                )}
+                                {item.reason && (
+                                  <p className="text-gray-600 text-xs mt-1 italic">💡 {item.reason}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -286,9 +314,49 @@ const WeeklyOptimizerDashboard = () => {
               <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-300">
                 <div className="flex items-start space-x-3">
                   <AlertCircle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-1" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">⚠️ Risks & Items for Review</h3>
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">{risksAndConflicts}</p>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">⚠️ Risks & Items for Review</h3>
+
+                    {/* Handle both string and array formats */}
+                    {typeof risksAndConflicts === 'string' ? (
+                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">{risksAndConflicts}</p>
+                    ) : Array.isArray(risksAndConflicts) && risksAndConflicts.length > 0 ? (
+                      <div className="space-y-3">
+                        {risksAndConflicts.map((item, index) => (
+                          <div key={index} className="bg-white rounded-lg p-4 border-l-4 border-amber-500">
+                            <div className="flex items-start gap-3">
+                              <div className="flex-shrink-0">
+                                {item.type === 'conflict' && <span className="text-xl">⚠️</span>}
+                                {item.type === 'risk' && <span className="text-xl">🚨</span>}
+                                {item.type === 'attention' && <span className="text-xl">👀</span>}
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-gray-900 mb-1 text-sm">{item.description}</h4>
+                                {item.meetings && item.meetings.length > 0 && (
+                                  <div className="text-xs text-gray-700 mb-1">
+                                    <strong>Meetings:</strong> {item.meetings.join(', ')}
+                                  </div>
+                                )}
+                                {item.day && item.time && (
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    📅 {item.day} at {item.time}
+                                  </p>
+                                )}
+                                {item.suggestion && (
+                                  <div className="mt-2 bg-amber-100 rounded-md p-2 border border-amber-200">
+                                    <p className="text-xs text-amber-900">
+                                      <strong>💡 Suggestion:</strong> {item.suggestion}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-600 text-sm">No conflicts or risks detected for this week! 🎉</p>
+                    )}
                   </div>
                 </div>
               </div>

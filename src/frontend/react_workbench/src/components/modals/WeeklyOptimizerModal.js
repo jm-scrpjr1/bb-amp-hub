@@ -342,7 +342,9 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                         {weekOverview.total_meetings || 0}
                       </p>
                       <p className="text-xs text-blue-700 mt-1">
-                        {weekOverview.total_meeting_hours || 0}h scheduled
+                        {typeof weekOverview.total_meeting_hours === 'number'
+                          ? weekOverview.total_meeting_hours.toFixed(2)
+                          : weekOverview.total_meeting_hours || 0}h scheduled
                       </p>
                     </div>
 

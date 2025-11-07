@@ -576,7 +576,11 @@ app.post('/api/weekly-optimizer/trigger', authenticateUser, async (req, res) => 
     const userId = req.user.id;
     console.log(`🔄 Manual optimization triggered by user ${userId}`);
 
-    const optimization = await weeklyOptimizerService.optimizeUserWeek(userId);
+    // Run the optimization (this saves to database)
+    await weeklyOptimizerService.optimizeUserWeek(userId);
+
+    // Fetch the saved optimization from database (to match the structure of /current endpoint)
+    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId);
 
     res.json({
       success: true,

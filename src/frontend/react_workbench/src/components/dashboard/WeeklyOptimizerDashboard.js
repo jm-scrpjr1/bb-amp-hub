@@ -166,8 +166,10 @@ const WeeklyOptimizerDashboard = () => {
                   </span>
                 </div>
                 <p className="text-sm text-gray-600">Meetings</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {weekOverview.total_meeting_hours || 0} hours total
+<parameter name="text-xs text-gray-500 mt-1">
+                  {typeof weekOverview.total_meeting_hours === 'number'
+                    ? weekOverview.total_meeting_hours.toFixed(2)
+                    : weekOverview.total_meeting_hours || 0} hours total
                 </p>
               </div>
 
@@ -284,7 +286,7 @@ const WeeklyOptimizerDashboard = () => {
                         </div>
                       </div>
                       <div className="text-sm text-gray-600 w-32 text-right">
-                        {data.meetings} meetings ({data.hours}h)
+                        {data.meetings} meetings ({typeof data.hours === 'number' ? data.hours.toFixed(2) : data.hours}h)
                       </div>
                     </div>
                   ))}

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Clock } from 'lucide-react';
+import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Clock, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../providers/AuthProvider';
 import environmentConfig from '../../config/environment';
+import WeeklyOptimizerSetupModal from './WeeklyOptimizerSetupModal';
 
 const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [optimization, setOptimization] = useState(null);
   const [error, setError] = useState(null);
+  const [showSetup, setShowSetup] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -102,12 +104,21 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
         >
           {/* Header */}
           <div className="relative bg-gradient-to-r from-cyan-500 to-purple-600 p-6 text-white">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="absolute top-4 right-4 flex gap-2">
+              <button
+                onClick={() => setShowSetup(true)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                title="Settings"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
             <div className="flex items-center gap-4">
               {/* AI Agent Image */}
@@ -254,16 +265,25 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                     Ready to optimize your week?
                   </h3>
                   <p className="text-gray-600 mb-4 text-sm">
-                    Click below to generate your first AI-powered weekly optimization. I'll analyze your upcoming week and provide personalized insights.
+                    Configure your preferences or generate your first optimization right away!
                   </p>
-                  <button
-                    onClick={handleGenerateNow}
-                    disabled={loading}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <Sparkles className="h-5 w-5" />
-                    Generate My Weekly Optimization
-                  </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setShowSetup(true)}
+                      className="px-6 py-4 bg-white border-2 border-purple-500 text-purple-600 rounded-xl font-semibold hover:bg-purple-50 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Settings className="h-5 w-5" />
+                      Configure Settings
+                    </button>
+                    <button
+                      onClick={handleGenerateNow}
+                      disabled={loading}
+                      className="px-6 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="h-5 w-5" />
+                      Generate Now
+                    </button>
+                  </div>
                 </div>
 
                 {/* Info Cards */}
@@ -422,6 +442,16 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
           </div>
         </motion.div>
       </div>
+
+      {/* Setup Modal */}
+      <WeeklyOptimizerSetupModal
+        isOpen={showSetup}
+        onClose={() => setShowSetup(false)}
+        onSaveComplete={async () => {
+          // After saving settings, trigger optimization
+          await handleGenerateNow();
+        }}
+      />
     </AnimatePresence>
   );
 };

@@ -366,17 +366,30 @@ IMPORTANT FOR "recommended_priorities":
 - Include "meeting_name" field with the meeting that needs to be moved
 - Include "action" field with specific time adjustment (e.g., "Move to 3:30 PM - 4:15 PM")
 - Include "reason" field explaining the impact
+- CRITICAL: When suggesting a new time, VERIFY it doesn't conflict with ANY other meetings on that day
+- CRITICAL: Suggest moving meetings to ACTUAL FREE TIME SLOTS on the calendar
+- CRITICAL: Analyze the full day's schedule to find gaps (e.g., 10 AM - 12 PM, 1 PM - 2 PM, etc.)
+- CRITICAL: Only suggest times that have no other meetings scheduled
 
 IMPORTANT FOR "risks_and_conflicts":
 - Every item MUST have:
   - "day": the day of the week (e.g., "Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
   - "time": the time range (e.g., "6:00 PM - 6:45 PM")
   - "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
-  - "suggestion": specific actionable suggestion
+  - "suggestion": specific actionable suggestion that considers existing meetings
+
+ALGORITHM FOR SUGGESTING NEW TIMES:
+1. Identify the conflicting meeting and its duration
+2. Look at ALL meetings on that day
+3. Find the FIRST available free slot that can fit the meeting duration
+4. Prefer morning slots (8 AM - 12 PM) over afternoon
+5. Avoid suggesting times that would create new conflicts
+6. If no free slot exists on that day, suggest moving to next available day
 
 DO NOT suggest buffers around lunch breaks or personal time blocks.
 DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
 DO create a priority item for EVERY conflict detected - do not limit to 3 items.
+DO consider the FULL calendar when making suggestions - not just the conflicting time.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

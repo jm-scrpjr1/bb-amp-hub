@@ -8,6 +8,8 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [googleConnected, setGoogleConnected] = useState(false);
   const [settings, setSettings] = useState({
     enabled: true,
     schedule_day: 'Sunday',
@@ -20,6 +22,7 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
   useEffect(() => {
     if (isOpen) {
       fetchSettings();
+      checkGoogleConnection();
     }
   }, [isOpen]);
 
@@ -43,6 +46,70 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
       console.error('Error fetching settings:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkGoogleConnection = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch(`${environmentConfig.apiUrl}/weekly-optimizer/google-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGoogleConnected(data.connected);
+      }
+    } catch (err) {
+      console.error('Error checking Google connection:', err);
+    }
+  };
+
+  const handleConnectGoogle = async () => {
+    try {
+      setConnecting(true);
+      const token = localStorage.getItem('authToken');
+
+      // Get OAuth URL from backend
+      const response = await fetch(`${environmentConfig.apiUrl}/weekly-optimizer/google-auth`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to initiate Google OAuth');
+      }
+
+      const data = await response.json();
+
+      // Open OAuth popup
+      const width = 600;
+      const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+
+      const popup = window.open(
+        data.authUrl,
+        'Google OAuth',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Poll for popup closure
+      const pollTimer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(pollTimer);
+          setConnecting(false);
+          // Recheck connection status
+          checkGoogleConnection();
+        }
+      }, 500);
+    } catch (err) {
+      console.error('Error connecting Google Calendar:', err);
+      alert('Failed to connect Google Calendar. Please try again.');
+      setConnecting(false);
     }
   };
 
@@ -127,30 +194,74 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
             ) : (
               <>
                 {/* Calendar Connection Status */}
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-green-500 rounded-full p-3">
-                      <Check className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-green-900 mb-2">
-                        📅 Calendar Connected
-                      </h3>
-                      <p className="text-green-700 text-sm mb-2">
-                        Your Google Workspace calendar is connected and ready!
-                      </p>
-                      <div className="bg-white rounded-lg p-3 mt-3">
-                        <p className="text-sm text-gray-700">
-                          <strong>Connected Account:</strong> {user?.email}
+                {googleConnected ? (
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border-2 border-green-200">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-green-500 rounded-full p-3">
+                        <Check className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">
+                          📅 Calendar Connected
+                        </h3>
+                        <p className="text-green-700 text-sm mb-2">
+                          Your Google Calendar is connected and ready!
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          ✓ Read calendar events<br />
-                          ✓ Access email summaries
-                        </p>
+                        <div className="bg-white rounded-lg p-3 mt-3">
+                          <p className="text-sm text-gray-700">
+                            <strong>Connected Account:</strong> {user?.email}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            ✓ Read calendar events<br />
+                            ✓ Access email summaries
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-gradient-to-br from-cyan-50 to-purple-50 rounded-xl p-6 border-2 border-cyan-200">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-gradient-to-br from-cyan-500 to-purple-600 rounded-full p-3">
+                        <Calendar className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          📅 Connect Your Calendar
+                        </h3>
+                        <p className="text-gray-700 text-sm mb-3">
+                          Connect your Google Calendar to enable AI-powered weekly optimization
+                        </p>
+                        <div className="bg-white rounded-lg p-4 mb-4">
+                          <p className="text-sm font-semibold text-gray-800 mb-2">
+                            🔒 Permissions Required:
+                          </p>
+                          <ul className="text-xs text-gray-600 space-y-1">
+                            <li>✓ Read calendar events</li>
+                            <li>✓ Access email summaries</li>
+                          </ul>
+                        </div>
+                        <button
+                          onClick={handleConnectGoogle}
+                          disabled={connecting}
+                          className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-cyan-600 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {connecting ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                              Connecting...
+                            </>
+                          ) : (
+                            <>
+                              <Calendar className="h-5 w-5" />
+                              Connect Google Calendar
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Schedule Preferences */}
                 <div className="bg-white border-2 border-gray-200 rounded-xl p-6">

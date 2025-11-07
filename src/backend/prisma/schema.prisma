@@ -425,3 +425,17 @@ model weekly_optimizer_logs {
   @@index([execution_time])
   @@index([status])
 }
+
+model google_oauth_tokens {
+  id            String   @id @default(uuid())
+  user_id       String   @unique @db.VarChar(255)
+  access_token  String   @db.Text
+  refresh_token String   @db.Text
+  expires_at    DateTime @db.Timestamp(6)
+  scopes        String[] @default([])
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @default(now()) @db.Timestamp(6)
+
+  @@index([user_id])
+  @@index([expires_at])
+}

@@ -330,7 +330,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       try {
         console.log(`📅 Fetching calendar events for ${user.email}...`);
         calendarEvents = await this.googleService.getCalendarEvents(
-          user.email,
+          user.id,
           weekStart,
           weekEnd
         );
@@ -360,7 +360,7 @@ Please provide a comprehensive weekly optimization with recommendations, insight
       try {
         console.log(`📧 Fetching email summary for ${user.email}...`);
         emailSummary = await this.googleService.getEmailSummary(
-          user.email,
+          user.id,
           new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
           new Date()
         );

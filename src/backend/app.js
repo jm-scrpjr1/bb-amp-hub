@@ -593,6 +593,148 @@ app.post('/api/weekly-optimizer/trigger', authenticateUser, async (req, res) => 
   }
 });
 
+// Initiate Google OAuth flow for Weekly Optimizer
+app.get('/api/weekly-optimizer/google-auth', authenticateUser, async (req, res) => {
+  try {
+    const { google } = require('googleapis');
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `${process.env.FRONTEND_URL || 'https://aiworkbench.boldbusiness.com'}/weekly-optimizer/callback`
+    );
+
+    const scopes = [
+      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/gmail.readonly'
+    ];
+
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+      state: req.user.id, // Pass user ID in state for callback
+      prompt: 'consent' // Force consent screen to get refresh token
+    });
+
+    res.json({
+      success: true,
+      authUrl
+    });
+  } catch (error) {
+    console.error('Error generating OAuth URL:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate OAuth URL',
+      details: error.message
+    });
+  }
+});
+
+// Handle Google OAuth callback
+app.get('/api/weekly-optimizer/google-callback', async (req, res) => {
+  try {
+    const { code, state: userId } = req.query;
+
+    if (!code || !userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing authorization code or user ID'
+      });
+    }
+
+    const { google } = require('googleapis');
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      `${process.env.FRONTEND_URL || 'https://aiworkbench.boldbusiness.com'}/weekly-optimizer/callback`
+    );
+
+    // Exchange code for tokens
+    const { tokens } = await oauth2Client.getToken(code);
+
+    // Store tokens in database
+    await prisma.google_oauth_tokens.upsert({
+      where: { user_id: userId },
+      create: {
+        user_id: userId,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: new Date(tokens.expiry_date),
+        scopes: tokens.scope ? tokens.scope.split(' ') : []
+      },
+      update: {
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token || undefined, // Keep existing if not provided
+        expires_at: new Date(tokens.expiry_date),
+        scopes: tokens.scope ? tokens.scope.split(' ') : [],
+        updated_at: new Date()
+      }
+    });
+
+    console.log(`✅ OAuth tokens stored for user ${userId}`);
+
+    res.json({
+      success: true,
+      message: 'Google Calendar connected successfully'
+    });
+  } catch (error) {
+    console.error('Error handling OAuth callback:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to complete OAuth flow',
+      details: error.message
+    });
+  }
+});
+
+// Check Google Calendar connection status
+app.get('/api/weekly-optimizer/google-status', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const tokens = await prisma.google_oauth_tokens.findUnique({
+      where: { user_id: userId }
+    });
+
+    res.json({
+      success: true,
+      connected: !!tokens,
+      expiresAt: tokens?.expires_at || null
+    });
+  } catch (error) {
+    console.error('Error checking Google connection status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to check connection status',
+      details: error.message
+    });
+  }
+});
+
+// Disconnect Google Calendar
+app.delete('/api/weekly-optimizer/google-disconnect', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await prisma.google_oauth_tokens.delete({
+      where: { user_id: userId }
+    });
+
+    console.log(`🔌 Google Calendar disconnected for user ${userId}`);
+
+    res.json({
+      success: true,
+      message: 'Google Calendar disconnected successfully'
+    });
+  } catch (error) {
+    console.error('Error disconnecting Google Calendar:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to disconnect Google Calendar',
+      details: error.message
+    });
+  }
+});
+
 // Admin Analytics endpoint
 app.get('/api/admin/analytics', authenticateUser, async (req, res) => {
   try {

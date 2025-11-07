@@ -35,6 +35,7 @@ import SubmitBoldIdeaPage from './pages/SubmitBoldIdeaPage';
 import SignInPage from './pages/SignInPage';
 import PreLoginPage from './pages/PreLoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import WeeklyOptimizerCallback from './pages/WeeklyOptimizerCallback';
 
 // Layout Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -107,6 +108,7 @@ function App() {
             <Route path="/auth/signin" element={<SignInPage />} />
             <Route path="/auth/signin/" element={<SignInPage />} />
             <Route path="/signin" element={<SignInPage />} />
+            <Route path="/weekly-optimizer/callback" element={<WeeklyOptimizerCallback />} />
 
             {/* Protected Routes */}
             <Route path="/home" element={

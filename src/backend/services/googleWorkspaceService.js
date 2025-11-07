@@ -326,36 +326,71 @@ class GoogleWorkspaceService {
   // ========== WEEKLY OPTIMIZER METHODS ==========
 
   /**
-   * Get authenticated client for a specific user (for Calendar/Gmail access)
+   * Get authenticated OAuth client for a specific user (for Calendar/Gmail access)
+   * Uses user's OAuth tokens from database instead of service account
    */
-  async getAuthClientForUser(userEmail) {
+  async getAuthClientForUser(userId) {
     try {
-      const auth = new google.auth.GoogleAuth({
-        keyFile: this.serviceAccountPath,
-        scopes: [
-          'https://www.googleapis.com/auth/calendar.readonly',
-          'https://www.googleapis.com/auth/calendar.events.readonly',
-          'https://www.googleapis.com/auth/gmail.readonly',
-          'https://www.googleapis.com/auth/gmail.metadata',
-          'https://www.googleapis.com/auth/gmail.send',
-          'https://www.googleapis.com/auth/gmail.modify',
-        ],
-        subject: userEmail, // Impersonate this user
+      // Get user's OAuth tokens from database
+      const tokenData = await prisma.google_oauth_tokens.findUnique({
+        where: { user_id: userId }
       });
 
-      return auth;
+      if (!tokenData) {
+        throw new Error('User has not connected their Google Calendar. Please connect in Weekly Optimizer settings.');
+      }
+
+      // Check if token is expired
+      const now = new Date();
+      const isExpired = tokenData.expires_at < now;
+
+      const oauth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        `${process.env.FRONTEND_URL || 'https://aiworkbench.boldbusiness.com'}/weekly-optimizer/callback`
+      );
+
+      // Set credentials
+      oauth2Client.setCredentials({
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+        expiry_date: tokenData.expires_at.getTime()
+      });
+
+      // If token is expired, refresh it
+      if (isExpired) {
+        console.log(`🔄 Refreshing expired OAuth token for user ${userId}`);
+        const { credentials } = await oauth2Client.refreshAccessToken();
+
+        // Update tokens in database
+        await prisma.google_oauth_tokens.update({
+          where: { user_id: userId },
+          data: {
+            access_token: credentials.access_token,
+            expires_at: new Date(credentials.expiry_date),
+            updated_at: new Date()
+          }
+        });
+
+        console.log(`✅ OAuth token refreshed for user ${userId}`);
+      }
+
+      return oauth2Client;
     } catch (error) {
-      console.error(`Error creating auth client for ${userEmail}:`, error);
+      console.error(`Error creating OAuth client for user ${userId}:`, error);
       throw error;
     }
   }
 
   /**
    * Get calendar events for a user within a date range
+   * @param {string} userId - User ID from database
+   * @param {Date} startDate - Start date for events
+   * @param {Date} endDate - End date for events
    */
-  async getCalendarEvents(userEmail, startDate, endDate) {
+  async getCalendarEvents(userId, startDate, endDate) {
     try {
-      const auth = await this.getAuthClientForUser(userEmail);
+      const auth = await this.getAuthClientForUser(userId);
       const calendar = google.calendar({ version: 'v3', auth });
 
       const response = await calendar.events.list({
@@ -368,7 +403,7 @@ class GoogleWorkspaceService {
       });
 
       const events = response.data.items || [];
-      console.log(`📅 Found ${events.length} calendar events for ${userEmail}`);
+      console.log(`📅 Found ${events.length} calendar events for user ${userId}`);
 
       return events.map(event => ({
         id: event.id,
@@ -383,17 +418,20 @@ class GoogleWorkspaceService {
         hangoutLink: event.hangoutLink || '',
       }));
     } catch (error) {
-      console.error(`Error fetching calendar events for ${userEmail}:`, error);
+      console.error(`Error fetching calendar events for user ${userId}:`, error);
       throw error;
     }
   }
 
   /**
    * Get email summary for a user within a date range
+   * @param {string} userId - User ID from database
+   * @param {Date} startDate - Start date for emails
+   * @param {Date} endDate - End date for emails
    */
-  async getEmailSummary(userEmail, startDate, endDate) {
+  async getEmailSummary(userId, startDate, endDate) {
     try {
-      const auth = await this.getAuthClientForUser(userEmail);
+      const auth = await this.getAuthClientForUser(userId);
       const gmail = google.gmail({ version: 'v1', auth });
 
       // Build query for emails in date range
@@ -409,7 +447,7 @@ class GoogleWorkspaceService {
       });
 
       const messages = response.data.messages || [];
-      console.log(`📧 Found ${messages.length} emails for ${userEmail}`);
+      console.log(`📧 Found ${messages.length} emails for user ${userId}`);
 
       // Get details for each message (limited to first 50 for performance)
       const detailedMessages = [];
@@ -452,7 +490,7 @@ class GoogleWorkspaceService {
         importantCount: detailedMessages.filter(m => m.isImportant).length,
       };
     } catch (error) {
-      console.error(`Error fetching emails for ${userEmail}:`, error);
+      console.error(`Error fetching emails for user ${userId}:`, error);
       throw error;
     }
   }

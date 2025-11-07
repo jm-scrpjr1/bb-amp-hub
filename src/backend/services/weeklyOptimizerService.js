@@ -277,8 +277,8 @@ Return ONLY valid JSON matching this exact structure:
       "priority": "Priority name",
       "action": "Specific action to take",
       "meeting_name": "Actual meeting name if applicable",
-      "day": "Day of week",
-      "time": "Time if applicable",
+      "day": "Day of week (e.g., Monday)",
+      "time": "Time range (e.g., 6:00 PM - 4:00 PM)",
       "reason": "Why this is important"
     }
   ],
@@ -289,22 +289,26 @@ Return ONLY valid JSON matching this exact structure:
       "type": "conflict|risk|attention",
       "description": "What the issue is",
       "meetings": ["Meeting A", "Meeting B"],
-      "day": "Day of week",
-      "time": "Time range",
-      "suggestion": "Specific suggestion (e.g., move Meeting A 1 hour earlier)"
+      "day": "REQUIRED - Day of week (e.g., Monday, Tuesday)",
+      "time": "REQUIRED - Time range (e.g., 6:00 PM - 6:45 PM)",
+      "suggestion": "Specific suggestion (e.g., Move 'Meeting A' to 4:00 PM)"
     }
   ]
 }`;
 
         // Include actual calendar events for specific recommendations
         const calendarEvents = calendarData.events || [];
-        const eventDetails = calendarEvents.map(e => ({
-          summary: e.summary,
-          start: e.start,
-          end: e.end,
-          day: new Date(e.start).toLocaleDateString('en-US', { weekday: 'long' }),
-          time: new Date(e.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-        }));
+        const eventDetails = calendarEvents.map(e => {
+          const startDate = new Date(e.start);
+          const endDate = new Date(e.end);
+          return {
+            summary: e.summary,
+            day: startDate.toLocaleDateString('en-US', { weekday: 'long' }),
+            start_time: startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+            end_time: endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+            time_range: `${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} - ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`
+          };
+        });
 
         const userPrompt = `Analyze this data and create a balanced weekly plan with SPECIFIC recommendations:
 
@@ -319,10 +323,18 @@ ${JSON.stringify(calendarData.conflicts || [], null, 2)}
 
 Focus on:
 1. Use ACTUAL meeting names and times from calendar events
-2. Identify SPECIFIC conflicts with exact meeting names and times
-3. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
-4. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
-5. Preventing overburden (Muri)
+2. For each risk/conflict, ALWAYS include the "day" field (e.g., "Monday", "Tuesday")
+3. For each risk/conflict, include the "time" field with the time range (e.g., "6:00 PM - 6:45 PM")
+4. Identify SPECIFIC conflicts with exact meeting names and times
+5. Suggest SPECIFIC time adjustments (e.g., "Move 'Team Standup' from 9 AM to 10 AM")
+6. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
+7. Preventing overburden (Muri)
+
+IMPORTANT: Every item in "risks_and_conflicts" array MUST have:
+- "day": the day of the week (e.g., "Monday")
+- "time": the time range (e.g., "6:00 PM - 6:45 PM")
+- "meetings": array of meeting names involved
+- "suggestion": specific actionable suggestion
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

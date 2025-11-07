@@ -440,9 +440,25 @@ Return ONLY valid JSON. Be concise and actionable.`;
         actionableEmails
       );
 
-      // Combine all data
+      // Calculate workload status
+      const calculateWorkloadStatus = (meetingHours) => {
+        if (meetingHours < 15) return 'Light';
+        if (meetingHours < 25) return 'Moderate';
+        if (meetingHours < 35) return 'Heavy';
+        return 'Overloaded';
+      };
+
+      // Combine all data with week_overview for frontend
       const optimizationData = {
         ...aiRecommendations,
+        week_overview: {
+          total_meetings: calendarData.totalMeetings || 0,
+          total_meeting_hours: calendarData.totalMeetingHours || 0,
+          unread_emails: emailData.unreadCount || 0,
+          high_priority_emails: emailData.highPriorityCount || 0,
+          workload_status: calculateWorkloadStatus(calendarData.totalMeetingHours || 0),
+          workload_percentage: Math.min(100, Math.round((calendarData.totalMeetingHours || 0) / 40 * 100))
+        },
         calendar_analysis: calendarData,
         email_analysis: emailData,
         generated_at: new Date().toISOString(),

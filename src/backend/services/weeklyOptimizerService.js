@@ -387,13 +387,23 @@ ALGORITHM FOR CHOOSING WHAT TO MOVE (PRIORITY ORDER):
 
 ALGORITHM FOR SUGGESTING NEW TIMES:
 1. Identify the conflicting meeting and its duration
-2. Look at ALL meetings on that day
-3. Find the FIRST available free slot that can fit the meeting duration
-4. Prefer morning slots (8 AM - 12 PM) over afternoon
-5. Avoid suggesting times that would create new conflicts
-6. If no free slot exists on that day, suggest moving to next available day
-7. For focus time blocks: suggest moving to a different time slot on the SAME day if possible
-8. For focus time: ensure suggested time still provides adequate focus duration (minimum 2-3 hours)
+2. Look at ALL meetings on that day INCLUDING LUNCH BREAKS
+3. Build a list of ALL free time slots (gaps between meetings)
+4. CRITICAL: Track ALL suggested moves - verify new times don't conflict with each other
+5. CRITICAL: Preserve lunch breaks - NEVER suggest times that would eliminate lunch (typically 12 PM - 1 PM or 4 PM - 5 PM)
+6. Find available free slots that can fit the meeting duration
+7. Prefer morning slots (8 AM - 12 PM) over afternoon
+8. Avoid suggesting times that would create new conflicts with EXISTING meetings OR OTHER SUGGESTED MOVES
+9. If no free slot exists on that day, suggest moving to next available day
+10. For focus time blocks: suggest moving to a different time slot on the SAME day if possible
+11. For focus time: ensure suggested time still provides adequate focus duration (minimum 2-3 hours)
+
+VALIDATION CHECKLIST (MUST DO BEFORE FINALIZING SUGGESTIONS):
+✓ Does the suggested time conflict with any EXISTING meeting?
+✓ Does the suggested time conflict with any OTHER SUGGESTED MOVE?
+✓ Does the suggested time eliminate or overlap with lunch break?
+✓ Is there a better free slot available (e.g., 11 AM - 12 PM gap)?
+✓ After ALL moves, does the schedule still have lunch break intact?
 
 EXAMPLE ANALYSIS:
 - Conflict: "John's Focus Time: Project Works (12 PM - 3 PM)" overlaps with "Weekly 1:1" and "Daily IT Sync"
@@ -402,12 +412,24 @@ EXAMPLE ANALYSIS:
 - BEST CHOICE: Option B (move 1 item instead of 2, preserves focus time duration)
 - Suggestion: "Move 'John's Focus Time: Project Works' to 11:00 AM - 2:00 PM to avoid conflicts with real meetings"
 
+BAD EXAMPLE (WHAT NOT TO DO):
+❌ Move 'Bold Workbench Project Huddle' to 3:00 PM - 3:45 PM
+❌ Move 'Daily IT Sync' to 3:30 PM - 4:30 PM
+❌ PROBLEM: These two suggestions overlap with each other! AND they eliminate lunch at 4-5 PM!
+
+GOOD EXAMPLE (WHAT TO DO):
+✓ Move 'Bold Workbench Project Huddle' to 11:00 AM - 11:45 AM (uses free slot)
+✓ Move 'Daily IT Sync' to 3:00 PM - 4:00 PM (before lunch at 4-5 PM)
+✓ RESULT: No overlaps, lunch preserved, all conflicts resolved
+
 DO NOT suggest buffers around lunch breaks or personal time blocks.
 DO analyze and provide recommendations for Wednesday, Thursday, and Friday.
 DO create a priority item for EVERY conflict detected - do not limit to 3 items.
 DO consider the FULL calendar when making suggestions - not just the conflicting time.
 DO prioritize moving placeholders and focus time over real meetings.
 DO evaluate which solution causes LEAST disruption to the schedule.
+DO validate that suggested times don't conflict with each other.
+DO preserve lunch breaks - they are sacred and must not be eliminated.
 
 Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 

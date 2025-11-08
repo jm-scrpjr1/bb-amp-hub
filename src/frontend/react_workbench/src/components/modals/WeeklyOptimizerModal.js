@@ -118,8 +118,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) return null;
-
+  // IMPORTANT: All hooks must be called BEFORE any conditional returns
   const optimizationData = optimization?.optimization_data;
   const weekOverview = optimizationData?.week_overview;
   const recommendations = optimizationData?.recommendations || [];
@@ -138,6 +137,9 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       setExpandedPriorityDays(initialExpanded);
     }
   }, [recommendationsByDay]);
+
+  // Early return AFTER all hooks
+  if (!isOpen) return null;
 
   // Toggle day expansion
   const toggleDayExpansion = (day) => {

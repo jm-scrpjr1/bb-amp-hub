@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import environmentConfig from '../../config/environment';
@@ -124,7 +124,9 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
     return grouped;
   };
 
-  const recommendationsByDay = groupRecommendationsByDay(recommendations);
+  const recommendationsByDay = useMemo(() => {
+    return groupRecommendationsByDay(recommendations);
+  }, [recommendations]);
 
   // Initialize all days as expanded by default
   useEffect(() => {
@@ -135,7 +137,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       });
       setExpandedPriorityDays(initialExpanded);
     }
-  }, [optimization]);
+  }, [recommendationsByDay]);
 
   // Toggle day expansion
   const toggleDayExpansion = (day) => {

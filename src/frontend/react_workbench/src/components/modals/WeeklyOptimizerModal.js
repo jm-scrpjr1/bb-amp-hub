@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Clock, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Calendar, Mail, TrendingUp, Sparkles, RefreshCw, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../providers/AuthProvider';
 import environmentConfig from '../../config/environment';
 import WeeklyOptimizerSetupModal from './WeeklyOptimizerSetupModal';
 
 const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [optimization, setOptimization] = useState(null);
   const [error, setError] = useState(null);
   const [showSetup, setShowSetup] = useState(false);
+
+  // Collapsible sections state
+  const [expandedPriorityDays, setExpandedPriorityDays] = useState({});
+  const [expandedRisks, setExpandedRisks] = useState(true); // Default open
 
   useEffect(() => {
     if (isOpen) {
@@ -96,18 +98,62 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const weekOverview = optimizationData?.week_overview;
   const recommendations = optimizationData?.recommendations || [];
 
-  // Handle both old object format and new string format for daily_breakdown
-  let dailyBreakdownContent = '';
-  if (optimizationData?.daily_breakdown) {
-    if (typeof optimizationData.daily_breakdown === 'string') {
-      dailyBreakdownContent = optimizationData.daily_breakdown;
-    } else if (typeof optimizationData.daily_breakdown === 'object') {
-      // Convert old object format to string
-      dailyBreakdownContent = Object.entries(optimizationData.daily_breakdown)
-        .map(([day, content]) => `**${day}:**\n${content}`)
-        .join('\n\n');
+  // Group recommendations by day
+  const groupRecommendationsByDay = (recommendations) => {
+    if (!Array.isArray(recommendations)) return {};
+
+    const grouped = {};
+    recommendations.forEach(rec => {
+      const day = rec.day || 'General';
+      if (!grouped[day]) {
+        grouped[day] = [];
+      }
+      grouped[day].push(rec);
+    });
+    return grouped;
+  };
+
+  const recommendationsByDay = groupRecommendationsByDay(recommendations);
+
+  // Toggle day expansion
+  const toggleDayExpansion = (day) => {
+    setExpandedPriorityDays(prev => ({
+      ...prev,
+      [day]: !prev[day]
+    }));
+  };
+
+  // Parse daily breakdown into structured format
+  const parseDailyBreakdown = (dailyBreakdown) => {
+    if (!dailyBreakdown) return [];
+
+    let text = '';
+    if (typeof dailyBreakdown === 'string') {
+      text = dailyBreakdown;
+    } else if (typeof dailyBreakdown === 'object') {
+      text = Object.entries(dailyBreakdown)
+        .map(([day, content]) => `${day}: ${content}`)
+        .join(' ');
     }
-  }
+
+    // Split by day names (Monday, Tuesday, etc.)
+    const dayPattern = /(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday):\s*/gi;
+    const parts = text.split(dayPattern).filter(Boolean);
+
+    const days = [];
+    for (let i = 0; i < parts.length; i += 2) {
+      if (parts[i] && parts[i + 1]) {
+        days.push({
+          day: parts[i].trim(),
+          content: parts[i + 1].trim()
+        });
+      }
+    }
+
+    return days;
+  };
+
+  const dailyBreakdownDays = parseDailyBreakdown(optimizationData?.daily_breakdown);
 
   return (
     <AnimatePresence>
@@ -414,10 +460,10 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                {/* Recommended Priorities */}
+                {/* Recommended Priorities - Collapsible by Day */}
                 {optimizationData?.recommended_priorities && (
                   <div className="bg-white border-2 border-purple-200 rounded-xl p-6">
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
                       <TrendingUp className="h-5 w-5 text-purple-600" />
                       <h3 className="text-lg font-semibold text-gray-800">🚀 Recommended Priorities</h3>
                     </div>
@@ -427,38 +473,76 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                       <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                         {optimizationData.recommended_priorities}
                       </div>
-                    ) : Array.isArray(optimizationData.recommended_priorities) ? (
-                      <div className="space-y-4">
-                        {optimizationData.recommended_priorities.map((item, index) => (
-                          <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                            <div className="flex items-start gap-3">
-                              <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                {index + 1}
+                    ) : Array.isArray(optimizationData.recommended_priorities) && Object.keys(recommendationsByDay).length > 0 ? (
+                      <div className="space-y-3">
+                        {Object.entries(recommendationsByDay).map(([day, items]) => (
+                          <div key={day} className="border border-purple-200 rounded-lg overflow-hidden">
+                            {/* Day Header - Collapsible */}
+                            <button
+                              onClick={() => toggleDayExpansion(day)}
+                              className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Calendar className="h-5 w-5 text-purple-600" />
+                                <h4 className="font-semibold text-gray-900">{day}</h4>
+                                <span className="text-sm text-purple-600 bg-purple-200 px-2 py-1 rounded-full">
+                                  {items.length} {items.length === 1 ? 'priority' : 'priorities'}
+                                </span>
                               </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
-                                <p className="text-gray-700 text-sm mb-2">{item.action}</p>
+                              {expandedPriorityDays[day] ? (
+                                <ChevronUp className="h-5 w-5 text-purple-600" />
+                              ) : (
+                                <ChevronDown className="h-5 w-5 text-purple-600" />
+                              )}
+                            </button>
 
-                                {/* Meeting details */}
-                                {item.meeting_name && (
-                                  <p className="text-purple-700 text-sm font-medium mb-2">
-                                    📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
-                                  </p>
-                                )}
+                            {/* Day Content - Collapsible */}
+                            <AnimatePresence>
+                              {expandedPriorityDays[day] && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="p-4 space-y-3 bg-white">
+                                    {items.map((item, index) => (
+                                      <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                        <div className="flex items-start gap-3">
+                                          <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                            {index + 1}
+                                          </div>
+                                          <div className="flex-1">
+                                            <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
+                                            <p className="text-gray-700 text-sm mb-2">{item.action}</p>
 
-                                {/* Conflict details */}
-                                {item.conflict_details && (
-                                  <p className="text-gray-700 text-sm mb-2 bg-white p-2 rounded border-l-2 border-purple-400">
-                                    {item.conflict_details}
-                                  </p>
-                                )}
+                                            {/* Meeting details */}
+                                            {item.meeting_name && (
+                                              <p className="text-purple-700 text-sm font-medium mb-2">
+                                                📅 {item.meeting_name} {item.time && `at ${item.time}`}
+                                              </p>
+                                            )}
 
-                                {/* Reason */}
-                                {item.reason && (
-                                  <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
-                                )}
-                              </div>
-                            </div>
+                                            {/* Conflict details */}
+                                            {item.conflict_details && (
+                                              <p className="text-gray-700 text-sm mb-2 bg-white p-2 rounded border-l-2 border-purple-400">
+                                                {item.conflict_details}
+                                              </p>
+                                            )}
+
+                                            {/* Reason */}
+                                            {item.reason && (
+                                              <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         ))}
                       </div>
@@ -479,68 +563,109 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                {/* Risks & Conflicts */}
+                {/* Risks & Conflicts - Collapsible */}
                 {optimizationData?.risks_and_conflicts && (
-                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-300">
-                    <div className="flex items-center gap-2 mb-3">
-                      <TrendingUp className="h-5 w-5 text-amber-600" />
-                      <h3 className="text-lg font-semibold text-gray-800">⚠️ Risks & Items for Review</h3>
-                    </div>
-
-                    {/* Handle both string and array formats */}
-                    {typeof optimizationData.risks_and_conflicts === 'string' ? (
-                      <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                        {optimizationData.risks_and_conflicts}
-                      </p>
-                    ) : Array.isArray(optimizationData.risks_and_conflicts) && optimizationData.risks_and_conflicts.length > 0 ? (
-                      <div className="space-y-3">
-                        {optimizationData.risks_and_conflicts.map((item, index) => (
-                          <div key={index} className="bg-white rounded-lg p-4 border-l-4 border-amber-500">
-                            <div className="flex items-start gap-3">
-                              <div className="flex-shrink-0">
-                                {item.type === 'conflict' && <span className="text-2xl">⚠️</span>}
-                                {item.type === 'risk' && <span className="text-2xl">🚨</span>}
-                                {item.type === 'attention' && <span className="text-2xl">👀</span>}
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-gray-900 mb-1">{item.description}</h4>
-                                {item.meetings && item.meetings.length > 0 && (
-                                  <div className="text-sm text-gray-700 mb-2">
-                                    <strong>Meetings:</strong> {item.meetings.join(', ')}
-                                  </div>
-                                )}
-                                {item.day && item.time && (
-                                  <p className="text-sm text-gray-600 mb-2">
-                                    📅 {item.day} at {item.time}
-                                  </p>
-                                )}
-                                {item.suggestion && (
-                                  <div className="mt-2 bg-amber-100 rounded-md p-3 border border-amber-200">
-                                    <p className="text-sm text-amber-900">
-                                      <strong>💡 Suggestion:</strong> {item.suggestion}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-300 overflow-hidden">
+                    {/* Header - Collapsible */}
+                    <button
+                      onClick={() => setExpandedRisks(!expandedRisks)}
+                      className="w-full flex items-center justify-between p-6 hover:bg-amber-100/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-amber-600" />
+                        <h3 className="text-lg font-semibold text-gray-800">⚠️ Risks & Items for Review</h3>
+                        {Array.isArray(optimizationData.risks_and_conflicts) && optimizationData.risks_and_conflicts.length > 0 && (
+                          <span className="text-sm text-amber-700 bg-amber-200 px-2 py-1 rounded-full">
+                            {optimizationData.risks_and_conflicts.length} {optimizationData.risks_and_conflicts.length === 1 ? 'item' : 'items'}
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-gray-600 text-sm">No conflicts or risks detected for this week! 🎉</p>
-                    )}
+                      {expandedRisks ? (
+                        <ChevronUp className="h-5 w-5 text-amber-600" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-amber-600" />
+                      )}
+                    </button>
+
+                    {/* Content - Collapsible */}
+                    <AnimatePresence>
+                      {expandedRisks && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-6 pb-6">
+                            {/* Handle both string and array formats */}
+                            {typeof optimizationData.risks_and_conflicts === 'string' ? (
+                              <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                                {optimizationData.risks_and_conflicts}
+                              </p>
+                            ) : Array.isArray(optimizationData.risks_and_conflicts) && optimizationData.risks_and_conflicts.length > 0 ? (
+                              <div className="space-y-3">
+                                {optimizationData.risks_and_conflicts.map((item, index) => (
+                                  <div key={index} className="bg-white rounded-lg p-4 border-l-4 border-amber-500">
+                                    <div className="flex items-start gap-3">
+                                      <div className="flex-shrink-0">
+                                        {item.type === 'conflict' && <span className="text-2xl">⚠️</span>}
+                                        {item.type === 'risk' && <span className="text-2xl">🚨</span>}
+                                        {item.type === 'attention' && <span className="text-2xl">👀</span>}
+                                      </div>
+                                      <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900 mb-1">{item.description}</h4>
+                                        {item.meetings && item.meetings.length > 0 && (
+                                          <div className="text-sm text-gray-700 mb-2">
+                                            <strong>Meetings:</strong> {item.meetings.join(', ')}
+                                          </div>
+                                        )}
+                                        {item.day && item.time && (
+                                          <p className="text-sm text-gray-600 mb-2">
+                                            📅 {item.day} at {item.time}
+                                          </p>
+                                        )}
+                                        {item.suggestion && (
+                                          <div className="mt-2 bg-amber-100 rounded-md p-3 border border-amber-200">
+                                            <p className="text-sm text-amber-900">
+                                              <strong>💡 Suggestion:</strong> {item.suggestion}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-600 text-sm">No conflicts or risks detected for this week! 🎉</p>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 )}
 
-                {/* Daily Breakdown */}
-                {dailyBreakdownContent && (
+                {/* Daily Breakdown - Formatted by Day */}
+                {dailyBreakdownDays && dailyBreakdownDays.length > 0 && (
                   <div className="bg-white border-2 border-gray-200 rounded-xl p-6">
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
                       <Calendar className="h-5 w-5 text-cyan-600" />
                       <h3 className="text-lg font-semibold text-gray-800">📅 Daily Breakdown</h3>
                     </div>
-                    <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                      {dailyBreakdownContent}
+                    <div className="space-y-4">
+                      {dailyBreakdownDays.map((dayData, index) => (
+                        <div key={index} className="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg p-4 border border-cyan-200">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Calendar className="h-4 w-4 text-cyan-600" />
+                            <h4 className="font-semibold text-gray-900">{dayData.day}</h4>
+                          </div>
+                          <p className="text-gray-700 text-sm leading-relaxed pl-6">
+                            {dayData.content}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

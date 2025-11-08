@@ -100,20 +100,42 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
 
   // Group recommendations by day
   const groupRecommendationsByDay = (recommendations) => {
-    if (!Array.isArray(recommendations)) return {};
+    if (!Array.isArray(recommendations) || recommendations.length === 0) return {};
 
     const grouped = {};
+    let hasAnyDayField = false;
+
     recommendations.forEach(rec => {
-      const day = rec.day || 'General';
-      if (!grouped[day]) {
-        grouped[day] = [];
+      if (rec.day) {
+        hasAnyDayField = true;
+        const day = rec.day;
+        if (!grouped[day]) {
+          grouped[day] = [];
+        }
+        grouped[day].push(rec);
       }
-      grouped[day].push(rec);
     });
+
+    // If no items have a day field, group all under "All Priorities"
+    if (!hasAnyDayField) {
+      grouped['All Priorities'] = recommendations;
+    }
+
     return grouped;
   };
 
   const recommendationsByDay = groupRecommendationsByDay(recommendations);
+
+  // Initialize all days as expanded by default
+  useEffect(() => {
+    if (Object.keys(recommendationsByDay).length > 0) {
+      const initialExpanded = {};
+      Object.keys(recommendationsByDay).forEach(day => {
+        initialExpanded[day] = true; // Default: all days expanded
+      });
+      setExpandedPriorityDays(initialExpanded);
+    }
+  }, [optimization]);
 
   // Toggle day expansion
   const toggleDayExpansion = (day) => {
@@ -473,79 +495,83 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                       <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                         {optimizationData.recommended_priorities}
                       </div>
-                    ) : Array.isArray(optimizationData.recommended_priorities) && Object.keys(recommendationsByDay).length > 0 ? (
-                      <div className="space-y-3">
-                        {Object.entries(recommendationsByDay).map(([day, items]) => (
-                          <div key={day} className="border border-purple-200 rounded-lg overflow-hidden">
-                            {/* Day Header - Collapsible */}
-                            <button
-                              onClick={() => toggleDayExpansion(day)}
-                              className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <Calendar className="h-5 w-5 text-purple-600" />
-                                <h4 className="font-semibold text-gray-900">{day}</h4>
-                                <span className="text-sm text-purple-600 bg-purple-200 px-2 py-1 rounded-full">
-                                  {items.length} {items.length === 1 ? 'priority' : 'priorities'}
-                                </span>
-                              </div>
-                              {expandedPriorityDays[day] ? (
-                                <ChevronUp className="h-5 w-5 text-purple-600" />
-                              ) : (
-                                <ChevronDown className="h-5 w-5 text-purple-600" />
-                              )}
-                            </button>
+                    ) : Array.isArray(optimizationData.recommended_priorities) && optimizationData.recommended_priorities.length > 0 ? (
+                      Object.keys(recommendationsByDay).length > 0 ? (
+                        <div className="space-y-3">
+                          {Object.entries(recommendationsByDay).map(([day, items]) => (
+                            <div key={day} className="border border-purple-200 rounded-lg overflow-hidden">
+                              {/* Day Header - Collapsible */}
+                              <button
+                                onClick={() => toggleDayExpansion(day)}
+                                className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Calendar className="h-5 w-5 text-purple-600" />
+                                  <h4 className="font-semibold text-gray-900">{day}</h4>
+                                  <span className="text-sm text-purple-600 bg-purple-200 px-2 py-1 rounded-full">
+                                    {items.length} {items.length === 1 ? 'priority' : 'priorities'}
+                                  </span>
+                                </div>
+                                {expandedPriorityDays[day] ? (
+                                  <ChevronUp className="h-5 w-5 text-purple-600" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5 text-purple-600" />
+                                )}
+                              </button>
 
-                            {/* Day Content - Collapsible */}
-                            <AnimatePresence>
-                              {expandedPriorityDays[day] && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{ height: 'auto', opacity: 1 }}
-                                  exit={{ height: 0, opacity: 0 }}
-                                  transition={{ duration: 0.2 }}
-                                  className="overflow-hidden"
-                                >
-                                  <div className="p-4 space-y-3 bg-white">
-                                    {items.map((item, index) => (
-                                      <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                                        <div className="flex items-start gap-3">
-                                          <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                            {index + 1}
-                                          </div>
-                                          <div className="flex-1">
-                                            <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
-                                            <p className="text-gray-700 text-sm mb-2">{item.action}</p>
+                              {/* Day Content - Collapsible */}
+                              <AnimatePresence>
+                                {expandedPriorityDays[day] && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="p-4 space-y-3 bg-white">
+                                      {items.map((item, index) => (
+                                        <div key={index} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                          <div className="flex items-start gap-3">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                              {index + 1}
+                                            </div>
+                                            <div className="flex-1">
+                                              <h4 className="font-semibold text-gray-900 mb-1">{item.priority}</h4>
+                                              <p className="text-gray-700 text-sm mb-2">{item.action}</p>
 
-                                            {/* Meeting details */}
-                                            {item.meeting_name && (
-                                              <p className="text-purple-700 text-sm font-medium mb-2">
-                                                📅 {item.meeting_name} {item.time && `at ${item.time}`}
-                                              </p>
-                                            )}
+                                              {/* Meeting details */}
+                                              {item.meeting_name && (
+                                                <p className="text-purple-700 text-sm font-medium mb-2">
+                                                  📅 {item.meeting_name} {item.day && `- ${item.day}`} {item.time && `at ${item.time}`}
+                                                </p>
+                                              )}
 
-                                            {/* Conflict details */}
-                                            {item.conflict_details && (
-                                              <p className="text-gray-700 text-sm mb-2 bg-white p-2 rounded border-l-2 border-purple-400">
-                                                {item.conflict_details}
-                                              </p>
-                                            )}
+                                              {/* Conflict details */}
+                                              {item.conflict_details && (
+                                                <p className="text-gray-700 text-sm mb-2 bg-white p-2 rounded border-l-2 border-purple-400">
+                                                  {item.conflict_details}
+                                                </p>
+                                              )}
 
-                                            {/* Reason */}
-                                            {item.reason && (
-                                              <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
-                                            )}
+                                              {/* Reason */}
+                                              {item.reason && (
+                                                <p className="text-gray-600 text-xs italic">💡 {item.reason}</p>
+                                              )}
+                                            </div>
                                           </div>
                                         </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        ))}
-                      </div>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-600 text-sm">No recommendations available.</p>
+                      )
                     ) : null}
                   </div>
                 )}

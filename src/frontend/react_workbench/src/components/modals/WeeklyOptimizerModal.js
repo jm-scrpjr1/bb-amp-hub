@@ -4,6 +4,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import environmentConfig from '../../config/environment';
 import WeeklyOptimizerSetupModal from './WeeklyOptimizerSetupModal';
 
+// Helper function to group recommendations by day (moved outside component to avoid re-creation)
+const groupRecommendationsByDay = (recommendations) => {
+  if (!Array.isArray(recommendations) || recommendations.length === 0) return {};
+
+  const grouped = {};
+  let hasAnyDayField = false;
+
+  recommendations.forEach(rec => {
+    if (rec.day) {
+      hasAnyDayField = true;
+      const day = rec.day;
+      if (!grouped[day]) {
+        grouped[day] = [];
+      }
+      grouped[day].push(rec);
+    }
+  });
+
+  // If no items have a day field, group all under "All Priorities"
+  if (!hasAnyDayField) {
+    grouped['All Priorities'] = recommendations;
+  }
+
+  return grouped;
+};
+
 const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [optimization, setOptimization] = useState(null);
@@ -97,32 +123,6 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const optimizationData = optimization?.optimization_data;
   const weekOverview = optimizationData?.week_overview;
   const recommendations = optimizationData?.recommendations || [];
-
-  // Group recommendations by day
-  const groupRecommendationsByDay = (recommendations) => {
-    if (!Array.isArray(recommendations) || recommendations.length === 0) return {};
-
-    const grouped = {};
-    let hasAnyDayField = false;
-
-    recommendations.forEach(rec => {
-      if (rec.day) {
-        hasAnyDayField = true;
-        const day = rec.day;
-        if (!grouped[day]) {
-          grouped[day] = [];
-        }
-        grouped[day].push(rec);
-      }
-    });
-
-    // If no items have a day field, group all under "All Priorities"
-    if (!hasAnyDayField) {
-      grouped['All Priorities'] = recommendations;
-    }
-
-    return grouped;
-  };
 
   const recommendationsByDay = useMemo(() => {
     return groupRecommendationsByDay(recommendations);

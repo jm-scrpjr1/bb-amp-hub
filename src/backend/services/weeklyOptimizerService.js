@@ -127,8 +127,10 @@ class WeeklyOptimizerService {
 
   /**
    * Analyze calendar data and extract insights
+   * @param {Array} events - Calendar events
+   * @param {Object} userSettings - User's optimizer settings (optional)
    */
-  analyzeCalendarData(events) {
+  analyzeCalendarData(events, userSettings = null) {
     // Helper function to check if an event is a focus time block or personal time
     const isFocusTime = (summary) => {
       const lowerSummary = (summary || '').toLowerCase();
@@ -227,6 +229,51 @@ class WeeklyOptimizerService {
             severity: 'medium',
             suggestion: 'Consider adding a 15-minute buffer between meetings',
             events: [event.summary, nextEvent.summary]
+          });
+        }
+      }
+
+      // Check for time constraint violations if user settings provided
+      if (userSettings && userSettings.time_constraints) {
+        const constraints = userSettings.time_constraints.toLowerCase();
+
+        // Get hour in EST timezone
+        const estHour = parseInt(start.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          hour12: false,
+          timeZone: 'America/New_York'
+        }));
+
+        const formatTime = (date) => date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: 'America/New_York'
+        });
+
+        // Check for "no meetings before 8am" or similar
+        if ((constraints.includes('before 8am') || constraints.includes('before 8 am')) && estHour < 8) {
+          conflicts.push({
+            type: 'time_constraint_violation',
+            description: `"${event.summary}" at ${formatTime(start)} violates your time constraint: ${userSettings.time_constraints}`,
+            severity: 'high',
+            suggestion: `Move "${event.summary}" to after 8:00 AM EST`,
+            events: [event.summary],
+            day: dayName,
+            time: `${formatTime(start)} - ${formatTime(end)}`
+          });
+        }
+
+        // Check for "no meetings after 5pm" or similar
+        if ((constraints.includes('after 5pm') || constraints.includes('after 5 pm')) && estHour >= 17) {
+          conflicts.push({
+            type: 'time_constraint_violation',
+            description: `"${event.summary}" at ${formatTime(start)} violates your time constraint: ${userSettings.time_constraints}`,
+            severity: 'high',
+            suggestion: `Move "${event.summary}" to before 5:00 PM EST`,
+            events: [event.summary],
+            day: dayName,
+            time: `${formatTime(start)} - ${formatTime(end)}`
           });
         }
       }
@@ -448,17 +495,21 @@ CRITICAL REQUIREMENTS:
 10. Balanced workload (60-70% focus time, 20-30% collaboration, 10% buffer)
 
 IMPORTANT FOR "recommended_priorities":
-- Create ONE priority item for EACH conflict/risk detected (not just 3 total)
-- Include "conflict_details" field explaining what's conflicting and why
-- Include "day" field showing which day the conflict occurs
-- Include "time" field showing the time range
+- CRITICAL: This array MUST NOT be empty - create at least one priority item for EACH conflict/risk/time_constraint_violation detected
+- If there are NO conflicts, create priorities based on user's top priorities (${dataSummary.priorities})
+- For each conflict in "risks_and_conflicts", create a corresponding priority item
+- Include "priority" field with a clear title (e.g., "Resolve Meeting Overlap on Monday")
+- Include "action" field with specific time adjustment (e.g., "Move 'Daily IT Sync' to 1:45 PM - 2:45 PM")
 - Include "meeting_name" field with the meeting that needs to be moved
-- Include "action" field with specific time adjustment (e.g., "Move to 3:30 PM - 4:15 PM")
-- Include "reason" field explaining the impact
+- Include "day" field showing which day the conflict occurs (e.g., "Monday", "Tuesday")
+- Include "time" field showing the current time range (e.g., "12:00 PM - 3:30 PM")
+- Include "reason" field explaining the impact (e.g., "Eliminates 3-hour overlap and creates focus time")
+- Include "conflict_details" field explaining what's conflicting and why
 - CRITICAL: When suggesting a new time, VERIFY it doesn't conflict with ANY other meetings on that day
 - CRITICAL: Suggest moving meetings to ACTUAL FREE TIME SLOTS on the calendar
 - CRITICAL: Analyze the full day's schedule to find gaps (e.g., 10 AM - 12 PM, 1 PM - 2 PM, etc.)
 - CRITICAL: Only suggest times that have no other meetings scheduled
+- CRITICAL: If user has time constraints (${dataSummary.constraints}), flag ANY meetings that violate these constraints as HIGH priority to fix
 
 IMPORTANT FOR "risks_and_conflicts":
 - Every item MUST have:
@@ -467,12 +518,21 @@ IMPORTANT FOR "risks_and_conflicts":
   - "meetings": array of ACTUAL meeting names involved (NOT lunch/breaks)
   - "suggestion": specific actionable suggestion that considers existing meetings
 
+USER'S TOP PRIORITIES (PROTECT THESE MEETINGS):
+The user has specified these as their top priorities: ${dataSummary.priorities}
+- CRITICAL: Look for meetings that match these priorities (e.g., if priority is "Onboarding", look for meetings with "onboarding" in the title)
+- CRITICAL: NEVER suggest moving or rescheduling meetings that match user's top priorities
+- CRITICAL: If a conflict involves a priority meeting, move the OTHER meeting instead
+- CRITICAL: Protect priority meetings at all costs - they should be scheduled at optimal times
+- CRITICAL: If no meetings match priorities, suggest creating time blocks for these priorities
+
 ALGORITHM FOR CHOOSING WHAT TO MOVE (PRIORITY ORDER):
-1. FIRST: Check if ANY item is a "placeholder" or "Place Holder" (non-real meeting) - ALWAYS move these first
-2. SECOND: Check if ANY item is a focus time block (personal time) - consider moving this instead of real meetings
-3. THIRD: Only move real meetings if no placeholders or focus time can be moved
-4. EVALUATE IMPACT: Moving 1 focus time block is better than moving 2 real meetings
-5. SUGGEST THE BEST SOLUTION: Not just any solution, but the one with least disruption
+1. FIRST: NEVER move meetings that match user's top priorities (${dataSummary.priorities})
+2. SECOND: Check if ANY item is a "placeholder" or "Place Holder" (non-real meeting) - ALWAYS move these first
+3. THIRD: Check if ANY item is a focus time block (personal time) - consider moving this instead of real meetings
+4. FOURTH: Only move real meetings if no placeholders or focus time can be moved AND they don't match user priorities
+5. EVALUATE IMPACT: Moving 1 focus time block is better than moving 2 real meetings
+6. SUGGEST THE BEST SOLUTION: Not just any solution, but the one with least disruption while protecting user priorities
 
 ALGORITHM FOR SUGGESTING NEW TIMES:
 1. Identify the conflicting meeting and its duration
@@ -725,8 +785,8 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
         emailSummary = this.getMockEmailSummary();
       }
 
-      // Analyze data
-      const calendarData = this.analyzeCalendarData(calendarEvents);
+      // Analyze data with user settings for time constraint checking
+      const calendarData = this.analyzeCalendarData(calendarEvents, settings);
       const emailData = this.analyzeEmailData(emailSummary);
 
       // Generate AI recommendations with user context from settings

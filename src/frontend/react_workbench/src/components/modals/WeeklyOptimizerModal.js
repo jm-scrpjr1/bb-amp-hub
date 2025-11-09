@@ -35,6 +35,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const [optimization, setOptimization] = useState(null);
   const [error, setError] = useState(null);
   const [showSetup, setShowSetup] = useState(false);
+  const [weekType, setWeekType] = useState('current'); // 'current' or 'next'
 
   // Collapsible sections state
   const [expandedPriorityDays, setExpandedPriorityDays] = useState({});
@@ -44,7 +45,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
     if (isOpen) {
       fetchCurrentOptimization();
     }
-  }, [isOpen]);
+  }, [isOpen, weekType]); // Re-fetch when weekType changes
 
   const fetchCurrentOptimization = async () => {
     try {
@@ -52,7 +53,7 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
       setError(null);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`${environmentConfig.apiUrl}/weekly-optimizer/current`, {
+      const response = await fetch(`${environmentConfig.apiUrl}/weekly-optimizer/current?weekType=${weekType}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -90,7 +91,8 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ weekType })
       });
 
       if (!response.ok) {
@@ -355,6 +357,52 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
                   <p className="text-gray-600 mb-4 text-sm">
                     Configure your preferences or generate your first optimization right away!
                   </p>
+
+                  {/* Week Selection */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      📅 Which week would you like to optimize?
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setWeekType('current')}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          weekType === 'current'
+                            ? 'border-cyan-500 bg-cyan-50 shadow-md'
+                            : 'border-gray-200 bg-white hover:border-cyan-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Calendar className={`h-5 w-5 ${weekType === 'current' ? 'text-cyan-600' : 'text-gray-400'}`} />
+                          <span className={`font-semibold ${weekType === 'current' ? 'text-cyan-900' : 'text-gray-700'}`}>
+                            Current Week
+                          </span>
+                        </div>
+                        <p className={`text-xs ${weekType === 'current' ? 'text-cyan-700' : 'text-gray-500'}`}>
+                          Remaining days (8am-5pm EST)
+                        </p>
+                      </button>
+                      <button
+                        onClick={() => setWeekType('next')}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          weekType === 'next'
+                            ? 'border-purple-500 bg-purple-50 shadow-md'
+                            : 'border-gray-200 bg-white hover:border-purple-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Calendar className={`h-5 w-5 ${weekType === 'next' ? 'text-purple-600' : 'text-gray-400'}`} />
+                          <span className={`font-semibold ${weekType === 'next' ? 'text-purple-900' : 'text-gray-700'}`}>
+                            Next Week
+                          </span>
+                        </div>
+                        <p className={`text-xs ${weekType === 'next' ? 'text-purple-700' : 'text-gray-500'}`}>
+                          Mon-Fri (8am-5pm EST)
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <button
                       onClick={() => setShowSetup(true)}

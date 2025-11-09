@@ -504,12 +504,13 @@ const weeklyOptimizerService = require('./services/weeklyOptimizerService');
 app.get('/api/weekly-optimizer/current', authenticateUser, async (req, res) => {
   try {
     const userId = req.user.id;
-    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId);
+    const { weekType = 'next' } = req.query; // 'current' or 'next'
+    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId, weekType);
 
     if (!optimization) {
       return res.status(404).json({
         success: false,
-        message: 'No optimization found for current week'
+        message: `No optimization found for ${weekType} week`
       });
     }
 
@@ -574,13 +575,14 @@ app.post('/api/weekly-optimizer/settings', authenticateUser, async (req, res) =>
 app.post('/api/weekly-optimizer/trigger', authenticateUser, async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log(`🔄 Manual optimization triggered by user ${userId}`);
+    const { weekType = 'next' } = req.body; // 'current' or 'next'
+    console.log(`🔄 Manual optimization triggered by user ${userId} for ${weekType} week`);
 
     // Run the optimization (this saves to database)
-    await weeklyOptimizerService.optimizeUserWeek(userId);
+    await weeklyOptimizerService.optimizeUserWeek(userId, weekType);
 
     // Fetch the saved optimization from database (to match the structure of /current endpoint)
-    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId);
+    const optimization = await weeklyOptimizerService.getCurrentOptimization(userId, weekType);
 
     res.json({
       success: true,

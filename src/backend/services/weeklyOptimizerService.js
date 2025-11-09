@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const crypto = require('crypto');
 const { GoogleWorkspaceService } = require('./googleWorkspaceService');
 
 class WeeklyOptimizerService {
@@ -35,23 +36,93 @@ class WeeklyOptimizerService {
 
   /**
    * Get the start and end dates for the upcoming week (Monday to Sunday)
+   * @deprecated Use getNextWeekDates() instead
    */
   getUpcomingWeekDates() {
+    return this.getNextWeekDates();
+  }
+
+  /**
+   * Get current week dates (remaining days from now until end of week)
+   * If current time is between 8am-5pm EST, includes today from now onwards
+   * Otherwise starts from next business hour
+   */
+  getCurrentWeekDates() {
+    // Get current time in EST
     const now = new Date();
-    const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
-    
+    const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const currentHour = estTime.getHours();
+    const dayOfWeek = estTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
+    let weekStart = new Date(estTime);
+
+    // If it's weekend or outside business hours (8am-5pm EST), start from next Monday 8am
+    if (dayOfWeek === 0 || dayOfWeek === 6 || currentHour < 8 || currentHour >= 17) {
+      // Calculate days until next Monday
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : dayOfWeek === 6 ? 2 : (8 - dayOfWeek);
+      weekStart.setDate(estTime.getDate() + daysUntilMonday);
+      weekStart.setHours(8, 0, 0, 0);
+    } else {
+      // It's a weekday during business hours - start from current time
+      weekStart = new Date(estTime);
+    }
+
+    // Week ends on Friday at 5pm EST
+    const weekEnd = new Date(weekStart);
+    const daysUntilFriday = 5 - weekStart.getDay();
+    weekEnd.setDate(weekStart.getDate() + daysUntilFriday);
+    weekEnd.setHours(17, 0, 0, 0);
+
+    return { weekStart, weekEnd };
+  }
+
+  /**
+   * Get next week dates (Monday 8am - Friday 5pm EST)
+   */
+  getNextWeekDates() {
+    const now = new Date();
+    const estTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const dayOfWeek = estTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
+
     // Calculate days until next Monday
     const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek);
-    
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() + daysUntilMonday);
-    weekStart.setHours(0, 0, 0, 0);
-    
+
+    const weekStart = new Date(estTime);
+    weekStart.setDate(estTime.getDate() + daysUntilMonday);
+    weekStart.setHours(8, 0, 0, 0);
+
     const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6); // Sunday
-    weekEnd.setHours(23, 59, 59, 999);
-    
+    weekEnd.setDate(weekStart.getDate() + 4); // Friday
+    weekEnd.setHours(17, 0, 0, 0);
+
     return { weekStart, weekEnd };
+  }
+
+  /**
+   * Generate a hash of calendar events for change detection
+   * @param {Array} events - Calendar events array
+   * @returns {string} SHA-256 hash of event data
+   */
+  generateCalendarHash(events) {
+    if (!events || events.length === 0) {
+      return crypto.createHash('sha256').update('no-events').digest('hex');
+    }
+
+    // Sort events by start time for consistent hashing
+    const sortedEvents = [...events].sort((a, b) =>
+      new Date(a.start) - new Date(b.start)
+    );
+
+    // Create a string representation of key event data
+    const eventData = sortedEvents.map(e => ({
+      summary: e.summary,
+      start: e.start,
+      end: e.end,
+      attendees: e.attendees?.length || 0
+    }));
+
+    const dataString = JSON.stringify(eventData);
+    return crypto.createHash('sha256').update(dataString).digest('hex');
   }
 
   /**
@@ -549,12 +620,14 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
   /**
    * Main optimization function for a single user
+   * @param {string} userId - User ID
+   * @param {string} weekType - 'current' or 'next' (default: 'next')
    */
-  async optimizeUserWeek(userId) {
+  async optimizeUserWeek(userId, weekType = 'next') {
     const startTime = Date.now();
-    
+
     try {
-      console.log(`🔄 Starting weekly optimization for user ${userId}`);
+      console.log(`🔄 Starting weekly optimization for user ${userId} (${weekType} week)`);
 
       // Get user from database
       const prisma = this.getPrisma();
@@ -577,9 +650,11 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
         return null;
       }
 
-      // Get upcoming week dates
-      const { weekStart, weekEnd } = this.getUpcomingWeekDates();
-      console.log(`📆 Date range: ${weekStart.toISOString()} to ${weekEnd.toISOString()}`);
+      // Get week dates based on type
+      const { weekStart, weekEnd } = weekType === 'current'
+        ? this.getCurrentWeekDates()
+        : this.getNextWeekDates();
+      console.log(`📆 Date range (${weekType}): ${weekStart.toISOString()} to ${weekEnd.toISOString()}`);
       console.log(`📆 Human readable: ${weekStart.toLocaleDateString()} to ${weekEnd.toLocaleDateString()}`);
 
       let calendarEvents = [];
@@ -602,6 +677,27 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
         usedMockData = true;
         calendarEvents = this.getMockCalendarEvents(weekStart, weekEnd);
       }
+
+      // Check for existing optimization with same calendar data (caching)
+      const calendarHash = this.generateCalendarHash(calendarEvents);
+      const existingOptimization = await prisma.weekly_optimizations.findFirst({
+        where: {
+          user_id: userId,
+          week_start_date: weekStart,
+          week_type: weekType,
+          calendar_events_hash: calendarHash
+        },
+        orderBy: {
+          created_at: 'desc'
+        }
+      });
+
+      if (existingOptimization) {
+        console.log(`✅ Found existing optimization with matching calendar data - using cached version`);
+        return existingOptimization;
+      }
+
+      console.log(`🔄 Calendar data changed or no existing optimization - generating new analysis`);
 
       // Fetch actionable emails with smart queries (like Abacus.ai)
       try {
@@ -674,12 +770,14 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
         is_demo_data: usedMockData // Flag to indicate mock data was used
       };
 
-      // Save to database
+      // Save to database with hash and week_type
       await prisma.weekly_optimizations.create({
         data: {
           user_id: userId,
           week_start_date: weekStart,
           week_end_date: weekEnd,
+          week_type: weekType,
+          calendar_events_hash: calendarHash,
           optimization_data: optimizationData
         }
       });
@@ -820,16 +918,21 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
   /**
    * Get current week's optimization for a user
+   * @param {string} userId - User ID
+   * @param {string} weekType - 'current' or 'next' (default: 'next')
    */
-  async getCurrentOptimization(userId) {
+  async getCurrentOptimization(userId, weekType = 'next') {
     try {
-      const { weekStart } = this.getUpcomingWeekDates();
+      const { weekStart } = weekType === 'current'
+        ? this.getCurrentWeekDates()
+        : this.getNextWeekDates();
       const prisma = this.getPrisma();
 
       const optimization = await prisma.weekly_optimizations.findFirst({
         where: {
           user_id: userId,
-          week_start_date: weekStart
+          week_start_date: weekStart,
+          week_type: weekType
         },
         orderBy: {
           created_at: 'desc'

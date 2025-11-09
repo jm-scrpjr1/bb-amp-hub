@@ -404,16 +404,19 @@ model weekly_optimizer_settings {
 }
 
 model weekly_optimizations {
-  id                String   @id @default(uuid())
-  user_id           String   @db.VarChar(255)
-  week_start_date   DateTime @db.Date
-  week_end_date     DateTime @db.Date
-  optimization_data Json
-  created_at        DateTime @default(now()) @db.Timestamp(6)
+  id                    String   @id @default(uuid())
+  user_id               String   @db.VarChar(255)
+  week_start_date       DateTime @db.Date
+  week_end_date         DateTime @db.Date
+  week_type             String   @default("next") @db.VarChar(20) // 'current' or 'next'
+  calendar_events_hash  String?  @db.VarChar(64) // SHA-256 hash of calendar events for change detection
+  optimization_data     Json
+  created_at            DateTime @default(now()) @db.Timestamp(6)
 
   @@index([user_id])
   @@index([week_start_date])
   @@index([user_id, week_start_date])
+  @@index([user_id, week_start_date, week_type])
 }
 
 model weekly_optimizer_logs {

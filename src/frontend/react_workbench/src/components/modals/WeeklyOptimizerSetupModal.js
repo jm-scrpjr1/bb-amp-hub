@@ -307,7 +307,7 @@ const WeeklyOptimizerSetupModal = ({ isOpen, onClose, onSaveComplete }) => {
                       <textarea
                         value={settings.top_priorities || ''}
                         onChange={(e) => setSettings({ ...settings, top_priorities: e.target.value })}
-                        placeholder="e.g., AI Workbench launch, Team capacity building, CISA portal completion"
+                        placeholder="e.g., Product launch, Team capacity building, Client onboarding"
                         rows={3}
                         className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none resize-none"
                       />

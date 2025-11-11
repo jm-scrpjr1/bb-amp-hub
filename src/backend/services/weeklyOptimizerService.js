@@ -56,11 +56,19 @@ class WeeklyOptimizerService {
 
     let weekStart = new Date(estTime);
 
-    // If it's weekend or outside business hours (8am-5pm EST), start from next Monday 8am
+    // If it's weekend or outside business hours (8am-5pm EST), start from next business day 8am
     if (dayOfWeek === 0 || dayOfWeek === 6 || currentHour < 8 || currentHour >= 17) {
-      // Calculate days until next Monday
-      const daysUntilMonday = dayOfWeek === 0 ? 1 : dayOfWeek === 6 ? 2 : (8 - dayOfWeek);
-      weekStart.setDate(estTime.getDate() + daysUntilMonday);
+      // If it's Friday after 5pm, Saturday, or Sunday - go to next Monday
+      if (dayOfWeek === 5 && currentHour >= 17) {
+        weekStart.setDate(estTime.getDate() + 3); // Friday -> Monday
+      } else if (dayOfWeek === 6) {
+        weekStart.setDate(estTime.getDate() + 2); // Saturday -> Monday
+      } else if (dayOfWeek === 0) {
+        weekStart.setDate(estTime.getDate() + 1); // Sunday -> Monday
+      } else {
+        // Weekday after hours - go to next business day (e.g., Tuesday 5pm -> Wednesday 8am)
+        weekStart.setDate(estTime.getDate() + 1);
+      }
       weekStart.setHours(8, 0, 0, 0);
     } else {
       // It's a weekday during business hours - start from current time
@@ -146,7 +154,9 @@ class WeeklyOptimizerService {
              lowerSummary.includes('out of office') ||
              lowerSummary.includes('ooo') ||
              lowerSummary.includes('pto') ||
-             lowerSummary.includes('vacation');
+             lowerSummary.includes('vacation') ||
+             lowerSummary === 'home' ||
+             lowerSummary.includes('work location');
     };
 
     // Filter out focus time blocks for meeting count
@@ -621,15 +631,39 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
         // Ensure arrays are arrays (AI might return strings sometimes)
         if (typeof parsed.recommended_priorities === 'string') {
-          // Keep as string for backward compatibility
-          console.log('⚠️ recommended_priorities is a string, keeping as-is');
+          console.log('⚠️ recommended_priorities is a string, converting to empty array');
+          parsed.recommended_priorities = [];
         }
         if (typeof parsed.risks_and_conflicts === 'string') {
-          // Keep as string for backward compatibility
-          console.log('⚠️ risks_and_conflicts is a string, keeping as-is');
+          console.log('⚠️ risks_and_conflicts is a string, converting to empty array');
+          parsed.risks_and_conflicts = [];
+        }
+
+        // CRITICAL: Ensure recommended_priorities is populated from conflicts
+        if (!Array.isArray(parsed.recommended_priorities) || parsed.recommended_priorities.length === 0) {
+          console.log('⚠️ recommended_priorities is empty, generating from conflicts...');
+          parsed.recommended_priorities = [];
+
+          // Generate priorities from detected conflicts
+          if (Array.isArray(parsed.risks_and_conflicts) && parsed.risks_and_conflicts.length > 0) {
+            parsed.risks_and_conflicts.forEach((conflict, index) => {
+              parsed.recommended_priorities.push({
+                priority: `Resolve ${conflict.type || 'Conflict'} #${index + 1}`,
+                action: conflict.suggestion || 'Review and reschedule',
+                meeting_name: conflict.meetings?.[0] || 'Meeting',
+                day: conflict.day || 'Unknown',
+                time: conflict.time || 'Unknown',
+                reason: conflict.description || 'Scheduling conflict detected',
+                conflict_details: conflict.description || 'Conflict needs resolution'
+              });
+            });
+            console.log(`✅ Generated ${parsed.recommended_priorities.length} priorities from conflicts`);
+          }
         }
 
         console.log('✅ Successfully generated structured recommendations');
+        console.log(`📊 Recommended Priorities Count: ${parsed.recommended_priorities?.length || 0}`);
+        console.log(`⚠️ Risks & Conflicts Count: ${parsed.risks_and_conflicts?.length || 0}`);
         return parsed;
 
       } catch (error) {

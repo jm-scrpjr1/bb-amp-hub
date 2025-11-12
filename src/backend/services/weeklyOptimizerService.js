@@ -113,6 +113,7 @@ class WeeklyOptimizerService {
    */
   generateCalendarHash(events) {
     if (!events || events.length === 0) {
+      console.log(`🔐 Hash: No events, using 'no-events' hash`);
       return crypto.createHash('sha256').update('no-events').digest('hex');
     }
 
@@ -130,7 +131,12 @@ class WeeklyOptimizerService {
     }));
 
     const dataString = JSON.stringify(eventData);
-    return crypto.createHash('sha256').update(dataString).digest('hex');
+    const hash = crypto.createHash('sha256').update(dataString).digest('hex');
+
+    console.log(`🔐 Hash generation: ${events.length} events → ${hash.substring(0, 16)}...`);
+    console.log(`   Sample events: ${sortedEvents.slice(0, 3).map(e => e.summary).join(', ')}`);
+
+    return hash;
   }
 
   /**
@@ -774,24 +780,37 @@ Return ONLY valid JSON. Be specific and actionable with real meeting names.`;
 
       // Check for existing optimization with same calendar data (caching)
       const calendarHash = this.generateCalendarHash(calendarEvents);
-      const existingOptimization = await prisma.weekly_optimizations.findFirst({
+      console.log(`🔐 Generated calendar hash: ${calendarHash.substring(0, 16)}...`);
+      console.log(`📊 Calendar events count: ${calendarEvents.length}`);
+
+      // First check if there's ANY optimization for this week (regardless of hash)
+      const anyExistingOptimization = await prisma.weekly_optimizations.findFirst({
         where: {
           user_id: userId,
           week_start_date: weekStart,
-          week_type: weekType,
-          calendar_events_hash: calendarHash
+          week_type: weekType
         },
         orderBy: {
           created_at: 'desc'
         }
       });
 
-      if (existingOptimization) {
-        console.log(`✅ Found existing optimization with matching calendar data - using cached version`);
-        return existingOptimization;
-      }
+      if (anyExistingOptimization) {
+        console.log(`📋 Found existing optimization for this week`);
+        console.log(`   Stored hash: ${anyExistingOptimization.calendar_events_hash?.substring(0, 16)}...`);
+        console.log(`   Current hash: ${calendarHash.substring(0, 16)}...`);
+        console.log(`   Hashes match: ${anyExistingOptimization.calendar_events_hash === calendarHash}`);
 
-      console.log(`🔄 Calendar data changed or no existing optimization - generating new analysis`);
+        if (anyExistingOptimization.calendar_events_hash === calendarHash) {
+          console.log(`✅ Calendar data unchanged - using cached version`);
+          return anyExistingOptimization;
+        } else {
+          console.log(`🔄 Calendar data changed - generating new analysis`);
+          console.log(`   Will delete old optimization and create new one`);
+        }
+      } else {
+        console.log(`🆕 No existing optimization found - generating first analysis for this week`);
+      }
 
       // Fetch actionable emails with smart queries (like Abacus.ai)
       try {

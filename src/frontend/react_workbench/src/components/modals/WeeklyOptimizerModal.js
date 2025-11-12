@@ -124,10 +124,11 @@ const WeeklyOptimizerModal = ({ isOpen, onClose }) => {
   const optimizationData = optimization?.optimization_data;
   const weekOverview = optimizationData?.week_overview;
   const recommendations = optimizationData?.recommendations || [];
+  const recommendedPriorities = optimizationData?.recommended_priorities || [];
 
   const recommendationsByDay = useMemo(() => {
-    return groupRecommendationsByDay(recommendations);
-  }, [recommendations]);
+    return groupRecommendationsByDay(recommendedPriorities);
+  }, [recommendedPriorities]);
 
   // Initialize all days as expanded by default
   useEffect(() => {

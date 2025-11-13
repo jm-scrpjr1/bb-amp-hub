@@ -4,7 +4,7 @@ import { WelcomeSection, QuickActions } from '../components/dashboard';
 import BoldUpdates from '../components/dashboard/BoldUpdates';
 import ActivitySection from '../components/dashboard/ActivitySection';
 import AIReadinessCard from '../components/dashboard/AIReadinessCard';
-import WeeklyOptimizerDashboard from '../components/dashboard/WeeklyOptimizerDashboard';
+import WeeklyOptimizerCard from '../components/dashboard/WeeklyOptimizerCard';
 import DirectMessageModal from '../components/ui/DirectMessageModal';
 import GroupChatModal from '../components/ui/GroupChatModal';
 import TutorialButton from '../components/dashboard/TutorialButton';
@@ -70,11 +70,6 @@ const MySpacePage = () => {
       <div className="flex gap-8 max-w-7xl mx-auto">
         {/* Main Content */}
         <div className="flex-1 space-y-8">
-          {/* Weekly Optimizer Dashboard - NEW HERO POSITION */}
-          <div className="weekly-optimizer">
-            <WeeklyOptimizerDashboard />
-          </div>
-
           {/* Welcome Section */}
           <div className="welcome-section">
             <WelcomeSection showWelcomeBanner={true} />
@@ -101,6 +96,11 @@ const MySpacePage = () => {
           {/* AI Readiness Card */}
           <ScrollEffects effect="fadeUp" delay={0.1}>
             <AIReadinessCard />
+          </ScrollEffects>
+
+          {/* Weekly Optimizer Card */}
+          <ScrollEffects effect="fadeUp" delay={0.15}>
+            <WeeklyOptimizerCard />
           </ScrollEffects>
 
           {/* Resources Section */}

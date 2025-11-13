@@ -1,9 +1,27 @@
 const { prisma } = require('../lib/db');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+// Load scoring map for point calculation
+const scoringMapPath = path.join(__dirname, '../migrations/question_scoring_map.json');
+const scoringMap = JSON.parse(fs.readFileSync(scoringMapPath, 'utf8'));
+
+// Create a lookup map for quick access to question scoring
+const questionScoringLookup = {};
+scoringMap.categories.forEach(cat => {
+  cat.questions.forEach(q => {
+    questionScoringLookup[q.text] = q.options;
+  });
+});
 
 class AIAssessmentService {
-  // Get random questions for assessment
-  static async getRandomQuestions(limit = 15) {
+  // Get random questions for assessment (15-20 questions randomized from 35 total)
+  static async getRandomQuestions(limit = null) {
+    // Default to random number between 15-20 if not specified
+    if (!limit) {
+      limit = Math.floor(Math.random() * 6) + 15; // Random between 15-20
+    }
     try {
       // Get questions from each category with some randomization
       const categories = await prisma.$queryRaw`
@@ -75,7 +93,7 @@ class AIAssessmentService {
     }
   }
 
-  // Save user response to a question with proper scoring based on Bold Business system
+  // Save user response to a question with NEW scoring system
   static async saveQuestionResponse(sessionId, questionId, userAnswer, timeSpentSeconds = 0) {
     try {
       // Get question details for scoring
@@ -92,54 +110,45 @@ class AIAssessmentService {
 
       const questionData = question[0];
       let pointsEarned = 0;
-      let isContradiction = questionData.points === 0; // Contradiction questions have 0 points
 
-      // Calculate points based on question type and Bold Business scoring system
+      // NEW SCORING SYSTEM: Use exact point values from scoring map
       if (questionData.question_type === 'multiple_choice') {
         const options = questionData.options;
         const answerIndex = options.indexOf(userAnswer);
 
         if (answerIndex >= 0) {
-          // Bold Business scoring: Best response = 5 pts, acceptable = 3 pts, weak = 1 pt, poor = 0
-          if (answerIndex === options.length - 1) pointsEarned = 5; // Best response (last option)
-          else if (answerIndex === options.length - 2) pointsEarned = 3; // Acceptable response
-          else if (answerIndex === 0) pointsEarned = 0; // Poor response (first option)
-          else pointsEarned = 1; // Weak response (middle options)
-        }
-      } else if (questionData.question_type === 'scale') {
-        const scaleValue = parseInt(userAnswer);
-        if (scaleValue >= questionData.scale_min && scaleValue <= questionData.scale_max) {
-          if (isContradiction) {
-            // Reverse scoring for contradiction questions (1-7 scale becomes 7-1)
-            pointsEarned = questionData.scale_max + questionData.scale_min - scaleValue;
+          // Look up the exact points for this question and answer
+          const scoringOptions = questionScoringLookup[questionData.question_text];
+          if (scoringOptions && scoringOptions[answerIndex]) {
+            pointsEarned = scoringOptions[answerIndex].points;
           } else {
-            // Normal scoring: convert 1-7 scale to 1-5 points
-            const normalizedScore = ((scaleValue - questionData.scale_min) / (questionData.scale_max - questionData.scale_min)) * 4 + 1;
-            pointsEarned = Math.round(normalizedScore);
+            // Fallback if not found in map (shouldn't happen with new questions)
+            console.warn(`⚠️ Question not found in scoring map: ${questionData.question_text}`);
+            pointsEarned = 0;
           }
         }
       }
 
-      // Apply category weight (40% for Likert, 40% for Trade-off/Scenario, handled in final calculation)
-      const weightedPoints = Math.round(pointsEarned * parseFloat(questionData.category_weight));
+      // Points are NOT weighted here - they're used as-is
+      // Category weighting is applied during final score calculation
 
       // Save response
       await prisma.$queryRaw`
         INSERT INTO user_question_responses (session_id, question_id, user_answer, points_earned, time_spent_seconds)
-        VALUES (${sessionId}, ${questionId}, ${userAnswer}, ${weightedPoints}, ${timeSpentSeconds})
+        VALUES (${sessionId}, ${questionId}, ${userAnswer}, ${pointsEarned}, ${timeSpentSeconds})
         ON CONFLICT (session_id, question_id)
         DO UPDATE SET
           user_answer = ${userAnswer},
-          points_earned = ${weightedPoints},
+          points_earned = ${pointsEarned},
           time_spent_seconds = ${timeSpentSeconds},
           answered_at = NOW()
       `;
 
       return {
         questionId,
-        pointsEarned: weightedPoints,
-        maxPoints: Math.round(5 * parseFloat(questionData.category_weight)), // Max 5 points per question
-        isContradiction
+        pointsEarned: pointsEarned,
+        maxPoints: 5, // Max 5 points per question
+        categoryWeight: parseFloat(questionData.category_weight)
       };
     } catch (error) {
       console.error('Error saving question response:', error);
@@ -147,37 +156,51 @@ class AIAssessmentService {
     }
   }
 
-  // Complete assessment and calculate final score
+  // Complete assessment and calculate final score with NEW weighted system
   static async completeAssessment(sessionId) {
     try {
-      // Calculate total score
+      // Calculate category scores first (with weighting)
+      const categoryScores = await this.calculateCategoryScores(sessionId);
+
+      // Calculate weighted total score
+      // Formula: Sum of (category_score_percentage × category_weight) for all categories
+      let weightedTotalScore = 0;
+      let totalWeight = 0;
+
+      categoryScores.forEach(cat => {
+        const categoryPercentage = cat.percentage; // 0-100
+        const categoryWeight = cat.weight; // 0.10 to 0.20
+        weightedTotalScore += (categoryPercentage * categoryWeight);
+        totalWeight += categoryWeight;
+      });
+
+      // Final percentage score (should be 0-100)
+      const percentageScore = Math.min(100, Math.round(weightedTotalScore));
+
+      // For display purposes, calculate raw totals
       const scoreData = await prisma.$queryRaw`
         SELECT
           SUM(r.points_earned) as total_score,
-          SUM(q.points) as max_possible_score,
+          COUNT(*) * 5 as max_possible_score,
           COUNT(*) as questions_answered
         FROM user_question_responses r
-        JOIN assessment_questions q ON r.question_id = q.id
-        JOIN assessment_categories c ON q.category_id = c.id
         WHERE r.session_id = ${sessionId}
       `;
 
       const totalScore = parseInt(scoreData[0].total_score) || 0;
       const maxPossibleScore = parseInt(scoreData[0].max_possible_score) || 1;
-      const percentageScore = Math.min(100, Math.round((totalScore / maxPossibleScore) * 100));
 
-      // Determine AI readiness level
+      // Determine AI readiness level (using NEW levels)
       let aiReadinessLevel;
-      if (percentageScore >= 80) aiReadinessLevel = 'Expert';
-      else if (percentageScore >= 65) aiReadinessLevel = 'Advanced';
-      else if (percentageScore >= 50) aiReadinessLevel = 'Intermediate';
-      else if (percentageScore >= 35) aiReadinessLevel = 'Beginner';
-      else aiReadinessLevel = 'Novice';
+      if (percentageScore >= 80) aiReadinessLevel = 'AI Champion';
+      else if (percentageScore >= 65) aiReadinessLevel = 'AI Explorer';
+      else if (percentageScore >= 50) aiReadinessLevel = 'AI Learner';
+      else aiReadinessLevel = 'Needs Development';
 
       // Update session with final scores
       await prisma.$queryRaw`
-        UPDATE user_assessment_sessions 
-        SET 
+        UPDATE user_assessment_sessions
+        SET
           completed_at = NOW(),
           total_score = ${totalScore},
           max_possible_score = ${maxPossibleScore},
@@ -186,9 +209,6 @@ class AIAssessmentService {
           status = 'completed'
         WHERE id = ${sessionId}
       `;
-
-      // Calculate category scores
-      const categoryScores = await this.calculateCategoryScores(sessionId);
 
       // Generate recommendations
       const recommendations = this.generateRecommendations(percentageScore, categoryScores);
@@ -221,7 +241,7 @@ class AIAssessmentService {
     }
   }
 
-  // Calculate scores by category
+  // Calculate scores by category with NEW scoring system
   static async calculateCategoryScores(sessionId) {
     try {
       const categoryScores = await prisma.$queryRaw`
@@ -230,7 +250,6 @@ class AIAssessmentService {
           c.name,
           c.weight,
           SUM(r.points_earned) as category_score,
-          SUM(q.points) as category_max_score,
           COUNT(*) as questions_count
         FROM user_question_responses r
         JOIN assessment_questions q ON r.question_id = q.id
@@ -242,7 +261,8 @@ class AIAssessmentService {
 
       return categoryScores.map(cat => {
         const rawScore = parseInt(cat.category_score) || 0;
-        const maxScore = parseInt(cat.category_max_score) || 1;
+        const questionsCount = parseInt(cat.questions_count) || 1;
+        const maxScore = questionsCount * 5; // Each question max 5 points
 
         // Calculate percentage first (0-100%)
         const percentage = Math.min(100, Math.round((rawScore / maxScore) * 100));
@@ -254,7 +274,7 @@ class AIAssessmentService {
           score: rawScore,
           maxScore: maxScore,
           percentage: percentage,
-          questionsCount: parseInt(cat.questions_count)
+          questionsCount: questionsCount
         };
       });
     } catch (error) {
@@ -475,6 +495,27 @@ class AIAssessmentService {
     } catch (error) {
       console.error('Error getting assessment session:', error);
       throw new Error('Failed to get assessment session');
+    }
+  }
+
+  // Delete/abort an assessment session (for cancel functionality)
+  static async deleteAssessmentSession(sessionId) {
+    try {
+      // Delete responses first (foreign key constraint)
+      await prisma.user_question_responses.deleteMany({
+        where: { session_id: parseInt(sessionId) }
+      });
+
+      // Delete the session
+      await prisma.user_assessment_sessions.delete({
+        where: { id: parseInt(sessionId) }
+      });
+
+      console.log(`✅ Deleted assessment session ${sessionId}`);
+      return { success: true, message: 'Assessment session deleted' };
+    } catch (error) {
+      console.error('Error deleting assessment session:', error);
+      throw new Error('Failed to delete assessment session');
     }
   }
 }

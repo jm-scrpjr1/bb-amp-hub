@@ -2135,6 +2135,25 @@ app.get('/api/assessment/session/:sessionId', authenticateUser, async (req, res)
   }
 });
 
+// Delete/abort assessment session
+app.delete('/api/assessment/session/:sessionId', authenticateUser, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const result = await AIAssessmentService.deleteAssessmentSession(sessionId);
+
+    res.json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    console.error('Error deleting assessment session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete assessment session'
+    });
+  }
+});
+
 // ===== RESOURCES API ENDPOINTS WITH RBAC =====
 
 // Get accessible resources/documents for current user with RBAC filtering

@@ -19,21 +19,40 @@ const WeeklyOptimizerCard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('auth_token') || localStorage.getItem('authToken');
-      const response = await fetch(`${API_URL}/weekly-optimizer/current`, {
+
+      // Try current week first, then next week
+      let response = await fetch(`${API_URL}/weekly-optimizer/current?weekType=current`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
 
+      // If no current week data, try next week
       if (response.status === 404) {
+        console.log('No current week optimization found, trying next week...');
+        response = await fetch(`${API_URL}/weekly-optimizer/current?weekType=next`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
+
+      if (response.status === 404) {
+        console.log('No optimization data found for current or next week');
         setOptimization(null);
       } else if (response.ok) {
         const data = await response.json();
+        console.log('Weekly Optimizer data loaded:', data);
         setOptimization(data.data);
+      } else {
+        console.error('Failed to fetch optimization:', response.status, response.statusText);
+        setOptimization(null);
       }
     } catch (err) {
       console.error('Error fetching optimization:', err);
+      setOptimization(null);
     } finally {
       setLoading(false);
     }
@@ -79,12 +98,17 @@ const WeeklyOptimizerCard = () => {
   const weekOverview = optimizationData.week_overview || {};
   const dailyBreakdown = optimizationData.daily_breakdown || {};
 
+  // Debug logging
+  console.log('WeeklyOptimizerCard - optimization:', optimization);
+  console.log('WeeklyOptimizerCard - optimizationData:', optimizationData);
+  console.log('WeeklyOptimizerCard - dailyBreakdown:', dailyBreakdown);
+
   // Calculate totals
-  const totalMeetings = Object.values(dailyBreakdown).reduce((sum, day) => 
+  const totalMeetings = Object.values(dailyBreakdown).reduce((sum, day) =>
     sum + (day.meetings?.length || 0), 0
   );
-  
-  const totalMeetingHours = Object.values(dailyBreakdown).reduce((sum, day) => 
+
+  const totalMeetingHours = Object.values(dailyBreakdown).reduce((sum, day) =>
     sum + (day.total_meeting_hours || 0), 0
   );
 

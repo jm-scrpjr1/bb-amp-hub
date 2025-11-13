@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, TrendingUp, RefreshCw, Clock, Users, ChevronRight } from 'lucide-react';
+import { Calendar, TrendingUp, RefreshCw, Clock, Users } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 import environmentConfig from '../../config/environment';
 
 const API_URL = environmentConfig.apiUrl;
 
 const WeeklyOptimizerCard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [optimization, setOptimization] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -209,7 +207,7 @@ const WeeklyOptimizerCard = () => {
 
       {/* People You Meet With */}
       {uniquePeople.size > 0 && (
-        <div className="mb-4">
+        <div>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">People you meet with</span>
           </div>
@@ -219,15 +217,6 @@ const WeeklyOptimizerCard = () => {
           </div>
         </div>
       )}
-
-      {/* View Details Button */}
-      <button
-        onClick={() => navigate('/my-space')}
-        className="w-full mt-4 py-2 px-4 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg transition-colors flex items-center justify-center text-sm font-medium"
-      >
-        View Full Details
-        <ChevronRight className="w-4 h-4 ml-1" />
-      </button>
     </div>
   );
 };

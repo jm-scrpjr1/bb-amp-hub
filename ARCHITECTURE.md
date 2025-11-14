@@ -34,6 +34,7 @@
 - **Prompt Library** - 78 curated AI prompts across 7 categories
 - **Weekly Optimizer** - AI-powered calendar and meeting optimization
 - **Resume Builder** - AI-enhanced resume generation with PDF export
+- **Talent Fit Agent** - AI-powered resume analysis and candidate ranking
 - **Group Management** - Role-based access control (RBAC) system
 - **Resource Hub** - Centralized document and resource management
 - **Admin Panel** - User and system management dashboard
@@ -164,7 +165,7 @@ src/backend/
 │   ├── openaiService.js          # ARIA chatbot & OpenAI integration
 │   ├── weeklyOptimizerService.js # Calendar optimization AI
 │   ├── resumeBuilderService.js   # Resume PDF generation
-│   ├── resumeAnalyzerService.js  # Resume analysis AI
+│   ├── resumeAnalyzerService.js  # TalentFit resume analysis AI
 │   ├── googleWorkspaceService.js # Google OAuth & Calendar
 │   ├── aiAssessmentService.js    # AI readiness assessments
 │   ├── groupService.js           # Group management
@@ -252,6 +253,20 @@ src/backend/
   - Topic tracking
   - User preferences
 
+#### 8. Resume Analyzer Service (`resumeAnalyzerService.js`)
+- **Purpose:** TalentFit AI-powered resume analysis
+- **Assistant ID:** `asst_R5RXI0LcyRxsgR80xb05oNQb` (same as ARIA)
+- **Features:**
+  - Multi-format support (PDF, DOCX)
+  - Parallel file processing for speed
+  - PDF upload to OpenAI file_search
+  - DOCX text extraction with Mammoth
+  - Job description matching
+  - Client preference alignment
+  - Candidate ranking with scores
+  - Key strengths and concerns analysis
+  - Public and authenticated endpoints
+
 ### API Middleware
 
 #### Authentication Middleware (`authenticateUser`)
@@ -306,6 +321,8 @@ src/frontend/react_workbench/src/
 │   │   ├── WeeklyOptimizerSetupModal.js  # Optimizer settings
 │   │   ├── DocumentViewerModal.js        # Document preview
 │   │   └── ResumeBuilderModal.js         # Resume builder
+│   ├── TalentFitModal.js         # TalentFit resume analysis
+│   ├── TalentFitHowItWorksModal.js # TalentFit onboarding
 │   ├── assessment/               # AI Assessment components
 │   │   ├── AIAssessmentDatabase.js       # Assessment UI
 │   │   └── StartAssessmentButton.js      # Start button
@@ -672,6 +689,30 @@ GET    /weekly-optimizer/history  # Get optimization history
 POST   /resume/build              # Generate resume PDF
 POST   /resume/analyze            # Analyze resume with AI
 GET    /resume/templates          # Get available templates
+```
+
+### Talent Fit Agent
+```
+POST   /talentfit/analyze         # Analyze resumes (authenticated)
+POST   /public/talentfit/analyze  # Analyze resumes (public access)
+```
+
+**Request Format:**
+```javascript
+// FormData with:
+// - jobDescription (string)
+// - clientWords (string)
+// - resumes (files[]) - PDF or DOCX
+```
+
+**Response Format:**
+```javascript
+{
+  success: true,
+  analysis: "AI-generated analysis with rankings...",
+  threadId: "thread_xxx",
+  assistantId: "asst_R5RXI0LcyRxsgR80xb05oNQb"
+}
 ```
 
 ### Resources
@@ -1128,6 +1169,25 @@ GOOGLE_CLIENT_SECRET=***
   - Member management
   - Permission delegation
 
+### 7. Talent Fit Agent
+- **Technology:** OpenAI Assistant API + Mammoth (DOCX parsing)
+- **Assistant ID:** `asst_R5RXI0LcyRxsgR80xb05oNQb`
+- **Features:**
+  - Multi-format resume support (PDF, DOCX)
+  - Parallel file processing for maximum speed
+  - Job description matching
+  - Client preference alignment
+  - AI-powered candidate ranking
+  - Key strengths identification
+  - Potential concerns flagging
+  - Structured output format
+  - Public and authenticated access
+- **Use Cases:**
+  - Recruiter candidate screening
+  - Hiring manager resume review
+  - Client-facing talent matching
+  - Internal hiring processes
+
 ---
 
 ## 📝 Notes & Best Practices
@@ -1204,6 +1264,10 @@ npx prisma studio
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 1.1
 **Last Updated:** November 14, 2024
 **Maintained By:** BB AMP Hub Development Team
+
+**Changelog:**
+- v1.1 (Nov 14, 2024): Added Talent Fit Agent documentation
+- v1.0 (Nov 14, 2024): Initial comprehensive architecture documentation

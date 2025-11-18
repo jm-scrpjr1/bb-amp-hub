@@ -2,7 +2,9 @@ const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
 const mammoth = require('mammoth');
-const pdfParse = require('pdf-parse');
+// Note: pdf-parse requires Node 20+, but EC2 has Node 18
+// Temporarily reverting to file upload for PDFs until Node.js is upgraded
+// const pdfParse = require('pdf-parse');
 
 class ResumeAnalyzerService {
   constructor() {
@@ -31,10 +33,9 @@ class ResumeAnalyzerService {
   async extractTextFromPdf(fileBuffer) {
     try {
       console.log('📄 Extracting text from PDF file...');
-      const data = await pdfParse(fileBuffer);
-      console.log('✅ PDF text extracted successfully');
-      console.log(`📊 Extracted ${data.numpages} pages, ~${data.text.length} characters`);
-      return data.text;
+      // Temporarily return null to upload PDF to OpenAI (Node 18 compatibility)
+      // TODO: Upgrade to Node 20+ and use pdf-parse for better multi-resume support
+      return null;
     } catch (error) {
       console.error('Error extracting PDF text:', error);
       throw new Error(`Failed to extract text from PDF: ${error.message}`);
@@ -96,14 +97,26 @@ class ResumeAnalyzerService {
             text: extractedText
           };
         } else if (fileExtension === '.pdf') {
-          // Extract text from PDF (same as DOCX)
+          // Check if we can extract text (returns null on Node 18)
           const extractedText = await this.extractTextFromPdf(resumeFile.buffer);
-          console.log(`✅ Extracted text from PDF: ${resumeFile.originalname}`);
-          return {
-            type: 'text',
-            name: resumeFile.originalname,
-            text: extractedText
-          };
+
+          if (extractedText) {
+            // Text extraction successful
+            console.log(`✅ Extracted text from PDF: ${resumeFile.originalname}`);
+            return {
+              type: 'text',
+              name: resumeFile.originalname,
+              text: extractedText
+            };
+          } else {
+            // Fall back to file upload for OpenAI file_search
+            const fileId = await this.uploadFile(resumeFile.buffer, resumeFile.originalname);
+            console.log(`✅ Uploaded PDF: ${resumeFile.originalname}`);
+            return {
+              type: 'file',
+              fileId: fileId
+            };
+          }
         } else {
           console.warn(`⚠️ Unsupported file type: ${fileExtension}`);
           return null;
@@ -113,12 +126,16 @@ class ResumeAnalyzerService {
       // Wait for all files to be processed in parallel
       const processedFiles = await Promise.all(fileProcessingPromises);
 
-      // All files are now text-based (both DOCX and PDF)
+      // Separate into resumeTexts and uploadedFileIds
       const resumeTexts = processedFiles
         .filter(f => f && f.type === 'text')
         .map(f => ({ name: f.name, text: f.text }));
 
-      console.log(`✅ Processed ${resumeTexts.length} resume files (DOCX + PDF) with text extraction`);
+      const uploadedFileIds = processedFiles
+        .filter(f => f && f.type === 'file')
+        .map(f => f.fileId);
+
+      console.log(`✅ Processed ${resumeTexts.length} text files and ${uploadedFileIds.length} PDF files`);
 
       // Build resume content string from all extracted texts
       let resumeContent = '';
@@ -161,13 +178,22 @@ Format your response as JSON with this structure:
   "analysis": "Overall analysis and recommendations"
 }`;
 
-      // Add message to thread (no file attachments needed - all text is in prompt)
+      // Add message to thread with file attachments if any
+      const messageParams = {
+        role: 'user',
+        content: analysisPrompt
+      };
+
+      if (uploadedFileIds.length > 0) {
+        messageParams.attachments = uploadedFileIds.map(fileId => ({
+          file_id: fileId,
+          tools: [{ type: 'file_search' }]
+        }));
+      }
+
       await this.client.beta.threads.messages.create(
         threadId,
-        {
-          role: 'user',
-          content: analysisPrompt
-        }
+        messageParams
       );
 
       console.log('💬 Analysis message added to thread');

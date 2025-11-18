@@ -172,13 +172,13 @@ Format your response as JSON with this structure:
 
       console.log('💬 Analysis message added to thread');
 
-      // Run the assistant with increased token limit for better output quality
+      // Run the assistant with reduced token limit to stay within TPM limits
       console.log('🔄 Creating assistant run...');
       const run = await this.client.beta.threads.runs.create(
         threadId,
         {
           assistant_id: this.assistantId,
-          max_completion_tokens: 15000  // Increased from default 4000 for more detailed analysis
+          max_completion_tokens: 5000  // Reduced to stay within 30k TPM limit
         }
       );
 

@@ -195,7 +195,8 @@ Format your response as JSON with this structure:
 
       while (runStatus.status !== 'completed' && attempts < maxAttempts) {
         if (runStatus.status === 'failed') {
-          throw new Error('Resume analysis failed');
+          console.error('❌ OpenAI Assistant run failed:', JSON.stringify(runStatus, null, 2));
+          throw new Error(`Resume analysis failed: ${runStatus.last_error?.message || 'Unknown error'}`);
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
         runStatus = await this.client.beta.threads.runs.retrieve(

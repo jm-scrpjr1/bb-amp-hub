@@ -41,6 +41,35 @@ class ResumeAnalyzerService {
     }
   }
 
+  /**
+   * Smart chunking: Truncate resume text to stay within token limits
+   * Keeps the most important parts: beginning (name, summary, recent experience)
+   * and end (skills, education)
+   * @param {string} text - Full resume text
+   * @param {number} maxTokens - Maximum tokens to keep (default: 2500)
+   * @returns {string} Truncated resume text
+   */
+  smartChunkResume(text, maxTokens = 2500) {
+    // Rough estimate: 1 token ≈ 4 characters
+    const maxChars = maxTokens * 4;
+
+    if (text.length <= maxChars) {
+      // Resume is already short enough
+      return text;
+    }
+
+    console.log(`✂️ Truncating resume from ${text.length} to ~${maxChars} characters`);
+
+    // Strategy: Keep first 70% and last 30% of allowed length
+    const firstPartChars = Math.floor(maxChars * 0.7);
+    const lastPartChars = Math.floor(maxChars * 0.3);
+
+    const firstPart = text.substring(0, firstPartChars);
+    const lastPart = text.substring(text.length - lastPartChars);
+
+    return `${firstPart}\n\n[... middle section truncated for brevity ...]\n\n${lastPart}`;
+  }
+
   async createThread() {
     try {
       const thread = await this.client.beta.threads.create();
@@ -120,11 +149,23 @@ class ResumeAnalyzerService {
 
       console.log(`✅ Processed ${resumeTexts.length} resume files (DOCX + PDF) with text extraction`);
 
-      // Build resume content string from all extracted texts
+      // Apply smart chunking to each resume to stay within TPM limits
+      console.log('✂️ Applying smart chunking to resumes to optimize token usage...');
+      const chunkedResumes = resumeTexts.map(resume => ({
+        name: resume.name,
+        text: this.smartChunkResume(resume.text, 2500) // Max 2500 tokens per resume
+      }));
+
+      // Calculate total estimated tokens
+      const totalChars = chunkedResumes.reduce((sum, r) => sum + r.text.length, 0);
+      const estimatedTokens = Math.ceil(totalChars / 4);
+      console.log(`📊 Estimated input tokens after chunking: ~${estimatedTokens} (${chunkedResumes.length} resumes)`);
+
+      // Build resume content string from all chunked texts
       let resumeContent = '';
-      if (resumeTexts.length > 0) {
+      if (chunkedResumes.length > 0) {
         resumeContent = '\n\nRESUMES (extracted from uploaded files):\n';
-        resumeTexts.forEach((resume, index) => {
+        chunkedResumes.forEach((resume, index) => {
           resumeContent += `\n--- Resume ${index + 1}: ${resume.name} ---\n${resume.text}\n`;
         });
       }

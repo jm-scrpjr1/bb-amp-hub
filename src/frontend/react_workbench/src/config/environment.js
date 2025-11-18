@@ -7,17 +7,16 @@
 
 const config = {
   development: {
-    apiUrl: 'http://localhost:3001/api',
+    apiUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
     googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-    enableMockAuth: false, // Disable mock auth - use real Google OAuth
-    enableBackendAuth: true, // Re-enable backend auth
+    enableMockAuth: false,
+    enableBackendAuth: process.env.REACT_APP_ENABLE_BACKEND_AUTH === 'true' || true,
     environment: 'development'
   },
   production: {
-    apiUrl: process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com',
+    apiUrl: process.env.REACT_APP_API_URL || 'https://api.boldbusiness.com/api',
     googleClientId: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'demo-client-id',
     enableMockAuth: process.env.REACT_APP_GOOGLE_CLIENT_ID === 'demo-client-id',
-    // Disable backend auth until backend server is deployed
     enableBackendAuth: process.env.REACT_APP_ENABLE_BACKEND_AUTH === 'true',
     environment: 'production'
   }

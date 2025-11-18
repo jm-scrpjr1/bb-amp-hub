@@ -1,5 +1,3 @@
-
-// Load environment variables
 require('dotenv').config();
 
 const express = require("express");
@@ -14,15 +12,12 @@ const { GoogleWorkspaceService } = require('./services/googleWorkspaceService');
 const weeklyOptimizerCron = require('./jobs/weeklyOptimizerCron');
 const app = express();
 
-// CORS Configuration - Only enable if not behind Nginx proxy
 const isProduction = process.env.NODE_ENV === 'production';
 const behindProxy = process.env.BEHIND_PROXY === 'true';
 
 if (!isProduction || !behindProxy) {
-  // Development or direct access - use Node.js CORS
   const corsOptions = {
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
       const allowedOrigins = process.env.CORS_ORIGIN
@@ -47,15 +42,11 @@ if (!isProduction || !behindProxy) {
   app.use(cors(corsOptions));
   console.log('🌐 CORS enabled in Node.js');
 } else {
-  // Production behind Nginx proxy - CORS handled by Nginx
   console.log('🌐 CORS handled by Nginx proxy - Backend CORS disabled');
-  // No CORS headers needed - Nginx handles everything
 }
 
-// Middleware
 app.use(express.json({ limit: '10mb' }));
 
-// Import services
 const { UserService } = require('./services/userService');
 const { AIGroupService } = require('./services/aiGroupService');
 const { GroupService } = require('./services/groupService');
@@ -63,10 +54,8 @@ const { PermissionService } = require('./services/permissionService');
 const AIAssessmentService = require('./services/aiAssessmentService');
 const { ResourceService } = require('./services/resourceService');
 
-// Import routes
 const promptsRouter = require('./routes/prompts');
 
-// INTELLIGENT ROUTING SYSTEM
 const NAVIGATION_OPTIONS = {
   IT_SUPPORT: {
     title: "IT Support Portal",

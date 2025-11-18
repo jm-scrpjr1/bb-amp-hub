@@ -1,9 +1,9 @@
-# BB Amp Hub
+# AI WORKBENCH
 
 **One-stop employee hub for Bold Business**
 
 ## Overview
-The **BB Amp Hub** is designed as a centralized digital workplace — a one-stop shop for employees to access tools, resources, and integrations. It supports Bold Business’ **global MSP operations**, bridging multiple geo-located teams and clients through automation, security, and standardized workflows.
+The **AI Workbench** is designed as a centralized digital workplace — a one-stop shop for employees to access tools, resources, and integrations. It supports Bold Business’ **global MSP operations**, bridging multiple geo-located teams and clients through automation, security, and standardized workflows.
 
 ## Goals
 - Provide employees and managers with seamless access to IT, HR, and project resources

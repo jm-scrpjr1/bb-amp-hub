@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
 const mammoth = require('mammoth');
+const pdfParse = require('pdf-parse');
 
 class ResumeAnalyzerService {
   constructor() {
@@ -30,12 +31,13 @@ class ResumeAnalyzerService {
   async extractTextFromPdf(fileBuffer) {
     try {
       console.log('📄 Extracting text from PDF file...');
-      // For now, we'll send PDF directly to OpenAI
-      // OpenAI's file_search tool can handle PDFs
-      return null; // Return null to indicate PDF should be uploaded as-is
+      const data = await pdfParse(fileBuffer);
+      console.log('✅ PDF text extracted successfully');
+      console.log(`📊 Extracted ${data.numpages} pages, ~${data.text.length} characters`);
+      return data.text;
     } catch (error) {
       console.error('Error extracting PDF text:', error);
-      throw error;
+      throw new Error(`Failed to extract text from PDF: ${error.message}`);
     }
   }
 
@@ -94,12 +96,13 @@ class ResumeAnalyzerService {
             text: extractedText
           };
         } else if (fileExtension === '.pdf') {
-          // Upload PDF to OpenAI for file_search
-          const fileId = await this.uploadFile(resumeFile.buffer, resumeFile.originalname);
-          console.log(`✅ Uploaded PDF: ${resumeFile.originalname}`);
+          // Extract text from PDF (same as DOCX)
+          const extractedText = await this.extractTextFromPdf(resumeFile.buffer);
+          console.log(`✅ Extracted text from PDF: ${resumeFile.originalname}`);
           return {
-            type: 'file',
-            fileId: fileId
+            type: 'text',
+            name: resumeFile.originalname,
+            text: extractedText
           };
         } else {
           console.warn(`⚠️ Unsupported file type: ${fileExtension}`);
@@ -110,18 +113,14 @@ class ResumeAnalyzerService {
       // Wait for all files to be processed in parallel
       const processedFiles = await Promise.all(fileProcessingPromises);
 
-      // Separate into resumeTexts and uploadedFileIds
+      // All files are now text-based (both DOCX and PDF)
       const resumeTexts = processedFiles
         .filter(f => f && f.type === 'text')
         .map(f => ({ name: f.name, text: f.text }));
 
-      const uploadedFileIds = processedFiles
-        .filter(f => f && f.type === 'file')
-        .map(f => f.fileId);
+      console.log(`✅ Processed ${resumeTexts.length} resume files (DOCX + PDF) with text extraction`);
 
-      console.log(`✅ Processed ${resumeTexts.length} DOCX files and ${uploadedFileIds.length} PDF files in parallel`);
-
-      // Build resume content string from extracted DOCX texts
+      // Build resume content string from all extracted texts
       let resumeContent = '';
       if (resumeTexts.length > 0) {
         resumeContent = '\n\nRESUMES (extracted from uploaded files):\n';
@@ -162,32 +161,24 @@ Format your response as JSON with this structure:
   "analysis": "Overall analysis and recommendations"
 }`;
 
-      // Add message to thread with file attachments
-      const messageParams = {
-        role: 'user',
-        content: analysisPrompt
-      };
-
-      if (uploadedFileIds.length > 0) {
-        messageParams.attachments = uploadedFileIds.map(fileId => ({
-          file_id: fileId,
-          tools: [{ type: 'file_search' }]
-        }));
-      }
-
+      // Add message to thread (no file attachments needed - all text is in prompt)
       await this.client.beta.threads.messages.create(
         threadId,
-        messageParams
+        {
+          role: 'user',
+          content: analysisPrompt
+        }
       );
 
       console.log('💬 Analysis message added to thread');
 
-      // Run the assistant
+      // Run the assistant with increased token limit for better output quality
       console.log('🔄 Creating assistant run...');
       const run = await this.client.beta.threads.runs.create(
         threadId,
         {
-          assistant_id: this.assistantId
+          assistant_id: this.assistantId,
+          max_completion_tokens: 15000  // Increased from default 4000 for more detailed analysis
         }
       );
 

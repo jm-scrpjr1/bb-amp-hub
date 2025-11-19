@@ -388,11 +388,22 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
     // TIER 2: Deep analysis of top 3 with gpt-4o (ACCURATE!)
     console.log('🎯 TIER 2: Deep analysis of top 3 with gpt-4o...');
 
+    // Extract candidate indices from names like "Candidate 18"
+    const topCandidateResumes = topCandidates.map(c => {
+      const match = c.name.match(/Candidate (\d+)/);
+      if (match) {
+        const index = parseInt(match[1]) - 1; // Convert to 0-based index
+        return parsedResumes[index];
+      }
+      // Fallback: try to find by exact name match
+      return parsedResumes.find(r => r.name === c.name);
+    }).filter(r => r !== undefined); // Remove any undefined entries
+
     const tier2Results = await this.screenWithModel(
       this.accurateModel,
       jobDescription,
       clientWords,
-      topCandidates.map(c => parsedResumes.find(r => r.name === c.name)),
+      topCandidateResumes,
       'deep'
     );
 

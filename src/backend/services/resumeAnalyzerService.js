@@ -407,21 +407,43 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
       'deep'
     );
 
+    // Map Tier 2 results back to actual resume names
+    // Tier 2 results have names like "Candidate 1", "Candidate 2", "Candidate 3"
+    // We need to map them to the actual resume names from topCandidateResumes
+    const tier2WithRealNames = tier2Results.map((result, index) => {
+      const actualResume = topCandidateResumes[index];
+      return {
+        ...result,
+        name: actualResume?.name || result.name,
+        tier: 'deep_analysis'
+      };
+    });
+
     // Merge results: Tier 2 for top 3, Tier 1 for the rest
     const finalResults = parsedResumes.map(resume => {
-      const tier2Result = tier2Results.find(r => r.name === resume.name);
+      // Check if this resume got Tier 2 analysis
+      const tier2Result = tier2WithRealNames.find(r => r.name === resume.name);
       if (tier2Result) {
-        return { ...tier2Result, tier: 'deep_analysis' };
+        return tier2Result;
       }
-      const tier1Result = tier1Results.find(r => r.name === resume.name);
-      return { ...tier1Result, tier: 'initial_screening' };
+      // Otherwise use Tier 1 result
+      const tier1Result = tier1Results.find(r => {
+        // Match by "Candidate X" format
+        const match = r.name.match(/Candidate (\d+)/);
+        if (match) {
+          const index = parseInt(match[1]) - 1;
+          return parsedResumes[index]?.name === resume.name;
+        }
+        return r.name === resume.name;
+      });
+      return { ...tier1Result, name: resume.name, tier: 'initial_screening' };
     });
 
     console.log('✅ Two-tier screening complete!');
 
     return {
       candidates: finalResults.sort((a, b) => b.matchScore - a.matchScore),
-      topCandidate: tier2Results[0]?.name || topCandidates[0]?.name,
+      topCandidate: tier2WithRealNames[0]?.name || topCandidates[0]?.name,
       analysis: `Screened ${parsedResumes.length} candidates using two-tier approach. Top 3 received deep analysis with ${this.accurateModel}.`
     };
   }

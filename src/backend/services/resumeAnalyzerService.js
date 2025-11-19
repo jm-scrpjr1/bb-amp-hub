@@ -149,7 +149,11 @@ class ResumeAnalyzerService {
       'resume', 'curriculum', 'vitae', 'cv', 'professional', 'summary',
       'objective', 'profile', 'contact', 'email', 'phone', 'address',
       'skills', 'experience', 'education', 'certification', 'linkedin',
-      'github', 'portfolio', 'website', 'mentoring', 'work', 'employment'
+      'github', 'portfolio', 'website', 'mentoring', 'work', 'employment',
+      'manager', 'engineer', 'developer', 'analyst', 'administrator', 'specialist',
+      'coordinator', 'director', 'consultant', 'architect', 'technician',
+      'services', 'infrastructure', 'support', 'senior', 'junior', 'lead',
+      'assistant', 'associate', 'officer', 'representative', 'supervisor'
     ];
 
     // Pattern for a likely name: 2-4 capitalized words, no special chars except spaces/hyphens
@@ -186,10 +190,11 @@ class ResumeAnalyzerService {
         if (candidateName !== 'Unknown Candidate') break;
       }
 
-      // Fallback: First line that looks like a name (2-4 words, mostly letters)
+      // Fallback: First line that looks like a name (2-4 words, each word capitalized like a name)
+      // This is more strict - each word must start with capital and have lowercase letters
       const words = line.split(/\s+/);
       if (words.length >= 2 && words.length <= 4 &&
-          words.every(w => /^[A-Za-z-]+$/.test(w)) &&
+          words.every(w => /^[A-Z][a-z]+$/.test(w)) &&  // Each word must be like "John" not "JOHN" or "john"
           line.length < 50) {
         candidateName = line;
         break;

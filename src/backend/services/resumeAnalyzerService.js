@@ -48,63 +48,82 @@ class ResumeAnalyzerService {
    * @returns {Array<string>} Array of individual resume texts
    */
   splitMultipleResumes(text) {
-    // Common patterns that indicate a new resume is starting:
-    // 1. Email addresses (usually at the top of each resume)
-    // 2. Phone numbers in specific formats
-    // 3. Multiple consecutive newlines (page breaks)
-    // 4. Common resume headers like "RESUME", "CV", "CURRICULUM VITAE"
+    console.log('🔍 Analyzing PDF for multiple resumes...');
 
-    // Strategy: Split by patterns that indicate resume boundaries
+    // STRATEGY 1: Try splitting by page breaks (form feed character \f)
+    // This is the most reliable method for PDFs where each resume starts on a new page
+    const pageBreakPattern = /\f/g;
+    const pageBreaks = text.match(pageBreakPattern) || [];
+
+    if (pageBreaks.length > 0) {
+      console.log(`📄 Detected ${pageBreaks.length + 1} pages in PDF`);
+      const pages = text.split('\f').filter(page => page.trim().length > 100);
+
+      if (pages.length > 1) {
+        console.log(`✅ Split into ${pages.length} resumes by page breaks`);
+        return pages;
+      }
+    }
+
+    // STRATEGY 2: Try splitting by email addresses
     const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
     const emails = text.match(emailPattern) || [];
+    console.log(`📧 Detected ${emails.length} email addresses in PDF`);
 
-    console.log(`📧 Detected ${emails.length} email addresses in PDF (potential resume count)`);
+    if (emails.length > 1) {
+      console.log(`📚 Multiple emails detected - attempting email-based splitting...`);
 
-    // If only 1 email found, it's likely a single resume
-    if (emails.length <= 1) {
-      console.log('📄 Single resume detected');
-      return [text];
-    }
+      const resumes = [];
+      const lines = text.split('\n');
+      let currentResume = [];
+      let lastEmailIndex = -1;
 
-    // Multiple emails found - likely multiple resumes
-    console.log(`📚 Multiple resumes detected (${emails.length} candidates)`);
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const hasEmail = emailPattern.test(line);
+        emailPattern.lastIndex = 0; // Reset regex
 
-    // Split by finding each email and extracting text around it
-    const resumes = [];
-    const lines = text.split('\n');
-    let currentResume = [];
-    let lastEmailIndex = -1;
+        // If we find an email and we already have content, start a new resume
+        if (hasEmail && currentResume.length > 0 && i - lastEmailIndex > 10) {
+          // Save previous resume
+          const resumeText = currentResume.join('\n').trim();
+          if (resumeText.length > 100) { // Only save if substantial content
+            resumes.push(resumeText);
+          }
+          // Start new resume
+          currentResume = [line];
+          lastEmailIndex = i;
+        } else {
+          currentResume.push(line);
+        }
+      }
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const hasEmail = emailPattern.test(line);
-      emailPattern.lastIndex = 0; // Reset regex
-
-      // If we find an email and we already have content, start a new resume
-      if (hasEmail && currentResume.length > 0 && i - lastEmailIndex > 10) {
-        // Save previous resume
+      // Don't forget the last resume
+      if (currentResume.length > 0) {
         const resumeText = currentResume.join('\n').trim();
-        if (resumeText.length > 100) { // Only save if substantial content
+        if (resumeText.length > 100) {
           resumes.push(resumeText);
         }
-        // Start new resume
-        currentResume = [line];
-        lastEmailIndex = i;
-      } else {
-        currentResume.push(line);
+      }
+
+      if (resumes.length > 1) {
+        console.log(`✅ Split into ${resumes.length} resumes by email addresses`);
+        return resumes;
       }
     }
 
-    // Don't forget the last resume
-    if (currentResume.length > 0) {
-      const resumeText = currentResume.join('\n').trim();
-      if (resumeText.length > 100) {
-        resumes.push(resumeText);
-      }
+    // STRATEGY 3: Try splitting by multiple consecutive blank lines (common page separator)
+    const multipleBlankLinePattern = /\n\s*\n\s*\n\s*\n/g;
+    const sections = text.split(multipleBlankLinePattern).filter(section => section.trim().length > 200);
+
+    if (sections.length > 1) {
+      console.log(`✅ Split into ${sections.length} resumes by blank line separators`);
+      return sections;
     }
 
-    console.log(`✅ Split into ${resumes.length} individual resumes`);
-    return resumes.length > 0 ? resumes : [text]; // Fallback to original text if splitting failed
+    // No splitting patterns found - treat as single resume
+    console.log('📄 Single resume detected (no splitting patterns found)');
+    return [text];
   }
 
   /**

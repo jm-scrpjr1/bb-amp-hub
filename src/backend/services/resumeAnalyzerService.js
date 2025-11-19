@@ -65,49 +65,54 @@ class ResumeAnalyzerService {
       }
     }
 
-    // STRATEGY 2: Try splitting by email addresses
+    // STRATEGY 2: Try splitting by detecting resume headers (name + email pattern)
+    // Look for patterns like: Name on one line, followed by email/phone within next 5 lines
     const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
-    const emails = text.match(emailPattern) || [];
-    console.log(`📧 Detected ${emails.length} email addresses in PDF`);
+    const namePattern = /^[A-Z][a-z]+(?:[\s-][A-Z][a-z]+){1,3}$/;
+    const lines = text.split('\n');
 
-    if (emails.length > 1) {
-      console.log(`📚 Multiple emails detected - attempting email-based splitting...`);
+    // Find potential resume start positions (name followed by contact info)
+    const resumeStarts = [];
+    for (let i = 0; i < lines.length - 5; i++) {
+      const line = lines[i].trim();
 
-      const resumes = [];
-      const lines = text.split('\n');
-      let currentResume = [];
-      let lastEmailIndex = -1;
-
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        const hasEmail = emailPattern.test(line);
-        emailPattern.lastIndex = 0; // Reset regex
-
-        // If we find an email and we already have content, start a new resume
-        if (hasEmail && currentResume.length > 0 && i - lastEmailIndex > 10) {
-          // Save previous resume
-          const resumeText = currentResume.join('\n').trim();
-          if (resumeText.length > 100) { // Only save if substantial content
-            resumes.push(resumeText);
+      // Check if this line looks like a name
+      if (namePattern.test(line)) {
+        // Check if email appears in next 5 lines
+        let hasEmail = false;
+        for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+          if (emailPattern.test(lines[j])) {
+            hasEmail = true;
+            break;
           }
-          // Start new resume
-          currentResume = [line];
-          lastEmailIndex = i;
-        } else {
-          currentResume.push(line);
+        }
+
+        if (hasEmail) {
+          // Make sure this isn't too close to the previous resume start
+          if (resumeStarts.length === 0 || i - resumeStarts[resumeStarts.length - 1] > 30) {
+            resumeStarts.push(i);
+          }
         }
       }
+      emailPattern.lastIndex = 0; // Reset regex
+    }
 
-      // Don't forget the last resume
-      if (currentResume.length > 0) {
-        const resumeText = currentResume.join('\n').trim();
-        if (resumeText.length > 100) {
+    if (resumeStarts.length > 1) {
+      console.log(`📧 Detected ${resumeStarts.length} resume headers (name + email pattern)`);
+      const resumes = [];
+
+      for (let i = 0; i < resumeStarts.length; i++) {
+        const startLine = resumeStarts[i];
+        const endLine = i < resumeStarts.length - 1 ? resumeStarts[i + 1] : lines.length;
+        const resumeText = lines.slice(startLine, endLine).join('\n').trim();
+
+        if (resumeText.length > 200) {
           resumes.push(resumeText);
         }
       }
 
       if (resumes.length > 1) {
-        console.log(`✅ Split into ${resumes.length} resumes by email addresses`);
+        console.log(`✅ Split into ${resumes.length} resumes by name+email pattern`);
         return resumes;
       }
     }
@@ -135,25 +140,57 @@ class ResumeAnalyzerService {
 
     const lines = resumeText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
 
-    // Extract candidate name (usually first non-empty line or line with email)
+    // Extract candidate name - IMPROVED LOGIC
     let candidateName = 'Unknown Candidate';
     const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/;
 
-    for (let i = 0; i < Math.min(10, lines.length); i++) {
-      const line = lines[i];
-      // Skip common headers
-      if (line.toLowerCase().includes('resume') ||
-          line.toLowerCase().includes('curriculum vitae') ||
-          line.toLowerCase().includes('cv')) {
-        continue;
-      }
-      // If line has email, previous line might be name
-      if (emailPattern.test(line) && i > 0) {
-        candidateName = lines[i - 1];
+    // Common words that indicate this is NOT a name
+    const skipWords = [
+      'resume', 'curriculum', 'vitae', 'cv', 'professional', 'summary',
+      'objective', 'profile', 'contact', 'email', 'phone', 'address',
+      'skills', 'experience', 'education', 'certification', 'linkedin',
+      'github', 'portfolio', 'website', 'mentoring', 'work', 'employment'
+    ];
+
+    // Pattern for a likely name: 2-4 capitalized words, no special chars except spaces/hyphens
+    const namePattern = /^[A-Z][a-z]+(?:[\s-][A-Z][a-z]+){1,3}$/;
+
+    for (let i = 0; i < Math.min(15, lines.length); i++) {
+      const line = lines[i].trim();
+
+      // Skip empty or very short lines
+      if (line.length < 3) continue;
+
+      // Skip lines with common non-name keywords
+      const lowerLine = line.toLowerCase();
+      if (skipWords.some(word => lowerLine.includes(word))) continue;
+
+      // Skip lines with URLs, emails, or phone numbers
+      if (line.includes('@') || line.includes('http') || line.includes('www.') || /\d{3}[-.\s]?\d{3}/.test(line)) continue;
+
+      // Check if line matches name pattern (e.g., "John Doe", "Mary Jane Smith")
+      if (namePattern.test(line)) {
+        candidateName = line;
         break;
       }
-      // First substantial line (not all caps, reasonable length)
-      if (line.length > 3 && line.length < 50 && line !== line.toUpperCase()) {
+
+      // If we find an email, check the previous 2 lines for a name
+      if (emailPattern.test(line)) {
+        for (let j = Math.max(0, i - 2); j < i; j++) {
+          const prevLine = lines[j].trim();
+          if (namePattern.test(prevLine)) {
+            candidateName = prevLine;
+            break;
+          }
+        }
+        if (candidateName !== 'Unknown Candidate') break;
+      }
+
+      // Fallback: First line that looks like a name (2-4 words, mostly letters)
+      const words = line.split(/\s+/);
+      if (words.length >= 2 && words.length <= 4 &&
+          words.every(w => /^[A-Za-z-]+$/.test(w)) &&
+          line.length < 50) {
         candidateName = line;
         break;
       }

@@ -42,6 +42,72 @@ class ResumeAnalyzerService {
   }
 
   /**
+   * Smart PDF Splitting: Detect and split multiple resumes in a single PDF
+   * Looks for common resume boundary patterns (names, contact info, page breaks)
+   * @param {string} text - Full PDF text that may contain multiple resumes
+   * @returns {Array<string>} Array of individual resume texts
+   */
+  splitMultipleResumes(text) {
+    // Common patterns that indicate a new resume is starting:
+    // 1. Email addresses (usually at the top of each resume)
+    // 2. Phone numbers in specific formats
+    // 3. Multiple consecutive newlines (page breaks)
+    // 4. Common resume headers like "RESUME", "CV", "CURRICULUM VITAE"
+
+    // Strategy: Split by patterns that indicate resume boundaries
+    const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
+    const emails = text.match(emailPattern) || [];
+
+    console.log(`📧 Detected ${emails.length} email addresses in PDF (potential resume count)`);
+
+    // If only 1 email found, it's likely a single resume
+    if (emails.length <= 1) {
+      console.log('📄 Single resume detected');
+      return [text];
+    }
+
+    // Multiple emails found - likely multiple resumes
+    console.log(`📚 Multiple resumes detected (${emails.length} candidates)`);
+
+    // Split by finding each email and extracting text around it
+    const resumes = [];
+    const lines = text.split('\n');
+    let currentResume = [];
+    let lastEmailIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const hasEmail = emailPattern.test(line);
+      emailPattern.lastIndex = 0; // Reset regex
+
+      // If we find an email and we already have content, start a new resume
+      if (hasEmail && currentResume.length > 0 && i - lastEmailIndex > 10) {
+        // Save previous resume
+        const resumeText = currentResume.join('\n').trim();
+        if (resumeText.length > 100) { // Only save if substantial content
+          resumes.push(resumeText);
+        }
+        // Start new resume
+        currentResume = [line];
+        lastEmailIndex = i;
+      } else {
+        currentResume.push(line);
+      }
+    }
+
+    // Don't forget the last resume
+    if (currentResume.length > 0) {
+      const resumeText = currentResume.join('\n').trim();
+      if (resumeText.length > 100) {
+        resumes.push(resumeText);
+      }
+    }
+
+    console.log(`✅ Split into ${resumes.length} individual resumes`);
+    return resumes.length > 0 ? resumes : [text]; // Fallback to original text if splitting failed
+  }
+
+  /**
    * Smart chunking: Truncate resume text to stay within token limits
    * Keeps the most important parts: beginning (name, summary, recent experience)
    * and end (skills, education)
@@ -149,9 +215,37 @@ class ResumeAnalyzerService {
 
       console.log(`✅ Processed ${resumeTexts.length} resume files (DOCX + PDF) with text extraction`);
 
+      // SMART PDF SPLITTING: Detect if any file contains multiple resumes
+      console.log('🔍 Checking for multiple resumes in each file...');
+      const splitResumes = [];
+
+      resumeTexts.forEach((resume) => {
+        // Try to split this file into multiple resumes
+        const individualResumes = this.splitMultipleResumes(resume.text);
+
+        if (individualResumes.length > 1) {
+          // Multiple resumes found in this file
+          console.log(`📚 File "${resume.name}" contains ${individualResumes.length} resumes`);
+          individualResumes.forEach((resumeText, resumeIndex) => {
+            splitResumes.push({
+              name: `${resume.name} - Candidate ${resumeIndex + 1}`,
+              text: resumeText
+            });
+          });
+        } else {
+          // Single resume in this file
+          splitResumes.push({
+            name: resume.name,
+            text: individualResumes[0]
+          });
+        }
+      });
+
+      console.log(`✅ Total resumes after splitting: ${splitResumes.length}`);
+
       // Apply smart chunking to each resume to stay within TPM limits
       console.log('✂️ Applying smart chunking to resumes to optimize token usage...');
-      const chunkedResumes = resumeTexts.map(resume => ({
+      const chunkedResumes = splitResumes.map(resume => ({
         name: resume.name,
         text: this.smartChunkResume(resume.text, 2500) // Max 2500 tokens per resume
       }));

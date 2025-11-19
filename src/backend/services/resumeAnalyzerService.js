@@ -65,55 +65,55 @@ class ResumeAnalyzerService {
       }
     }
 
-    // STRATEGY 2: Try splitting by detecting resume headers (name + email pattern)
-    // Look for patterns like: Name on one line, followed by email/phone within next 5 lines
+    // STRATEGY 2: Try splitting by email addresses
+    // Find all email addresses and their positions, then look for significant gaps
     const emailPattern = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
-    const namePattern = /^[A-Z][a-z]+(?:[\s-][A-Z][a-z]+){1,3}$/;
+    const emails = [];
     const lines = text.split('\n');
 
-    // Find potential resume start positions (name followed by contact info)
-    const resumeStarts = [];
-    for (let i = 0; i < lines.length - 5; i++) {
-      const line = lines[i].trim();
-
-      // Check if this line looks like a name
-      if (namePattern.test(line)) {
-        // Check if email appears in next 5 lines
-        let hasEmail = false;
-        for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
-          if (emailPattern.test(lines[j])) {
-            hasEmail = true;
-            break;
-          }
-        }
-
-        if (hasEmail) {
-          // Make sure this isn't too close to the previous resume start
-          if (resumeStarts.length === 0 || i - resumeStarts[resumeStarts.length - 1] > 30) {
-            resumeStarts.push(i);
-          }
-        }
+    // Find all emails and their line numbers
+    for (let i = 0; i < lines.length; i++) {
+      const match = lines[i].match(emailPattern);
+      if (match) {
+        emails.push({ email: match[0], lineNumber: i });
       }
-      emailPattern.lastIndex = 0; // Reset regex
     }
 
-    if (resumeStarts.length > 1) {
-      console.log(`📧 Detected ${resumeStarts.length} resume headers (name + email pattern)`);
-      const resumes = [];
+    if (emails.length > 1) {
+      console.log(`📧 Detected ${emails.length} email addresses in PDF`);
 
-      for (let i = 0; i < resumeStarts.length; i++) {
-        const startLine = resumeStarts[i];
-        const endLine = i < resumeStarts.length - 1 ? resumeStarts[i + 1] : lines.length;
-        const resumeText = lines.slice(startLine, endLine).join('\n').trim();
+      // Find emails that are likely resume headers (significant gap from previous email)
+      const resumeStarts = [0]; // First resume starts at line 0
 
-        if (resumeText.length > 200) {
-          resumes.push(resumeText);
+      for (let i = 1; i < emails.length; i++) {
+        const gap = emails[i].lineNumber - emails[i - 1].lineNumber;
+
+        // If there's a gap of at least 20 lines, it's likely a new resume
+        // Also check if the email is in the first 15 lines of the gap (likely a header)
+        if (gap > 20) {
+          const potentialStart = Math.max(0, emails[i].lineNumber - 10); // Start 10 lines before email
+          resumeStarts.push(potentialStart);
         }
       }
 
-      if (resumes.length > 1) {
-        console.log(`✅ Split into ${resumes.length} resumes by name+email pattern`);
-        return resumes;
+      if (resumeStarts.length > 1) {
+        console.log(`📚 Multiple emails detected - attempting email-based splitting...`);
+        const resumes = [];
+
+        for (let i = 0; i < resumeStarts.length; i++) {
+          const startLine = resumeStarts[i];
+          const endLine = i < resumeStarts.length - 1 ? resumeStarts[i + 1] : lines.length;
+          const resumeText = lines.slice(startLine, endLine).join('\n').trim();
+
+          if (resumeText.length > 200) {
+            resumes.push(resumeText);
+          }
+        }
+
+        if (resumes.length > 1) {
+          console.log(`✅ Split into ${resumes.length} resumes by email addresses`);
+          return resumes;
+        }
       }
     }
 

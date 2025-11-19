@@ -153,52 +153,79 @@ class ResumeAnalyzerService {
       'manager', 'engineer', 'developer', 'analyst', 'administrator', 'specialist',
       'coordinator', 'director', 'consultant', 'architect', 'technician',
       'services', 'infrastructure', 'support', 'senior', 'junior', 'lead',
-      'assistant', 'associate', 'officer', 'representative', 'supervisor'
+      'assistant', 'associate', 'officer', 'representative', 'supervisor',
+      'subdivision', 'pacific', 'bay', 'street', 'avenue', 'road', 'city'
     ];
 
-    // Pattern for a likely name: 2-4 capitalized words, no special chars except spaces/hyphens
-    const namePattern = /^[A-Z][a-z]+(?:[\s-][A-Z][a-z]+){1,3}$/;
+    // Helper function to check if a line looks like a person's name
+    const looksLikeName = (text) => {
+      const trimmed = text.trim();
 
-    for (let i = 0; i < Math.min(15, lines.length); i++) {
+      // Skip if too short or too long
+      if (trimmed.length < 3 || trimmed.length > 60) return false;
+
+      // Skip if contains skip words
+      const lower = trimmed.toLowerCase();
+      if (skipWords.some(word => lower.includes(word))) return false;
+
+      // Skip if contains URLs, emails, or phone numbers
+      if (trimmed.includes('@') || trimmed.includes('http') || trimmed.includes('www.') || /\d{3}[-.\s]?\d{3}/.test(trimmed)) return false;
+
+      // Split into words
+      const words = trimmed.split(/\s+/);
+
+      // Must be 2-5 words (to handle middle names/initials)
+      if (words.length < 2 || words.length > 5) return false;
+
+      // Each word should start with a capital letter (handles both "John" and "JOHN")
+      // Allow single letters for middle initials (e.g., "A." or "M")
+      const validWords = words.every(w => {
+        // Remove trailing periods (for initials like "A.")
+        const clean = w.replace(/\.$/, '');
+
+        // Single letter is OK (middle initial)
+        if (clean.length === 1) return /^[A-Z]$/.test(clean);
+
+        // Otherwise must start with capital and be mostly letters
+        return /^[A-Z]/.test(clean) && /^[A-Za-z]+$/.test(clean);
+      });
+
+      return validWords;
+    };
+
+    // Try to find name in first 20 lines
+    for (let i = 0; i < Math.min(20, lines.length); i++) {
       const line = lines[i].trim();
 
-      // Skip empty or very short lines
+      // Skip empty lines
       if (line.length < 3) continue;
 
-      // Skip lines with common non-name keywords
-      const lowerLine = line.toLowerCase();
-      if (skipWords.some(word => lowerLine.includes(word))) continue;
-
-      // Skip lines with URLs, emails, or phone numbers
-      if (line.includes('@') || line.includes('http') || line.includes('www.') || /\d{3}[-.\s]?\d{3}/.test(line)) continue;
-
-      // Check if line matches name pattern (e.g., "John Doe", "Mary Jane Smith")
-      if (namePattern.test(line)) {
+      // Check if this line looks like a name
+      if (looksLikeName(line)) {
         candidateName = line;
         break;
       }
 
-      // If we find an email, check the previous 2 lines for a name
+      // If we find an email, check the previous 3 lines for a name
       if (emailPattern.test(line)) {
-        for (let j = Math.max(0, i - 2); j < i; j++) {
+        for (let j = Math.max(0, i - 3); j < i; j++) {
           const prevLine = lines[j].trim();
-          if (namePattern.test(prevLine)) {
+          if (looksLikeName(prevLine)) {
             candidateName = prevLine;
             break;
           }
         }
         if (candidateName !== 'Unknown Candidate') break;
       }
+    }
 
-      // Fallback: First line that looks like a name (2-4 words, each word capitalized like a name)
-      // This is more strict - each word must start with capital and have lowercase letters
-      const words = line.split(/\s+/);
-      if (words.length >= 2 && words.length <= 4 &&
-          words.every(w => /^[A-Z][a-z]+$/.test(w)) &&  // Each word must be like "John" not "JOHN" or "john"
-          line.length < 50) {
-        candidateName = line;
-        break;
-      }
+    // Convert ALL CAPS names to Title Case for better readability
+    if (candidateName !== 'Unknown Candidate' && candidateName === candidateName.toUpperCase()) {
+      candidateName = candidateName
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
     }
 
     // Extract contact info (email, phone)

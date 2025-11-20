@@ -604,7 +604,10 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 
       parsedResumes.forEach(resume => {
         // Create a unique key from name and email (lowercase for case-insensitive comparison)
-        const key = `${resume.name.toLowerCase()}_${resume.email.toLowerCase()}`;
+        // Handle cases where name or email might be undefined
+        const name = resume.name || 'unknown';
+        const email = resume.email || 'no-email';
+        const key = `${name.toLowerCase()}_${email.toLowerCase()}`;
 
         if (!seenCandidates.has(key)) {
           seenCandidates.add(key);

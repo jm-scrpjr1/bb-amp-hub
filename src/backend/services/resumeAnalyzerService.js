@@ -154,7 +154,10 @@ class ResumeAnalyzerService {
       'coordinator', 'director', 'consultant', 'architect', 'technician',
       'services', 'infrastructure', 'support', 'senior', 'junior', 'lead',
       'assistant', 'associate', 'officer', 'representative', 'supervisor',
-      'subdivision', 'pacific', 'bay', 'street', 'avenue', 'road', 'city'
+      'subdivision', 'pacific', 'bay', 'street', 'avenue', 'road', 'city',
+      'maintenance', 'agreement', 'information', 'technology', 'itil', 'processes',
+      'personal', 'data', 'websense', 'internet', 'gateway', 'network', 'system',
+      'technical', 'project', 'department', 'company', 'organization'
     ];
 
     // Helper function to check if a line looks like a person's name
@@ -360,18 +363,24 @@ ${resume.certifications}
 
     const userPrompt = `Analyze the following candidates against the job requirements and client preferences.
 
+IMPORTANT SCORING RULES:
+1. Base your analysis on BOTH the job description AND client preferences
+2. If there are CLIENT PREFERENCES provided, they should be PRIORITIZED and weighted MORE HEAVILY than the job description
+3. Client preferences represent specific insights from interviews/calls and should be considered critical requirements
+4. Match scores should reflect how well candidates meet BOTH criteria, with extra weight on client preferences
+
 JOB DESCRIPTION:
 ${jobDescription}
 
-CLIENT'S PREFERENCES (from interviews/calls):
-${clientWords}
+CLIENT'S PREFERENCES (PRIORITY - from interviews/calls):
+${clientWords || 'No specific client preferences provided - use job description only'}
 
 CANDIDATES:
 ${resumeContent}
 
 ${analysisType === 'deep'
-  ? 'Provide DETAILED analysis for each candidate including specific examples from their experience that match the requirements.'
-  : 'Provide CONCISE initial screening scores and key highlights for each candidate.'}
+  ? 'Provide DETAILED analysis for each candidate including specific examples from their experience that match the requirements. Pay special attention to how they align with client preferences.'
+  : 'Provide CONCISE initial screening scores and key highlights for each candidate. Prioritize alignment with client preferences in your scoring.'}
 
 Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 {
@@ -589,12 +598,32 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
 
       console.log(`✅ Parsed ${parsedResumes.length} resumes with smart extraction`);
 
+      // STEP 3.5: Remove duplicates based on candidate name and email
+      const uniqueResumes = [];
+      const seenCandidates = new Set();
+
+      parsedResumes.forEach(resume => {
+        // Create a unique key from name and email (lowercase for case-insensitive comparison)
+        const key = `${resume.name.toLowerCase()}_${resume.email.toLowerCase()}`;
+
+        if (!seenCandidates.has(key)) {
+          seenCandidates.add(key);
+          uniqueResumes.push(resume);
+        } else {
+          console.log(`⚠️ Skipping duplicate candidate: ${resume.name}`);
+        }
+      });
+
+      if (uniqueResumes.length < parsedResumes.length) {
+        console.log(`🔍 Removed ${parsedResumes.length - uniqueResumes.length} duplicate(s)`);
+      }
+
       // STEP 4: Run two-tier screening with Chat Completions API
       console.log('🎯 STEP 4: Running two-tier screening...');
       const analysisResult = await this.screenResumesWithChatAPI(
         jobDescription,
         clientWords,
-        parsedResumes
+        uniqueResumes
       );
 
       console.log('✅ TalentFit OPTIMIZED analysis complete!');

@@ -370,6 +370,12 @@ IMPORTANT SCORING RULES:
 3. Client preferences represent specific insights from interviews/calls and should be considered critical requirements
 4. Match scores should reflect how well candidates meet BOTH criteria, with extra weight on client preferences
 
+SCORING SCALE (be consistent):
+- 80-100: "Strong fit" - Meets most/all requirements, has key experience
+- 60-79: "Good fit" - Meets many requirements, some gaps but trainable
+- 40-59: "Moderate fit" - Meets some requirements, significant gaps
+- 0-39: "Poor fit" - Missing most requirements, not suitable
+
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -395,7 +401,9 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
       "recommendation": "Strong fit" | "Good fit" | "Moderate fit" | "Poor fit"
     }
   ]
-}`;
+}
+
+IMPORTANT: The recommendation MUST match the matchScore range above. Do not give "Poor fit" to a 50% candidate or "Moderate fit" to a 50% candidate - be consistent!`;
 
     try {
       const startTime = Date.now();
@@ -457,26 +465,24 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
       'initial'
     );
 
+    // Map Tier 1 results to actual resumes (AI returns "Candidate 1", "Candidate 2", etc.)
+    const tier1WithResumes = tier1Results.map((result, index) => ({
+      ...result,
+      resume: parsedResumes[index],
+      tier1Index: index
+    }));
+
     // Sort by match score and get top 3
-    const topCandidates = tier1Results
+    const topCandidates = tier1WithResumes
       .sort((a, b) => b.matchScore - a.matchScore)
       .slice(0, 3);
 
-    console.log(`✅ TIER 1 complete. Top 3 candidates: ${topCandidates.map(c => c.name).join(', ')}`);
+    console.log(`✅ TIER 1 complete. Top 3 candidates: ${topCandidates.map(c => c.resume.name).join(', ')}`);
 
     // TIER 2: Deep analysis of top 3 with gpt-4o (ACCURATE!)
     console.log('🎯 TIER 2: Deep analysis of top 3 with gpt-4o...');
 
-    // Extract candidate indices from names like "Candidate 18"
-    const topCandidateResumes = topCandidates.map(c => {
-      const match = c.name.match(/Candidate (\d+)/);
-      if (match) {
-        const index = parseInt(match[1]) - 1; // Convert to 0-based index
-        return parsedResumes[index];
-      }
-      // Fallback: try to find by exact name match
-      return parsedResumes.find(r => r.name === c.name);
-    }).filter(r => r !== undefined); // Remove any undefined entries
+    const topCandidateResumes = topCandidates.map(c => c.resume);
 
     const tier2Results = await this.screenWithModel(
       this.accurateModel,
@@ -487,19 +493,17 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
     );
 
     // Map Tier 2 results back to actual resume names
-    // Tier 2 results have names like "Candidate 1", "Candidate 2", "Candidate 3"
-    // We need to map them to the actual resume names from topCandidateResumes
     const tier2WithRealNames = tier2Results.map((result, index) => {
       const actualResume = topCandidateResumes[index];
       return {
         ...result,
-        name: actualResume?.name || result.name,
+        name: actualResume.name,
         tier: 'deep_analysis'
       };
     });
 
     // Merge results: Tier 2 for top 3, Tier 1 for the rest
-    const finalResults = parsedResumes.map((resume, resumeIndex) => {
+    const finalResults = parsedResumes.map((resume) => {
       // Check if this resume got Tier 2 analysis
       const tier2Result = tier2WithRealNames.find(r => r.name === resume.name);
       if (tier2Result) {
@@ -507,15 +511,14 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
       }
 
       // Otherwise use Tier 1 result
-      // Tier 1 results have names like "Candidate 1", "Candidate 2", etc.
-      // We need to match by index
-      const tier1Result = tier1Results[resumeIndex];
+      const tier1Result = tier1WithResumes.find(t => t.resume._uniqueId === resume._uniqueId);
 
       if (tier1Result) {
         return {
           ...tier1Result,
           name: resume.name,
-          tier: 'initial_screening'
+          tier: 'initial_screening',
+          resume: undefined // Remove the resume object from the result
         };
       }
 
@@ -617,18 +620,24 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
       const uniqueResumes = [];
       const seenCandidates = new Set();
 
-      parsedResumes.forEach(resume => {
+      parsedResumes.forEach((resume, index) => {
         // Create a unique key from name and email (lowercase for case-insensitive comparison)
         // Handle cases where name or email might be undefined
         const name = resume.name || 'unknown';
-        const email = resume.email || 'no-email';
-        const key = `${name.toLowerCase()}_${email.toLowerCase()}`;
+        const email = resume.contact?.email || resume.email || '';
+
+        // For Unknown Candidates without email, use index to make them unique
+        const key = email
+          ? `${name.toLowerCase()}_${email.toLowerCase()}`
+          : `${name.toLowerCase()}_index_${index}`;
 
         if (!seenCandidates.has(key)) {
           seenCandidates.add(key);
+          // Add a unique ID to each resume for tracking
+          resume._uniqueId = key;
           uniqueResumes.push(resume);
         } else {
-          console.log(`⚠️ Skipping duplicate candidate: ${resume.name}`);
+          console.log(`⚠️ Skipping duplicate candidate: ${resume.name} (${email || 'no email'})`);
         }
       });
 

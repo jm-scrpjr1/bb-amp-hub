@@ -157,7 +157,8 @@ class ResumeAnalyzerService {
       'subdivision', 'pacific', 'bay', 'street', 'avenue', 'road', 'city',
       'maintenance', 'agreement', 'information', 'technology', 'itil', 'processes',
       'personal', 'data', 'websense', 'internet', 'gateway', 'network', 'system',
-      'technical', 'project', 'department', 'company', 'organization'
+      'technical', 'project', 'department', 'company', 'organization',
+      'linux', 'suse', 'open', 'windows', 'server', 'ubuntu', 'debian', 'centos'
     ];
 
     // Helper function to check if a line looks like a person's name
@@ -498,23 +499,37 @@ Return ONLY valid JSON (no markdown, no code blocks) with this exact structure:
     });
 
     // Merge results: Tier 2 for top 3, Tier 1 for the rest
-    const finalResults = parsedResumes.map(resume => {
+    const finalResults = parsedResumes.map((resume, resumeIndex) => {
       // Check if this resume got Tier 2 analysis
       const tier2Result = tier2WithRealNames.find(r => r.name === resume.name);
       if (tier2Result) {
         return tier2Result;
       }
+
       // Otherwise use Tier 1 result
-      const tier1Result = tier1Results.find(r => {
-        // Match by "Candidate X" format
-        const match = r.name.match(/Candidate (\d+)/);
-        if (match) {
-          const index = parseInt(match[1]) - 1;
-          return parsedResumes[index]?.name === resume.name;
-        }
-        return r.name === resume.name;
-      });
-      return { ...tier1Result, name: resume.name, tier: 'initial_screening' };
+      // Tier 1 results have names like "Candidate 1", "Candidate 2", etc.
+      // We need to match by index
+      const tier1Result = tier1Results[resumeIndex];
+
+      if (tier1Result) {
+        return {
+          ...tier1Result,
+          name: resume.name,
+          tier: 'initial_screening'
+        };
+      }
+
+      // Fallback if no result found (shouldn't happen)
+      console.log(`⚠️ No analysis found for ${resume.name}`);
+      return {
+        name: resume.name,
+        matchScore: 0,
+        strengths: [],
+        concerns: ['No analysis available'],
+        summary: 'Unable to analyze this candidate',
+        recommendation: 'Poor fit',
+        tier: 'no_analysis'
+      };
     });
 
     console.log('✅ Two-tier screening complete!');

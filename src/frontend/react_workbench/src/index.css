@@ -61,31 +61,30 @@
   }
 
   .bold-business-theme {
-    /* Bold Business Theme - Dark Space/Cosmic Theme */
-    --background: 8 47% 8%; /* Deep space blue */
-    --foreground: 180 100% 90%; /* Bright cyan text */
-    --card: 210 50% 12%; /* Dark blue cards */
-    --card-foreground: 180 100% 90%; /* Bright cyan text */
-    --popover: 210 50% 12%; /* Dark blue */
-    --popover-foreground: 180 100% 90%; /* Bright cyan */
-    --primary: 180 100% 50%; /* Bright cyan #00FFFF */
-    --primary-foreground: 210 50% 8%; /* Dark blue text */
-    --secondary: 210 50% 15%; /* Slightly lighter blue */
-    --secondary-foreground: 180 100% 90%; /* Bright cyan */
-    --muted: 210 50% 10%; /* Very dark blue */
-    --muted-foreground: 180 50% 70%; /* Muted cyan */
-    --accent: 180 100% 50%; /* Bright cyan accent */
-    --accent-foreground: 210 50% 8%; /* Dark blue text */
+    --background: 8 47% 8%;
+    --foreground: 180 100% 90%;
+    --card: 210 50% 12%;
+    --card-foreground: 180 100% 90%;
+    --popover: 210 50% 12%;
+    --popover-foreground: 180 100% 90%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 210 50% 8%;
+    --secondary: 210 50% 15%;
+    --secondary-foreground: 180 100% 90%;
+    --muted: 210 50% 10%;
+    --muted-foreground: 180 50% 70%;
+    --accent: 180 100% 50%;
+    --accent-foreground: 210 50% 8%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 255 255 255;
-    --border: 210 50% 20%; /* Dark blue borders */
-    --input: 210 50% 12%; /* Dark blue inputs */
-    --ring: 180 100% 50%; /* Bright cyan focus ring */
-    --chart-1: 180 100% 50%; /* Bright cyan */
-    --chart-2: 240 100% 60%; /* Electric blue */
-    --chart-3: 200 100% 50%; /* Teal */
-    --chart-4: 160 100% 50%; /* Aqua */
-    --chart-5: 220 100% 60%; /* Purple-blue */
+    --border: 210 50% 20%;
+    --input: 210 50% 12%;
+    --ring: 180 100% 50%;
+    --chart-1: 180 100% 50%;
+    --chart-2: 240 100% 60%;
+    --chart-3: 200 100% 50%;
+    --chart-4: 160 100% 50%;
+    --chart-5: 220 100% 60%;
   }
 }
 
@@ -98,7 +97,6 @@
     font-family: 'Inter', sans-serif;
   }
 
-  /* Bold Business Theme - Dark Space Background */
   .bold-business-theme {
     background:
       radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
@@ -109,7 +107,6 @@
     min-height: 100vh !important;
   }
 
-  /* Cosmic particle effect overlay */
   .bold-business-theme::before {
     content: '';
     position: fixed;
@@ -135,12 +132,10 @@
     100% { transform: translateX(-200px) translateY(-100px); }
   }
 
-  /* Bold Business Theme Body Override */
   .bold-business-theme body {
     background: transparent !important;
   }
 
-  /* Bold Business Theme Card Backgrounds - Dark Glass Effect */
   .bold-business-theme .bg-white {
     background: rgba(26, 35, 50, 0.8) !important;
     backdrop-filter: blur(20px) !important;
@@ -150,7 +145,6 @@
       inset 0 1px 0 rgba(0, 255, 255, 0.1) !important;
   }
 
-  /* Bold Business Theme Gray Backgrounds */
   .bold-business-theme .bg-gray-50 {
     background: rgba(15, 20, 25, 0.6) !important;
     border: 1px solid rgba(0, 255, 255, 0.1) !important;
@@ -161,7 +155,6 @@
     border: 1px solid rgba(0, 255, 255, 0.15) !important;
   }
 
-  /* Bold Business Theme - Cosmic Colors */
   .bold-business-theme .text-blue-600 {
     color: #00FFFF !important;
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5) !important;
@@ -187,13 +180,11 @@
     box-shadow: 0 0 25px rgba(0, 255, 255, 0.4) !important;
   }
 
-  /* Bold Business Theme - Cosmic Headers */
   .bold-business-theme .bg-gradient-to-r {
     background: linear-gradient(135deg, #00FFFF 0%, #0080FF 50%, #0040FF 100%) !important;
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.3) !important;
   }
 
-  /* Bold Business Theme - Glowing Container */
   .bold-business-theme .max-w-4xl {
     border: 2px solid rgba(0, 255, 255, 0.3) !important;
     border-radius: 20px !important;
@@ -205,7 +196,6 @@
       inset 0 1px 0 rgba(0, 255, 255, 0.2) !important;
   }
 
-  /* Bold Business Theme - Readable Headers */
   .bold-business-theme h1 {
     color: #FFFFFF !important;
     text-shadow:
@@ -227,7 +217,6 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5) !important;
   }
 
-  /* Bold Business Theme - High Contrast Text Colors */
   .bold-business-theme .text-gray-900 {
     color: #FFFFFF !important;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
@@ -253,19 +242,16 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
   }
 
-  /* Bold Business Theme - Sidebar Styling */
   .bold-business-theme .w-64 {
     background: rgba(10, 15, 28, 0.95) !important;
     border-right: 1px solid rgba(0, 255, 255, 0.2) !important;
     backdrop-filter: blur(20px) !important;
   }
 
-  /* Bold Business Theme - Logo Section */
   .bold-business-theme .border-gray-200 {
     border-color: rgba(0, 255, 255, 0.2) !important;
   }
 
-  /* Bold Business Theme - Hero Section Fix */
   .bold-business-theme .bg-gradient-to-r.from-blue-700.to-blue-800 {
     background: linear-gradient(135deg, rgba(10, 15, 28, 0.95) 0%, rgba(15, 25, 40, 0.95) 100%) !important;
     border: 1px solid rgba(0, 255, 255, 0.3) !important;
@@ -274,7 +260,6 @@
       inset 0 1px 0 rgba(0, 255, 255, 0.2) !important;
   }
 
-  /* Bold Business Theme - Hero Text */
   .bold-business-theme .text-white {
     color: #FFFFFF !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
@@ -292,7 +277,6 @@
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7) !important;
   }
 
-  /* Bold Business Theme - Modal Fixes */
   .bold-business-theme .bg-gradient-to-r.from-purple-600 {
     background: linear-gradient(135deg, rgba(15, 25, 40, 0.95) 0%, rgba(20, 30, 50, 0.95) 100%) !important;
     border: 1px solid rgba(0, 255, 255, 0.3) !important;
@@ -311,7 +295,6 @@
     background: linear-gradient(180deg, rgba(26, 35, 50, 0.9) 0%, rgba(20, 30, 45, 0.95) 100%) !important;
   }
 
-  /* Bold Business Theme - Modal Text Colors */
   .bold-business-theme .text-purple-100 {
     color: #E0F7FF !important;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
@@ -322,7 +305,6 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
   }
 
-  /* Bold Business Theme - Input Fields */
   .bold-business-theme input,
   .bold-business-theme textarea,
   .bold-business-theme select {

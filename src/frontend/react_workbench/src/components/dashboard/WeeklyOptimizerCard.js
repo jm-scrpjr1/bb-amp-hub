@@ -98,12 +98,9 @@ const WeeklyOptimizerCard = () => {
   const weekOverview = optimizationData.week_overview || {};
   const dailyBreakdown = optimizationData.daily_breakdown || {};
 
-  // Debug logging
   console.log('WeeklyOptimizerCard - optimization:', optimization);
   console.log('WeeklyOptimizerCard - optimizationData:', optimizationData);
   console.log('WeeklyOptimizerCard - dailyBreakdown:', dailyBreakdown);
-
-  // Calculate totals
   const totalMeetings = Object.values(dailyBreakdown).reduce((sum, day) =>
     sum + (day.meetings?.length || 0), 0
   );

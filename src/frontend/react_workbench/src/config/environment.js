@@ -46,7 +46,6 @@ const getCurrentEnvironment = () => {
 const currentEnv = getCurrentEnvironment();
 const environmentConfig = config[currentEnv];
 
-// Log environment info for debugging (will remove after testing)
 console.log('🔍 Environment detected:', currentEnv);
 console.log('🔍 Environment config:', environmentConfig);
 console.log('🔍 Window hostname:', window.location.hostname);

@@ -1453,7 +1453,6 @@ const PreLoginPage = () => {
             </div>
           </div>
 
-          {/* Elementor-Style Flexbox Infinite Carousel with Drag */}
           <div className="relative z-30 overflow-hidden w-full cursor-grab active:cursor-grabbing">
             <motion.div
               className="flex gap-8"

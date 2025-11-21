@@ -80,13 +80,10 @@ const Sidebar = ({ isOpen, onClose, onStartTour }) => {
   // Filter navigation items based on user permissions
   const getFilteredNavigationItems = () => {
     return navigationItems.filter(item => {
-      // Show admin panel only to authorized users
       if (item.adminOnly) {
-        // Temporary: Show admin panel for owner email during development
         if (user?.email === 'jlope@boldbusiness.com') {
           return true;
         }
-        // Add more permission logic here
         return false;
       }
       return true;

@@ -98,8 +98,6 @@ class AdminService {
 
   async updateGroup(groupId, groupData) {
     try {
-      // Temporary fallback: if PUT fails, try to get the group and return it
-      // This is a temporary fix until the backend PUT endpoint is deployed
       try {
         const response = await this.backendAuth.makeAuthenticatedRequest(`/groups/${groupId}`, {
           method: 'PUT',

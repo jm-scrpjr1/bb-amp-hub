@@ -75,7 +75,6 @@ const TalentFitModal = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      {/* Custom Scrollbar Styles */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 12px;

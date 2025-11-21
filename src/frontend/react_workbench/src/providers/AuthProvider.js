@@ -40,7 +40,6 @@ const AuthProvider = ({ children }) => {
         return;
       }
 
-      // Check for persisted user data first (fastest)
       const nextjsUser = localStorage.getItem('nextjs_auth_user');
       if (nextjsUser) {
         try {

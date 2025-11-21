@@ -258,7 +258,6 @@ const SignInPage = () => {
     }
   };
 
-  // Temporary debug function for manual login
   const handleManualLogin = async () => {
     setIsLoading(true);
     try {
@@ -494,7 +493,6 @@ const SignInPage = () => {
               Powered by Bold Business AI-Amplified™ Technology
             </motion.p>
 
-            {/* Debug Section - Remove in production */}
             {process.env.NODE_ENV === 'development' && (
               <motion.div
                 className="mt-4 p-3 bg-white/10 rounded-lg border border-white/20"

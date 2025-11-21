@@ -345,6 +345,7 @@ const PreLoginPage = () => {
               <motion.div
                 className="relative text-cyan-300 font-semibold text-base cursor-pointer transition-all duration-300"
                 whileHover={{ scale: 1.05 }}
+                onClick={() => navigate('/explore')}
                 style={{
                   textShadow: '0 0 20px rgba(6, 229, 236, 0.5)'
                 }}

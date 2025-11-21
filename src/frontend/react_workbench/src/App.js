@@ -34,6 +34,7 @@ import ProfilePage from './pages/ProfilePage';
 import SubmitBoldIdeaPage from './pages/SubmitBoldIdeaPage';
 import SignInPage from './pages/SignInPage';
 import PreLoginPage from './pages/PreLoginPage';
+import ExplorePage from './pages/ExplorePage';
 import NotFoundPage from './pages/NotFoundPage';
 import WeeklyOptimizerCallback from './pages/WeeklyOptimizerCallback';
 
@@ -104,7 +105,7 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<PreLoginPage />} />
-            <Route path="/explore" element={<PreLoginPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
             <Route path="/auth/signin" element={<SignInPage />} />
             <Route path="/auth/signin/" element={<SignInPage />} />
             <Route path="/signin" element={<SignInPage />} />

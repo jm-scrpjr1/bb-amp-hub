@@ -175,7 +175,7 @@ const ExplorePage = () => {
       </motion.div>
 
       {/* Hero Section - "We've Reinvented How Work Gets Done" */}
-      <div className="relative w-full min-h-screen pt-32 pb-20 px-6 overflow-hidden">
+      <div className="relative w-full pt-32 pb-10 px-6 overflow-hidden">
         <div
           className="absolute inset-0 opacity-30"
           style={{
@@ -199,7 +199,7 @@ const ExplorePage = () => {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center py-24">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -228,15 +228,74 @@ const ExplorePage = () => {
           </motion.div>
 
           <motion.div
-            className="relative"
+            className="relative flex justify-center items-center"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
+            {/* Multiple layered glows for UNREAL effect */}
+            <motion.div
+              className="absolute inset-0"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                background: 'radial-gradient(circle, rgba(6, 229, 236, 0.8) 0%, rgba(99, 102, 241, 0.6) 30%, transparent 70%)',
+                filter: 'blur(60px)',
+              }}
+            />
+
+            <motion.div
+              className="absolute inset-0"
+              animate={{
+                scale: [1.2, 1, 1.2],
+                opacity: [0.4, 0.7, 0.4],
+                rotate: [0, 180, 360],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+              style={{
+                background: 'radial-gradient(circle, rgba(139, 92, 246, 0.7) 0%, rgba(6, 229, 236, 0.5) 40%, transparent 70%)',
+                filter: 'blur(80px)',
+              }}
+            />
+
+            <motion.div
+              className="absolute inset-0"
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.2, 0.5, 0.2],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+              style={{
+                background: 'radial-gradient(circle, rgba(34, 211, 238, 0.9) 0%, rgba(168, 85, 247, 0.6) 35%, transparent 65%)',
+                filter: 'blur(100px)',
+              }}
+            />
+
             <motion.img
               src="/images/About/3 Circles.webp"
               alt="AI Bots"
-              className="w-full h-auto drop-shadow-2xl"
+              className="relative z-10 h-auto drop-shadow-2xl"
+              style={{
+                width: '80%',
+                maxWidth: '450px',
+                filter: 'drop-shadow(0 0 60px rgba(6, 229, 236, 0.9)) drop-shadow(0 0 100px rgba(139, 92, 246, 0.7)) drop-shadow(0 0 140px rgba(34, 211, 238, 0.5))'
+              }}
               animate={{
                 y: [0, -20, 0],
                 rotate: [0, 5, 0, -5, 0],
@@ -246,16 +305,13 @@ const ExplorePage = () => {
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
-              style={{
-                filter: 'drop-shadow(0 0 40px rgba(6, 229, 236, 0.6))'
-              }}
             />
           </motion.div>
         </div>
       </div>
 
       {/* 4 AI Amplifiers Section */}
-      <div className="relative w-full py-20 px-6">
+      <div className="relative w-full py-10 px-6" style={{ background: 'rgba(15, 23, 42, 0.3)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-16"
@@ -288,104 +344,311 @@ const ExplorePage = () => {
           </motion.div>
 
           {/* Amplifiers Grid */}
-          <div className="space-y-32">
+          <div className="space-y-32 overflow-visible">
             {amplifiers.map((amplifier, index) => (
               <motion.div
                 key={amplifier.id}
-                className={`grid md:grid-cols-2 gap-12 items-center ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
+                className="space-y-8 overflow-visible"
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
               >
-                {/* Image Side */}
+                {/* Banner Image */}
                 <motion.div
-                  className={`relative ${index % 2 === 1 ? 'md:order-2' : ''}`}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}
+                  className="relative w-full rounded-3xl my-16 overflow-visible"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <div className="relative">
-                    <motion.div
-                      className="absolute inset-0 rounded-3xl opacity-50 blur-3xl"
-                      style={{
-                        background: `linear-gradient(135deg, ${amplifier.color.split(' ')[1]} 0%, ${amplifier.color.split(' ')[3]} 100%)`
-                      }}
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.3, 0.6, 0.3],
-                      }}
-                      transition={{
-                        duration: 4,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    />
+                  {/* ULTRA BRIGHT outer glow layers with WHITE cores - SCREEN BLEND MODE */}
+                  <motion.div
+                    className="absolute -inset-12 rounded-3xl blur-[80px] z-0"
+                    style={{
+                      background: `radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, ${amplifier.color.split(' ')[1]} 30%, ${amplifier.color.split(' ')[3]} 60%, transparent 80%)`,
+                      mixBlendMode: 'screen'
+                    }}
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.9, 1, 0.9],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
 
-                    <motion.img
-                      src={amplifier.botsImage}
-                      alt={amplifier.title}
-                      className="relative z-10 w-full h-auto rounded-3xl"
-                      animate={{
-                        y: [0, -15, 0],
-                      }}
-                      transition={{
-                        duration: 5,
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                      style={{
-                        filter: 'drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5))'
-                      }}
+                  <motion.div
+                    className="absolute -inset-16 rounded-3xl blur-[120px] z-0"
+                    style={{
+                      background: `radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, ${amplifier.color.split(' ')[1]} 20%, ${amplifier.color.split(' ')[3]} 50%, transparent 75%)`,
+                      mixBlendMode: 'screen'
+                    }}
+                    animate={{
+                      scale: [1.2, 1.4, 1.2],
+                      opacity: [0.8, 1, 0.8],
+                      rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                      duration: 8,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+
+                  <motion.div
+                    className="absolute -inset-20 rounded-3xl blur-[160px] z-0"
+                    style={{
+                      background: `radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, ${amplifier.color.split(' ')[3]} 15%, ${amplifier.color.split(' ')[1]} 40%, transparent 70%)`,
+                      mixBlendMode: 'screen'
+                    }}
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.7, 0.95, 0.7],
+                    }}
+                    transition={{
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 1.5
+                    }}
+                  />
+
+                  <motion.div
+                    className="absolute -inset-24 rounded-3xl blur-[200px] z-0"
+                    style={{
+                      background: `radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, ${amplifier.color.split(' ')[1]} 10%, ${amplifier.color.split(' ')[3]} 35%, transparent 65%)`,
+                      mixBlendMode: 'screen'
+                    }}
+                    animate={{
+                      scale: [1.1, 1.6, 1.1],
+                      opacity: [0.6, 0.9, 0.6],
+                      rotate: [360, 180, 0],
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: 2
+                    }}
+                  />
+
+                  <div className="relative z-10 rounded-3xl overflow-hidden"
+                    style={{
+                      boxShadow: `0 0 40px rgba(255, 255, 255, 0.8), 0 0 80px ${amplifier.color.split(' ')[1]}, 0 0 140px ${amplifier.color.split(' ')[3]}, 0 20px 100px ${amplifier.color.split(' ')[1]}90`
+                    }}
+                  >
+                    <img
+                      src={amplifier.image}
+                      alt={`${amplifier.title} Banner`}
+                      className="w-full h-auto"
                     />
                   </div>
                 </motion.div>
 
-                {/* Content Side */}
-                <motion.div
-                  className={`${index % 2 === 1 ? 'md:order-1' : ''}`}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                >
+                {/* Content Grid */}
+                <div className={`grid md:grid-cols-2 gap-12 items-center overflow-visible ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+                  {/* Image Side */}
                   <motion.div
-                    className="inline-block mb-4 px-4 py-2 rounded-full"
-                    style={{
-                      background: `linear-gradient(135deg, ${amplifier.color.split(' ')[1]}20, ${amplifier.color.split(' ')[3]}20)`,
-                      border: `1px solid ${amplifier.color.split(' ')[1]}40`
-                    }}
+                    className={`relative overflow-visible ${index % 2 === 1 ? 'md:order-2' : ''}`}
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <span className={`text-sm font-semibold bg-gradient-to-r ${amplifier.color} bg-clip-text text-transparent`}>
-                      What it does?
-                    </span>
+                    <div className="relative p-16 overflow-visible">
+                      {/* MEGA ULTRA INTENSE layered glows with WHITE CORES for BOT IMAGES - SCREEN BLEND */}
+                      <motion.div
+                        className="absolute -inset-16 rounded-3xl blur-[80px] z-0"
+                        style={{
+                          background: `radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, ${amplifier.color.split(' ')[1]} 20%, ${amplifier.color.split(' ')[3]} 45%, transparent 70%)`,
+                          mixBlendMode: 'screen'
+                        }}
+                        animate={{
+                          scale: [1, 1.5, 1],
+                          opacity: [1, 1, 1],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+
+                      <motion.div
+                        className="absolute -inset-20 rounded-3xl blur-[120px] z-0"
+                        style={{
+                          background: `radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, ${amplifier.color.split(' ')[1]} 15%, ${amplifier.color.split(' ')[3]} 40%, transparent 65%)`,
+                          mixBlendMode: 'screen'
+                        }}
+                        animate={{
+                          scale: [1.4, 1, 1.4],
+                          opacity: [1, 1, 1],
+                          rotate: [0, 180, 360],
+                        }}
+                        transition={{
+                          duration: 8,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+
+                      <motion.div
+                        className="absolute -inset-24 rounded-3xl blur-[160px] z-0"
+                        style={{
+                          background: `radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, ${amplifier.color.split(' ')[3]} 10%, ${amplifier.color.split(' ')[1]} 35%, transparent 60%)`,
+                          mixBlendMode: 'screen'
+                        }}
+                        animate={{
+                          scale: [1, 1.6, 1],
+                          opacity: [0.9, 1, 0.9],
+                        }}
+                        transition={{
+                          duration: 5,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 1.5
+                        }}
+                      />
+
+                      <motion.div
+                        className="absolute -inset-28 rounded-3xl blur-[200px] z-0"
+                        style={{
+                          background: `radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, ${amplifier.color.split(' ')[1]} 8%, ${amplifier.color.split(' ')[3]} 30%, transparent 55%)`,
+                          mixBlendMode: 'screen'
+                        }}
+                        animate={{
+                          scale: [1.3, 1.7, 1.3],
+                          opacity: [0.8, 1, 0.8],
+                          rotate: [360, 180, 0],
+                        }}
+                        transition={{
+                          duration: 10,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 2
+                        }}
+                      />
+
+                      <motion.img
+                        src={amplifier.botsImage}
+                        alt={amplifier.title}
+                        className="relative z-10 w-full h-auto rounded-3xl"
+                        animate={{
+                          y: [0, -15, 0],
+                        }}
+                        transition={{
+                          duration: 5,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                        style={{
+                          filter: `drop-shadow(0 0 40px rgba(255, 255, 255, 1)) drop-shadow(0 0 80px ${amplifier.color.split(' ')[1]}) drop-shadow(0 0 120px ${amplifier.color.split(' ')[3]}) drop-shadow(0 0 160px ${amplifier.color.split(' ')[1]}) drop-shadow(0 20px 100px rgba(0, 0, 0, 0.8))`
+                        }}
+                      />
+                    </div>
                   </motion.div>
 
-                  <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                    {amplifier.title}
-                  </h3>
-
-                  <p className="text-xl text-gray-300 mb-4 font-semibold">
-                    {amplifier.description}
-                  </p>
-
-                  <p className="text-lg text-gray-400 leading-relaxed">
-                    {amplifier.details}
-                  </p>
-
+                  {/* Content Side */}
                   <motion.div
-                    className="mt-8"
-                    whileHover={{ scale: 1.05 }}
+                    className={`${index % 2 === 1 ? 'md:order-1' : ''}`}
+                    initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
                   >
-                    <button
-                      className={`px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${amplifier.color} shadow-lg transition-all duration-300`}
+                    <motion.div
+                      className="inline-block mb-4 px-4 py-2 rounded-full"
                       style={{
-                        boxShadow: `0 10px 30px ${amplifier.color.split(' ')[1]}40`
+                        background: `linear-gradient(135deg, ${amplifier.color.split(' ')[1]}20, ${amplifier.color.split(' ')[3]}20)`,
+                        border: `1px solid ${amplifier.color.split(' ')[1]}40`
                       }}
                     >
-                      Learn More
-                    </button>
+                      <span className={`text-sm font-semibold bg-gradient-to-r ${amplifier.color} bg-clip-text text-transparent`}>
+                        What it does?
+                      </span>
+                    </motion.div>
+
+                    <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                      {amplifier.title}
+                    </h3>
+
+                    <p className="text-xl text-gray-300 mb-4 font-semibold">
+                      {amplifier.description}
+                    </p>
+
+                    <p className="text-lg text-gray-400 leading-relaxed">
+                      {amplifier.details}
+                    </p>
+
+                    <motion.div
+                      className="mt-8 relative inline-block"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {/* INTENSE Button glow layers */}
+                      <motion.div
+                        className="absolute -inset-4 rounded-xl blur-[40px]"
+                        style={{
+                          background: `linear-gradient(135deg, ${amplifier.color.split(' ')[1]}, ${amplifier.color.split(' ')[3]})`
+                        }}
+                        animate={{
+                          scale: [1, 1.3, 1],
+                          opacity: [0.8, 1, 0.8],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      />
+
+                      <motion.div
+                        className="absolute -inset-6 rounded-xl blur-[60px]"
+                        style={{
+                          background: `radial-gradient(circle, ${amplifier.color.split(' ')[1]} 0%, ${amplifier.color.split(' ')[3]} 100%)`
+                        }}
+                        animate={{
+                          scale: [1.2, 1.5, 1.2],
+                          opacity: [0.6, 0.9, 0.6],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 0.5
+                        }}
+                      />
+
+                      <motion.div
+                        className="absolute -inset-8 rounded-xl blur-[80px]"
+                        style={{
+                          background: `radial-gradient(circle, ${amplifier.color.split(' ')[3]} 0%, ${amplifier.color.split(' ')[1]} 60%, transparent 80%)`
+                        }}
+                        animate={{
+                          scale: [1.1, 1.6, 1.1],
+                          opacity: [0.5, 0.8, 0.5],
+                          rotate: [0, 180, 360],
+                        }}
+                        transition={{
+                          duration: 6,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 1
+                        }}
+                      />
+
+                      <button
+                        className={`relative z-10 px-8 py-4 rounded-xl font-semibold text-white bg-gradient-to-r ${amplifier.color} shadow-lg transition-all duration-300`}
+                        style={{
+                          boxShadow: `0 0 60px ${amplifier.color.split(' ')[1]}, 0 0 120px ${amplifier.color.split(' ')[3]}, 0 0 180px ${amplifier.color.split(' ')[1]}80, 0 10px 40px ${amplifier.color.split(' ')[1]}90`
+                        }}
+                      >
+                        Learn More
+                      </button>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -449,14 +712,14 @@ const ExplorePage = () => {
       <div className="relative w-full py-20 px-6 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-20"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
             <motion.p
-              className="text-cyan-400 text-lg font-semibold mb-2"
+              className="text-cyan-400 text-2xl font-semibold mb-4"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -465,7 +728,7 @@ const ExplorePage = () => {
               Why Bold's
             </motion.p>
             <motion.h2
-              className="text-5xl md:text-6xl font-bold text-white mb-4"
+              className="text-6xl md:text-7xl font-bold text-white mb-4"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
